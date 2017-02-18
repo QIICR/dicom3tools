@@ -1,0 +1,92 @@
+.TH DCCP 1 "06 March 2014" "DICOM PS3" "DICOM PS3 - Create DICOM file"
+.SH NAME
+dccreate \- ACR/NEMA DICOM PS3 ... DICOM PS3 - Create DICOM file
+.SH SYNOPSIS
+.HP 10
+.B dccreate
+.so man1/gen.so
+[
+.B \-v|verbose
+]
+.so man1/optout.so
+.SH DESCRIPTION
+.LP
+.B dccreate
+creates a new dicom file with no pixel data using whatever command line option
+values to populate the attributes.
+.LP
+The encoding of the file will be the default or explicitly
+requested transfer syntax, as described in dcintro(1) under output
+options.
+.LP
+During the creation, specific attributes may be added, class and instance unique identifiers generated,
+group lengths added, as specified by
+the replacement options described in dcintro(1). If patient and study information is present (indicating a composite IOD), and the
+SOP Class can be automatically determined, such as for CT or MR images,
+specific SOP Class instances will be created, otherwise SC will be used.
+Unique study, series and instance identifiers will be generated from a
+time stamp, but can be overridden by command line options to allow for
+shared identifiers between files of a series.
+.SH OPTIONS
+The verbose output goes to standard error.
+.LP
+The basic switches are described in dcintro(1). Options specific to this program are:
+.TP
+.B \-verbose
+.RS
+Display byte offset from file start and message start, in hexadecimal, and dump contents while reading, once read, during replacement, and before writing.
+.RE
+.SH ENVIRONMENT
+.LP
+\ 
+.SH EXAMPLES
+.LP
+.RE
+% dccreate test.dcm \-r PatientID 123 \-r StudyID 456 \-nodisclaimer
+.RE
+% dcdump test.dcm
+.RE
+(0x0002,0x0000) UL File Meta Information Group Length 	 VR=<UL>   VL=<0x0004>  [0x000000c0] 
+.RE
+(0x0002,0x0001) OB File Meta Information Version 	 VR=<OB>   VL=<0x0002>  [0x00,0x01] 
+.RE
+(0x0002,0x0002) UI Media Storage SOP Class UID 	 VR=<UI>   VL=<0x001a>  <1.2.840.10008.5.1.4.1.1.7> 
+.RE
+(0x0002,0x0003) UI Media Storage SOP Instance UID 	 VR=<UI>   VL=<0x0030>  <1.3.6.1.4.1.5962.1.1.456.0.0.1357662469.73993.0> 
+.RE
+(0x0002,0x0010) UI Transfer Syntax UID 	 VR=<UI>   VL=<0x0014>  <1.2.840.10008.1.2.1> 
+.RE
+(0x0002,0x0012) UI Implementation Class UID 	 VR=<UI>   VL=<0x0012>  <1.3.6.1.4.1.5962.2> 
+.RE
+(0x0002,0x0013) SH Implementation Version Name 	 VR=<SH>   VL=<0x000a>  <DCTOOL100 > 
+.RE
+(0x0002,0x0016) AE Source Application Entity Title 	 VR=<AE>   VL=<0x0008>  <CLUNIE1 > 
+.RE
+(0x0008,0x0012) DA Instance Creation Date 	 VR=<DA>   VL=<0x0008>  <20130108> 
+.RE
+(0x0008,0x0013) TM Instance Creation Time 	 VR=<TM>   VL=<0x0006>  <112749> 
+.RE
+(0x0008,0x0014) UI Instance Creator UID 	 VR=<UI>   VL=<0x0012>  <1.3.6.1.4.1.5962.3> 
+.RE
+(0x0008,0x0016) UI SOP Class UID 	 VR=<UI>   VL=<0x001a>  <1.2.840.10008.5.1.4.1.1.7> 
+.RE
+(0x0008,0x0018) UI SOP Instance UID 	 VR=<UI>   VL=<0x0030>  <1.3.6.1.4.1.5962.1.1.456.0.0.1357662469.73993.0> 
+.RE
+(0x0008,0x0050) SH Accession Number 	 VR=<SH>   VL=<0x0000>  <> 
+.RE
+(0x0008,0x0201) SH Timezone Offset From UTC 	 VR=<SH>   VL=<0x0006>  <-0500 > 
+.RE
+(0x0010,0x0020) LO Patient ID 	 VR=<LO>   VL=<0x0004>  <123 > 
+.RE
+(0x0020,0x000d) UI Study Instance UID 	 VR=<UI>   VL=<0x002c>  <1.3.6.1.4.1.5962.1.2.456.1357662469.73993.0> 
+.RE
+(0x0020,0x0010) SH Study ID 	 VR=<SH>   VL=<0x0004>  <456 > 
+\ 
+.SH FILES
+.LP
+\ 
+.SH SEE ALSO
+.BR dcintro(1),dccp(1),ancreate(1)
+.SH AUTHOR
+Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+.SH BUGS

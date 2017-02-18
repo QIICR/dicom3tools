@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# usage: dcbzip2 infile outfile
+#
+#
+TMPROOT=/tmp/`basename $0`.$$
+
+DCCP=dccp
+BZIP2=bzip2
+
+$DCCP $1 -justmeta -ra TransferSyntaxUID "1.3.6.1.4.1.5962.300.1" >$2
+$DCCP $1 -nometa -output-vr explicit -output-endian little | $BZIP2 >$TMPROOT.1.tmp
+# no longer remove the BZ prefix (000498)
+cat $TMPROOT.1.tmp >>$2
+rm $TMPROOT.1.tmp

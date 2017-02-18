@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# usage: dcunbzip2 infile outfile
+#
+#
+TMPROOT=/tmp/`basename $0`.$$
+
+DCCP=dccp
+DCRMMETA=dcrmmeta
+BZIP2=bzip2
+
+$DCRMMETA $1 $TMPROOT.0.tmp
+# no longer need to add back the BZ prefix (000498)
+$BZIP2 -d < $TMPROOT.0.tmp > $TMPROOT.2.tmp
+rm $TMPROOT.0.tmp
+$DCCP $TMPROOT.2.tmp $2
+rm $TMPROOT.2.tmp

@@ -1,0 +1,43 @@
+.TH SHIMDUMP 1 "06 March 2014" "DICOM PS3" "Imatron dump"
+.SH NAME
+shimdump \- ACR/NEMA DICOM PS3 ... Imatron dump contents
+.SH SYNOPSIS
+.HP 10
+.B shimdump
+.so man1/gen.so
+.I inputfilename
+.SH DESCRIPTION
+.LP
+.B shimdump
+reads the named Imatron input file and dumps its contents.
+.LP
+.SH OPTIONS
+The dump output goes to standard error.
+.PP
+The basic switches are described in dcintro(1).
+.SH ENVIRONMENT
+.LP
+\ 
+.SH EXAMPLES
+.LP
+.RE
+\ 
+.RE
+% shimdump test
+.RE
+\ 
+.RE
+[block:offset] Description        <value>
+.RE
+\ 
+.RE
+ ...
+.SH FILES
+.LP
+\ 
+.SH SEE ALSO
+.BR dcintro(1) ,
+.BR shimtodc(1)
+.SH AUTHOR
+Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+.SH BUGS

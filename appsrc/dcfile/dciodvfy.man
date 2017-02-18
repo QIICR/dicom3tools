@@ -1,0 +1,137 @@
+.TH DCIODVFY 1 "6 December 2016" "DICOM PS3" "DICOM PS3 - Validate DICOM objects"
+.SH NAME
+dciodvfy \- ACR/NEMA DICOM PS3 ... DICOM PS3 - Validate DICOM objects
+.SH SYNOPSIS
+.HP 10
+.B dciodvfy
+.so man1/gen.so
+[
+.B \-profile profilename
+]
+[
+.B \-describe
+]
+[
+.B \-dump
+]
+[
+.B \-v|verbose
+]
+[
+.B \-filename
+]
+.so man1/optin.so
+.SH DESCRIPTION
+.LP
+.B dciodvfy
+reads the named dicom file and describes the type of information object
+(SOP class instance) contained therein, validating it against the standard
+and checking for required modules and attributes, and appropriate
+representation and values of attributes.
+.SH OPTIONS
+The description and verbose output go to standard error.
+.LP
+Binary attributes are written in hexadecimal with a preceding
+"0x". Numeric string attributes are written in decimal. Attribute values
+are displayed in hexadecimal or string format as determined by the value representation.
+.PP
+The basic input switches are described in dcintro(1). Options specific to this program are:
+.TP
+.B \-profile profilename
+.RS
+Validate against the IOD matching the named profile. Currently supported profiles that specialize the DICOM standard IODs with additional requirements are
+.TP
+IHEREM (specializes XRayRadiationDoseSR),
+.TP
+IHEMammo (specializes MammographyImageForProcessing and MammographyImageForPresentation),
+.TP
+IHEMammoProfileWithPartialViewOption (specializes MammographyImageForPresentation),
+.TP
+IHEDBT (specializes BreastTomosynthesisImage),
+.TP
+IHEXDSIManifest (specializes KeyObjectSelectionDocument),
+.TP
+Dental (specializes IntraoralImageForPresentation, DXImageForPresentation and BasicDirectory)
+.RE
+.TP
+.B \-describe
+.RS
+Describe the contents of the object without getting too verbose.
+.RE
+.TP
+.B \-dump
+.RS
+Dump the attribute list; differs from dcdump in that the list is decorated with whether or
+not the attribute is used in the IOD and what information entity the attribute belongs to based on the IOD.
+.RE
+.TP
+.B \-verbose
+.RS
+Display byte offset from file start and message start, in hexadecimal, and dump contents while reading and once read.
+.RE
+.TP
+.B \-filename
+.RS
+Show the name of the file supplied in the arguments; a hyphen will be reported if no filename was supplied.
+.RE
+.SH ENVIRONMENT
+.LP
+\ 
+.SH EXAMPLES
+.LP
+.RE
+\ 
+.RE
+% dciodvfy test.dc3
+.RE
+Warning - Value dubious for this VR - (0x0008,0x0090) ...
+.RE
+            Retired Person Name form 
+.RE
+MRImage 
+.RE
+Error - Missing attribute Type 1 Required ...
+.RE
+          Element=<FileMetaInformationVersion> Module=...
+.RE
+
+.RE
+% dciodvfy -describe test.dc3
+.RE
+Warning - Value dubious for this VR - (0x0008,0x0090) ...
+.RE
+            Retired Person Name form 
+.RE
+MRImage 
+.RE
+Error - Missing attribute Type 1 Required ...
+.RE
+          Element=<FileMetaInformationVersion> Module=...
+.RE
+        CompositeIOD <MRImage>
+.RE
+        Module <FileMetaInformation>
+.RE
+ ...
+.RE
+                (0x0002,0x0010) UI Transfer Syntax UID ...
+.RE
+...
+.RE
+        Module <Patient>
+.RE
+                (0x0010,0x0010) PN Patient's Name ... 
+.RE
+...
+.RE
+.SH FILES
+.LP
+\ 
+.SH SEE ALSO
+.BR dcentvfy(1) ,
+.BR dcdump(1) ,
+.BR dcfile(1) ,
+.BR dcintro(1)
+.SH AUTHOR
+Copyright (c) 1993-2016, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+.SH BUGS
