@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)attrseq.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)attrseq.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attr.h"
 #include "attrlist.h"
 #include "attrmxls.h"
@@ -98,6 +98,34 @@ SequenceAttribute::getLists(AttributeList ***a)
 	return n;
 }
 
+void
+SequenceAttribute::operator+=(AttributeList *item)
+{
+	listoflists+=item;
+	item->setParentSequenceAttribute(this);
+}
+
+Uint32
+SequenceAttribute::whatItemNumberIsList(AttributeList *itemToMatch)
+{
+//cerr << "SequenceAttribute::whatItemNumberIsList(): itemToMatch = " << itemToMatch << endl;
+	FifoListIterator<AttributeList *> itemsi(listoflists);
+
+	Uint32 itemNumber=1;
+	while (!itemsi) {
+		AttributeList *item = itemsi();
+//cerr << "SequenceAttribute::whatItemNumberIsList(): checking [" << itemNumber << "] = " << item << endl;
+		if (item == itemToMatch) {
+//cerr << "SequenceAttribute::whatItemNumberIsList(): match [" << itemNumber << "]" << endl;
+			return itemNumber;
+		}
+		++itemNumber;
+		++itemsi;
+	}
+//cerr << "SequenceAttribute::whatItemNumberIsList(): no match " << endl;
+	return 0;	// flag that did not match
+}
+
 Uint32
 SequenceAttribute::getNumberOfItems (void) const
 {
@@ -113,7 +141,7 @@ SequenceAttribute::getNumberOfItems (void) const
 
 bool
 SequenceAttribute::verifyVM(const char *module,const char *element,
-	TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
 	Uint32 multiplicityMin,Uint32 multiplicityMax,const char *specifiedSource) const
 {
@@ -135,16 +163,27 @@ SequenceAttribute::verifyVM(const char *module,const char *element,
 		}
 	}
 	if (err) {
-		log << EMsgDC(BadSequenceNumberOfItems)
-		    <<  " " << dec << nItems << " (" << errmin;
-		if (errmin != errmax)
-			if (errmax == VMUNLIMITED)
+		if (newformat) {
+			log << EMsgDCA(BadSequenceNumberOfItems,this->buildFullPathInInstanceToCurrentAttribute(dict))
+			    <<  " = <" << dec << nItems << ">";
+		}
+		else {
+			log << EMsgDC(BadSequenceNumberOfItems)
+			    << " " << dec << nItems;
+		}
+		log << " (" << errmin;
+		if (errmin != errmax) {
+			if (errmax == VMUNLIMITED) {
 				log << "-n";
-			else
+			}
+			else {
 				log << "-" << errmax;
+			}
+		}
 		log << " " << MMsgDC(RequiredBy) << " " << source << ")";
-		if (element) log << " " << MMsgDC(Element) << "=<" << element << ">";
-		if (module)  log << " " << MMsgDC(Module)  << "=<" << module  << ">";
+		if (!newformat && element)	log << " " << MMsgDC(Element) << "=<" << element << ">";
+		if (newformat && module)	log << " -";
+		if (module)					log << " " << MMsgDC(Module)  << "=<" << module  << ">";
 		log << endl;
 		return false;
 	}

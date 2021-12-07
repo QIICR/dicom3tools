@@ -1,4 +1,4 @@
-#  transyn.awk Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  transyn.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 # create C++ defines from SOP class template 
 
 NR==1	{

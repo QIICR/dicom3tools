@@ -1,4 +1,4 @@
-/* useindex.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* useindex.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_useindex__
 #define __Header_useindex__
 

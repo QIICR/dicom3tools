@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)pbmswbit.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)pbmswbit.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <cctype>	// for isdigit()
 #else
@@ -149,7 +149,9 @@ main(int argc,char **argv)
 
 	unsigned char value;
 	long count = (long)width*height/8;
-
+	if (verbose) {
+		log << "count " << dec << count << endl;
+	}
 	while (count--) {
 		in.read((char *)&value,1);
 		if (!in || in.gcount() != 1) {
@@ -172,7 +174,7 @@ main(int argc,char **argv)
 			return 1;
 		}
 	}
-
+	
 	return 0;
 }
 

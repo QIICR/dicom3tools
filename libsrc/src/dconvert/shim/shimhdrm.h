@@ -1,4 +1,4 @@
-/* shimhdrm.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* shimhdrm.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 // Manually define classes to handle "method" based blocks
 // (equivalent to automatically generated stuff in shimhdrp.h)
 

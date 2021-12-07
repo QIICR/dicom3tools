@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dcentvfy.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dcentvfy.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <fstream>
 #else
@@ -558,7 +558,7 @@ static bool readOneFile(const char *filename,PatientRecord *&headPatient,DicomIn
 	ManagedAttributeList *list = new ManagedAttributeList();
 	Assert(list);
 
-	list->read(din,&log,false,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
+	list->read(din,false/*newformat*/,&log,false,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
 
 	if (!list->good()) {
 		log << list->errors()

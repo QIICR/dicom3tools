@@ -1,4 +1,4 @@
-/* strtype.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* strtype.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_strtype__
 #define __Header_strtype__
 
@@ -49,6 +49,26 @@ public:
 			if (string) delete[] string;
 		}
 	operator const char *(void) const
+		{
+			return string;
+		}
+};
+
+class String_Cat {
+	char *string;
+public:
+	String_Cat(const char *s1,const char *s2)
+		{
+			size_t length=0;
+			if (s1) length+=strlen(s1);
+			if (s2) length+=strlen(s2);
+			string=new char[length+1];
+			string[0]=0;
+			if (s1) strcat(string,s1);
+			if (s2) strcat(string,s2);
+			string[length]=0;
+		}
+	operator char *(void) const
 		{
 			return string;
 		}

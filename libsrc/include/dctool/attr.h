@@ -1,4 +1,4 @@
-/* attr.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attr.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 // public interface for Attribute class
 
 #ifndef __Header_attr__
@@ -19,6 +19,8 @@ private:
 	Uint32	byteoffset;
 	bool used;
 	InformationEntity ie;
+	Attribute* parentSequenceAttribute;
+	AttributeList* parentAttributeList;
 protected:
 	TextOutputStream&	writeBase(
 		TextOutputStream& stream,
@@ -35,6 +37,11 @@ public:
 	
 	void	setByteOffset(Uint32 offset);
 	Uint32	getByteOffset(void) const;
+	
+	//void	setParentSequenceAttribute(Attribute* a)  { parentSequenceAttribute=a; }
+	//Attribute* getParentSequenceAttribute(void) const { return parentSequenceAttribute; }
+	void	setParentAttributeList(AttributeList* list)  { parentAttributeList=list; }
+	AttributeList* getParentAttributeList(void) const { return parentAttributeList; }
 
 	void	setUsed(void)  { used=true; }
 	void	setUnused(void)  { used=false; }
@@ -65,12 +72,12 @@ public:
 			unsigned short highbit,
 			Uint32 length=0xffffffff);
 
-	virtual	bool validateVR(TextOutputStream& stream,
+	virtual	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,
 			SpecificCharacterSetInfo *specificCharacterSetInfo = NULL,
 			ElementDictionary *dict=0) const
 		{ (void)stream; (void)dict; return true; }
 
-	bool validateRetired(TextOutputStream& stream,
+	bool validateRetired(bool verbose,bool newformat,TextOutputStream& stream,
 			ElementDictionary *dict=0) const;
 
 	virtual const char *	getVR(void) const = 0;
@@ -143,15 +150,27 @@ public:
 
 	virtual int	getLists(AttributeList ***);
 
-	virtual bool	verifyDefinedTerms(char *(*method)(char *value),bool verbose,TextOutputStream& log,ElementDictionary *dict,int which=-1) const;
-	virtual bool	verifyEnumValues(char *(*method)(char *value),bool verbose,TextOutputStream& log,ElementDictionary *dict,int which=-1) const;
-	virtual bool	verifyEnumValues(char *(*method)(Uint16 value),bool verbose,TextOutputStream& log,ElementDictionary *dict,int which=-1) const;
-	virtual bool	verifyBitMap(char *(*method)(Uint16 value),bool verbose,TextOutputStream& log,ElementDictionary *dict,int which=-1) const;
-	virtual bool	verifyEnumValues(char *(*method)(Uint16 group,Uint16 value),bool verbose,TextOutputStream& log,ElementDictionary *dict,int which=-1) const;
-	virtual bool	verifyNotZero(bool verbose,TextOutputStream& log,ElementDictionary *dict,int which=-1,bool warningNotError=true) const;
+	virtual bool	verifyDefinedTerms(char *(*method)(char *value),bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict,int which=-1) const;
+	virtual bool	verifyEnumValues(char *(*method)(char *value),bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict,int which=-1) const;
+	virtual bool	verifyEnumValues(char *(*method)(Uint16 value),bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict,int which=-1) const;
+	virtual bool	verifyBitMap(char *(*method)(Uint16 value),bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict,int which=-1) const;
+	virtual bool	verifyEnumValues(char *(*method)(Uint16 group,Uint16 value),bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict,int which=-1) const;
+	virtual bool	verifyNotZero(bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict,int which=-1,bool warningNotError=true) const;
 
-	virtual bool	verifyVR(const char *module,const char *element,TextOutputStream& log,ElementDictionary *dict) const;
-	virtual bool	verifyVM(const char *module,const char *element,TextOutputStream& log,ElementDictionary *dict,Uint32 multiplicityMin=0,Uint32 multiplicityMax=0,const char *source=NULL) const;
+	virtual bool	verifyVR(const char *module,const char *element,bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict) const;
+	virtual bool	verifyVM(const char *module,const char *element,bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict,Uint32 multiplicityMin=0,Uint32 multiplicityMax=0,const char *source=NULL) const;
+	
+	virtual char*	buildFullPathInInstanceToValueOfCurrentAttribute(ElementDictionary *dict,int valueNumber) const;
+	virtual char*	buildFullPathInInstanceToCurrentAttribute(ElementDictionary *dict) const;
+
+	static const char*	MMsgDCF(const char *index,const Attribute *a);
+	static const char*	EMsgDCF(const char *index,const Attribute *a);
+	static const char*	WMsgDCF(const char *index,const Attribute *a);
+	static const char*	MMsgDCF(const char *index,const Attribute *a,int valuenumber);
+	static const char*	EMsgDCF(const char *index,const Attribute *a,int valuenumber);
+	static const char*	WMsgDCF(const char *index,const Attribute *a,int valuenumber);
+
+	static char *getCopyOfKeywordOrPrivateTagRepresentation(Tag t,ElementDictionary *dict);
 };
 
 #endif // __Header_attr__

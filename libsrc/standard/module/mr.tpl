@@ -12,13 +12,15 @@ DefineMacro="CommonCTMRImageDescriptionFrameLevelMacro" InformationEntity="Image
 MacroEnd
 
 DefineMacro="MRImageDescriptionImageLevelMacro" InformationEntity="Image"
-	Name="ComplexImageComponent"			Type="1C"	StringEnumValues="EnhancedMRComplexImageComponentImageLevel"	Condition="NotLegacyConvertedMR" mbpo="true"
-	Name="AcquisitionContrast"				Type="1C"	StringEnumValues="EnhancedMRAcquisitionContrastImageLevel"		Condition="NotLegacyConvertedMR" mbpo="true"
+	Name="ComplexImageComponent"				Type="1C"	StringEnumValues="EnhancedMRComplexImageComponentImageLevel"	Condition="NotLegacyConvertedMR" mbpo="true"
+	Name="AcquisitionContrast"					Type="1C"	StringEnumValues="EnhancedMRAcquisitionContrastImageLevel"		Condition="NotLegacyConvertedMR" mbpo="true"
+	Name="FunctionalSettlingPhaseFramesPresent"	Type="3"	StringEnumValues="YesNoFull"
 MacroEnd
 
 DefineMacro="MRImageDescriptionFrameLevelMacro" InformationEntity="Image"
-	Name="ComplexImageComponent"			Type="1C"	StringEnumValues="EnhancedMRComplexImageComponentFrameLevel"	Condition="NotLegacyConvertedMR" mbpo="true"
-	Name="AcquisitionContrast"				Type="1C"	StringEnumValues="EnhancedMRAcquisitionContrastFrameLevel"		Condition="NotLegacyConvertedMR" mbpo="true"
+	Name="ComplexImageComponent"				Type="1C"	StringEnumValues="EnhancedMRComplexImageComponentFrameLevel"	Condition="NotLegacyConvertedMR" mbpo="true"
+	Name="AcquisitionContrast"					Type="1C"	StringEnumValues="EnhancedMRAcquisitionContrastFrameLevel"		Condition="NotLegacyConvertedMR" mbpo="true"
+	Name="FunctionalSettlingPhaseFramesPresent"	Type="3"	StringEnumValues="YesNoFull"
 MacroEnd
 
 DefineMacro="MRSpectroscopyDescriptionImageLevelMacro" InformationEntity="Image"
@@ -219,6 +221,13 @@ DefineMacro="MRArterialSpinLabelingMacro" InformationEntity="FunctionalGroup"
 	SequenceEnd
 MacroEnd
 
+DefineMacro="FunctionalMRMacro"
+	Sequence="FunctionalMRSequence"				Type="1"	VM="1"
+		Name="SettlingPhaseFrame"				Type="1C"	Condition="FunctionalSettlingPhaseFramesPresentIsYes"	StringEnumValues="YesNoFull"
+		Name="FunctionalSyncPulse"				Type="1"
+	SequenceEnd
+MacroEnd
+
 DefineMacro="MRImageAndSpectroscopyInstanceMacro" InformationEntity="Image"
 	Name="AcquisitionNumber"						Type="3"
 	Name="AcquisitionDateTime"						Type="1C"	Condition="ImageTypeValue1OriginalOrMixedAndNotLegacyConvertedMR" mbpo="true"
@@ -277,6 +286,8 @@ Module="MultiFrameFunctionalGroupsForEnhancedMRImage"
 		InvokeMacro="MRMetaboliteMapMacro"		Condition="NeedMRMetaboliteMapMacroInSharedFunctionalGroupSequence"
 		InvokeMacro="MRVelocityEncodingMacro"		Condition="NeedMRVelocityEncodingMacroInSharedFunctionalGroupSequence"
 		InvokeMacro="MRArterialSpinLabelingMacro"		Condition="NeedMRArterialSpinLabelingMacroInSharedFunctionalGroupSequence"
+		InvokeMacro="FunctionalMRMacro"		Condition="FunctionalMRMacroOKInSharedFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"			Condition="TemporalPositionMacroOKInSharedFunctionalGroupSequence"
 	SequenceEnd
 	Sequence="PerFrameFunctionalGroupsSequence"	Type="1"	VM="1-n"
 		InvokeMacro="PixelMeasuresMacro"		Condition="PixelMeasuresSequenceNotInSharedFunctionalGroupSequence"
@@ -306,6 +317,8 @@ Module="MultiFrameFunctionalGroupsForEnhancedMRImage"
 		InvokeMacro="MRMetaboliteMapMacro"		Condition="NeedMRMetaboliteMapMacroInPerFrameFunctionalGroupSequence"
 		InvokeMacro="MRVelocityEncodingMacro"		Condition="NeedMRVelocityEncodingMacroInPerFrameFunctionalGroupSequence"
 		InvokeMacro="MRArterialSpinLabelingMacro"		Condition="NeedMRArterialSpinLabelingMacroInPerFrameFunctionalGroupSequence"
+		InvokeMacro="FunctionalMRMacro"		Condition="FunctionalMRMacroOKInPerFrameFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"			Condition="TemporalPositionMacroOKInPerFrameFunctionalGroupSequence"
 	SequenceEnd
 ModuleEnd
 
@@ -353,6 +366,7 @@ Module="MultiFrameFunctionalGroupsForMRSpectroscopy"
 		InvokeMacro="MRAveragesMacro"			Condition="NeedMRAveragesMacroInSharedFunctionalGroupSequence"
 		InvokeMacro="MRSpatialSaturationMacro"		Condition="NeedMRSpatialSaturationMacroInSharedFunctionalGroupSequence"
 		InvokeMacro="MRVelocityEncodingMacro"		Condition="NeedMRVelocityEncodingMacroInSharedFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"			Condition="TemporalPositionMacroOKInSharedFunctionalGroupSequence"
 	SequenceEnd
 	Sequence="PerFrameFunctionalGroupsSequence"	Type="1"	VM="1-n"
 		InvokeMacro="PixelMeasuresMacro"		Condition="PixelMeasuresSequenceNotInSharedFunctionalGroupSequence"
@@ -376,6 +390,7 @@ Module="MultiFrameFunctionalGroupsForMRSpectroscopy"
 		InvokeMacro="MRAveragesMacro"			Condition="NeedMRAveragesMacroInPerFrameFunctionalGroupSequence"
 		InvokeMacro="MRSpatialSaturationMacro"		Condition="NeedMRSpatialSaturationMacroInPerFrameFunctionalGroupSequence"
 		InvokeMacro="MRVelocityEncodingMacro"		Condition="NeedMRVelocityEncodingMacroInPerFrameFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"			Condition="TemporalPositionMacroOKInPerFrameFunctionalGroupSequence"
 	SequenceEnd
 ModuleEnd
 
@@ -395,7 +410,15 @@ Module="EnhancedMRImage"
 
 	Name="PhotometricInterpretation"				Type="1"
 	Verify="PhotometricInterpretation"							Condition="EnhancedMRImageInstance"      StringEnumValues="PhotometricInterpretationMonochrome2"
-	Verify="PhotometricInterpretation"							Condition="EnhancedMRColorImageInstance" StringEnumValues="PhotometricInterpretationRGBorYBR_FULL_422orYBR_RCTorYBR_ICTorYBR_PARTIAL_420"
+	Verify="PhotometricInterpretation"							Condition="EnhancedMRColorImageInstance" StringEnumValues="PhotometricInterpretationRGBOrYBR_FULL_422OrYBR_RCTOrYBR_ICTOrYBR_PARTIAL_420"
+
+	Verify="PhotometricInterpretation"				Condition="UncompressedTransferSyntaxAndThreeSamples"					StringEnumValues="PhotometricInterpretationRGB"
+	Verify="PhotometricInterpretation"				Condition="JPEGLSLosslessTransferSyntaxAndThreeSamples"					StringEnumValues="PhotometricInterpretationRGB"
+	Verify="PhotometricInterpretation"				Condition="JPEG2000TransferSyntaxAndThreeSamples"						StringEnumValues="PhotometricInterpretationYBRRCTOrICT"
+	Verify="PhotometricInterpretation"				Condition="JPEG2000LosslessTransferSyntaxAndThreeSamples"				StringEnumValues="PhotometricInterpretationYBRRCT"
+	Verify="PhotometricInterpretation"				Condition="MPEG2TransferSyntax"											StringEnumValues="PhotometricInterpretationYBRPartial420"	# regardless of number of samples (required to be 3 by PS 3.5)
+	Verify="PhotometricInterpretation"				Condition="JPEGLossyTransferSyntaxAndThreeSamples"						StringEnumValues="PhotometricInterpretationYBRFull422"
+	Verify="PhotometricInterpretation"				Condition="RLETransferSyntaxAndThreeSamples"							StringEnumValues="PhotometricInterpretationYBRFullOrRGB"
 
 	Name="BitsAllocated"							Type="1"	
 	Verify="BitsAllocated"										Condition="PhotometricInterpretationIsMonochrome"	BinaryEnumValues="BitsAre8Or16"
@@ -420,7 +443,7 @@ Module="EnhancedMRImage"
 	Name="LossyImageCompression"					Type="1C"	Condition="NotLegacyConvertedMR"	StringEnumValues="LossyImageCompression"	mbpo="true"
 	Name="LossyImageCompressionRatio"				Type="1C"	Condition="LossyImageCompressionIs01"	NotZeroError=""
 	Name="LossyImageCompressionMethod"				Type="1C"	StringDefinedTerms="LossyImageCompressionMethod"	Condition="LossyImageCompressionIs01"
-	Verify="LossyImageCompressionMethod"								Condition="LossyImageCompressionMethodInconsistentWithTransferSyntax"	ThenWarningMessage="method inconsistent with transfer syntax" ShowValueWithMessage="true"
+	Verify="LossyImageCompressionMethod"								Condition="LossyImageCompressionMethodInconsistentWithTransferSyntax"	ThenWarningMessage="method inconsistent with Transfer Syntax" ShowValueWithMessage="true"
 	Name="PresentationLUTShape"						Type="1"	StringEnumValues="IdentityPresentationLUTShape"
 	Sequence="IconImageSequence"					Type="3"	VM="1"
 		InvokeMacro="IconImageSequenceMacro"
@@ -480,6 +503,13 @@ Module="MRSpectroscopy"
 	Name="FrequencyCorrection"				Type="1C"	StringDefinedTerms="YesNoFull"				Condition="ImageTypeValue1OriginalOrMixed"
 	Name="FirstOrderPhaseCorrection"		Type="1C"	StringDefinedTerms="YesNoFull"				Condition="ImageTypeValue1OriginalOrMixed"
 	Name="WaterReferencedPhaseCorrection"	Type="1C"	StringDefinedTerms="YesNoFull"				Condition="ImageTypeValue1OriginalOrMixed"
+	Name="WaterReferenceAcquisition"		Type="3"	StringDefinedTerms="WaterReferenceAcquisition"
+	Sequence="ReferencedInstanceSequence"			Type="1C"	VM="1-n"	Condition="WaterReferenceAcquisitionIsReferenced"
+		InvokeMacro="ImageSOPInstanceReferenceMacro"
+		Sequence="PurposeOfReferenceCodeSequence"	Type="1"	VM="1"
+			InvokeMacro="CodeSequenceMacro"				DefinedContextID="7215"
+		SequenceEnd
+	SequenceEnd
 ModuleEnd
 
 Module="MRSpectroscopyPulseSequence"
@@ -496,6 +526,7 @@ Module="MRSpectroscopyPulseSequence"
 	Name="SegmentedKSpaceTraversal"			Type="1C"	StringEnumValues="SegmentedKSpaceTraversal"		Condition="ImageTypeValue1OriginalOrMixed"
 	Name="CoverageOfKSpace"					Type="1C"	StringDefinedTerms="CoverageOfKSpace"	Condition="ImageTypeValue1OriginalOrMixedAndSpectroscopyVolume"
 	Name="NumberOfKSpaceTrajectories"		Type="1C"	Condition="ImageTypeValue1OriginalOrMixed"
+	Name="EchoPeakPosition"					Type="3"
 ModuleEnd
 
 Module="MRSpectroscopyData"
@@ -520,7 +551,7 @@ Module="RawData"
 	Sequence="ConceptNameCodeSequence"				Type="3"	VM="1"
 		InvokeMacro="CodeSequenceMacro"
 	SequenceEnd
-
+	Name="ImageLaterality"							Type="3"	StringEnumValues="ImageLaterality"
 	Name="CreatorVersionUID"						Type="1"
 	Sequence="ReferencedInstanceSequence"			Type="3"	VM="1-n"
 		InvokeMacro="ImageSOPInstanceReferenceMacro"
@@ -549,10 +580,11 @@ Module="MultiFrameFunctionalGroupsForLegacyConvertedEnhancedMRImage"
 		InvokeMacro="FrameAnatomyMacro"						Condition="FrameAnatomyMacroOKInSharedFunctionalGroupSequence"
 		InvokeMacro="PixelValueTransformationMacro"			Condition="PixelValueTransformationSequenceOKInSharedFunctionalGroupSequence"
 		InvokeMacro="FrameVOILUTMacro"						Condition="FrameVOILUTMacroOKInSharedFunctionalGroupSequence"
-		InvokeMacro="RealWorldValueMappingMacro"			Condition="FrameVOILUTMacroOKInSharedFunctionalGroupSequence"
+		InvokeMacro="RealWorldValueMappingMacro"			Condition="RealWorldValueMappingMacroOKInSharedFunctionalGroupSequence"
 		InvokeMacro="ContrastBolusUsageMacro"				Condition="NeedContrastBolusUsageMacroInSharedFunctionalGroupSequence"
 		InvokeMacro="RespiratorySynchronizationMacro"		Condition="RespiratorySynchronizationMacroOKInSharedFunctionalGroupSequence"
 		InvokeMacro="MRImageFrameTypeMacro"					Condition="MRImageFrameTypeSequenceNotInPerFrameFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"					Condition="TemporalPositionMacroOKInSharedFunctionalGroupSequence"
 		InvokeMacro="UnassignedSharedConvertedAttributesMacro"
 	SequenceEnd
 
@@ -571,8 +603,9 @@ Module="MultiFrameFunctionalGroupsForLegacyConvertedEnhancedMRImage"
 		InvokeMacro="ContrastBolusUsageMacro"				Condition="NeedContrastBolusUsageMacroInPerFrameFunctionalGroupSequence"
 		InvokeMacro="RespiratorySynchronizationMacro"		Condition="RespiratorySynchronizationMacroOKInPerFrameFunctionalGroupSequence"
 		InvokeMacro="MRImageFrameTypeMacro"					Condition="MRImageFrameTypeSequenceNotInSharedFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"					Condition="TemporalPositionMacroOKInPerFrameFunctionalGroupSequence"
 		InvokeMacro="UnassignedPerFrameConvertedAttributesMacro"
-		InvokeMacro="ImageFrameConversionSourceMacro"
+		InvokeMacro="ImageFrameConversionSourceMacro"		Condition="ImageFrameConversionSourceMacroPresentInPerFrameFunctionalGroupSequence"
 	SequenceEnd
 ModuleEnd
 
@@ -613,6 +646,92 @@ Module="MultiFrameFunctionalGroupsForPrivatePixelMedLegacyConvertedEnhancedMRIma
 		InvokeMacro="ImageFrameConversionSourceMacro"		Condition="ConversionSourceAttributesSequenceNotInSharedFunctionalGroupSequence"
 	SequenceEnd
 ModuleEnd
+
+
+Module="TractographyResultsSeries"
+	Name="Modality"										Type="1"	StringEnumValues="MRModality"
+	Name="SeriesNumber"									Type="1"
+	Sequence="ReferencedPerformedProcedureStepSequence"	Type="1C"	VM="1"	Condition="SeriesNeedReferencedPerformedProcedureStepSequence"
+		InvokeMacro="SOPInstanceReferenceMacro"
+	SequenceEnd
+ModuleEnd
+
+Module="TractographyResults"
+	InvokeMacro="ContentIdentificationMacro"
+	Name="ContentDate"									Type="1"
+	Name="ContentTime"									Type="1"
+	Sequence="TrackSetSequence"							Type="1"	VM="1-n"
+		Name="TrackSetNumber"							Type="1"
+		Name="TrackSetLabel"							Type="1"
+		Name="TrackSetDescription"						Type="3"
+		Sequence="TrackSetAnatomicalTypeCodeSequence"	Type="1"	VM="1"
+			InvokeMacro="CodeSequenceMacro"
+			Sequence="ModifierCodeSequence"				Type="3"	VM="1-n"
+				InvokeMacro="CodeSequenceMacro"
+			SequenceEnd
+		SequenceEnd
+		Sequence="TrackSequence"						Type="1"	VM="1-n"
+			Name="PointCoordinatesData"					Type="1"
+			Name="RecommendedDisplayCIELabValueList"	Type="1C"	Condition="NeedRecommendedDisplayCIELabValueListInTrackSequence"
+			Name="RecommendedDisplayCIELabValue"		Type="1C"	Condition="NeedRecommendedDisplayCIELabValueInTrackSequence"
+		SequenceEnd
+		Name="RecommendedDisplayCIELabValue"			Type="1C"	Condition="NeedRecommendedDisplayCIELabValueInTrackSetSequence"
+		Name="RecommendedLineThickness"					Type="3"
+		Sequence="MeasurementsSequence"					Type="3"	VM="1-n"
+			Sequence="ConceptNameCodeSequence"			Type="1"	VM="1"
+				InvokeMacro="CodeSequenceMacro"
+			SequenceEnd
+			Sequence="MeasurementUnitsCodeSequence"		Type="1"	VM="1"
+				InvokeMacro="CodeSequenceMacro"
+			SequenceEnd
+			Sequence="MeasurementValuesSequence"		Type="1"	VM="1-n"
+				Name="FloatingPointValues"				Type="1"
+				Name="TrackPointIndexList"				Type="1C"	NoCondition=""
+			SequenceEnd
+		SequenceEnd
+		Sequence="TrackStatisticsSequence"				Type="3"	VM="1-n"
+			Sequence="ConceptNameCodeSequence"			Type="1"	VM="1"
+				InvokeMacro="CodeSequenceMacro"
+			SequenceEnd
+			Sequence="ModifierCodeSequence"				Type="1"	VM="1"
+				InvokeMacro="CodeSequenceMacro"
+			SequenceEnd
+			Sequence="MeasurementUnitsCodeSequence"		Type="1"	VM="1"
+				InvokeMacro="CodeSequenceMacro"
+			SequenceEnd
+			Name="FloatingPointValues"					Type="1"
+		SequenceEnd
+		Sequence="TrackSetStatisticsSequence"			Type="3"	VM="1-n"
+			InvokeMacro="TableSummaryStatisticsMacro"
+		SequenceEnd
+		Sequence="DiffusionAcquisitionCodeSequence"		Type="3"	VM="1"
+			InvokeMacro="CodeSequenceMacro"
+		SequenceEnd
+		Sequence="DiffusionModelCodeSequence"			Type="1"	VM="1"
+			InvokeMacro="CodeSequenceMacro"
+		SequenceEnd
+		Sequence="TrackingAlgorithmIdentificationSequence"	Type="1"	VM="1-n"
+			InvokeMacro="AlgorithmIdentificationMacro"
+		SequenceEnd
+	SequenceEnd
+
+	Sequence="ReferencedInstanceSequence"				Type="1C"	VM="1-n"	NoCondition=""
+		InvokeMacro="ImageSOPInstanceReferenceMacro"
+	SequenceEnd
+ModuleEnd
+
+DefineMacro="TableSummaryStatisticsMacro"
+	Sequence="ConceptNameCodeSequence"							Type="1"	VM="1"
+		InvokeMacro="CodeSequenceMacro"
+	SequenceEnd
+	Sequence="ModifierCodeSequence"								Type="1"	VM="1"
+		InvokeMacro="CodeSequenceMacro"
+	SequenceEnd
+	Sequence="MeasurementUnitsCodeSequence"						Type="1"	VM="1"
+		InvokeMacro="CodeSequenceMacro"
+	SequenceEnd
+	Name="FloatingPointValue"									Type="1"
+MacroEnd
 
 
 

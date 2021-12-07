@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)condn.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)condn.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attr.h"
 #include "attrseq.h"
 #include "attrlist.h"
@@ -101,6 +101,93 @@ static bool ElementPresentInPath(AttributeList *list,Tag tag)
 	return false;
 }
 
+static bool SequencePresentInPathHasItems(AttributeList *list,Tag tag)
+{
+//cerr << "SequencePresentInPathHasItems:" << endl;
+//cerr << "SequencePresentInPathHasItems: tag " << hex << tag.getGroup() << "," << tag.getElement() << dec << endl;
+	Attribute *a=(*list)[tag];
+	if (a) {
+//cerr << "SequencePresentInPathHasItems: tag present" << endl;
+		if (a->isSequence()) {
+//cerr << "SequencePresentInPathHasItems: tag is sequence" << endl;
+			SequenceAttribute *aseq=(SequenceAttribute *)a;
+			Assert(aseq);
+			if (!aseq->isEmpty()) {
+//cerr << "SequencePresentInPathHasItems: tag is not empty sequence" << endl;
+				return true;
+			}
+		}
+		return false;
+	}
+	else {
+		AttributeListIterator listi(*list);
+		while (!listi) {
+			Attribute *a=listi();
+			if (a->isSequence()) {
+				SequenceAttribute *aseq=(SequenceAttribute *)a;
+				Assert(aseq);
+				AttributeList **array;
+				int n;
+				if ((n=aseq->getLists(&array)) > 0) {
+//cerr << "SequencePresentInPathHasItems: found " << n << " items" << endl;
+					int i;
+					for (i=0; i<n; ++i) {
+//cerr << "SequencePresentInPathHasItems: item " << dec << i << endl;
+						AttributeList *list=array[i];
+						if (SequencePresentInPathHasItems(list,tag)) {	// recurses if necessary
+//cerr << "SequencePresentInPathHasItems: back from SequencePresentInPathHasItems having found tag" << endl;
+							delete [] array;
+							return true;
+						}
+					}
+				}
+				delete [] array;
+			}
+			++listi;
+		}
+	}
+//cerr << "SequencePresentInPathHasItems: did not find tag" << endl;
+	return false;
+}
+
+static bool ElementPresentInPathFirstItem(AttributeList *list,Tag tag)
+{
+//cerr << "ElementPresentInPathFirstItem:" << endl;
+//cerr << "ElementPresentInPathFirstItem: tag " << hex << tag.getGroup() << "," << tag.getElement() << dec << endl;
+	if ((*list)[tag]) {
+//cerr << "ElementPresentInPathFirstItem: tag present" << endl;
+		return true;
+	}
+	else {
+		AttributeListIterator listi(*list);
+		while (!listi) {
+			Attribute *a=listi();
+			if (a->isSequence()) {
+				SequenceAttribute *aseq=(SequenceAttribute *)a;
+				Assert(aseq);
+				AttributeList **array;
+				int n;
+				if ((n=aseq->getLists(&array)) > 0) {
+//cerr << "ElementPresentInPathFirstItem: found " << n << " items" << endl;
+					{
+//cerr << "ElementPresentInPathFirstItem: item " << dec << 0 << endl;
+						AttributeList *list=array[0];
+						if (ElementPresentInPath(list,tag)) {	// recurses if necessary
+//cerr << "ElementPresentInPathFirstItem: back from ElementPresentInPathFirstItem having found tag" << endl;
+							delete [] array;
+							return true;	
+						}
+					}
+				}
+				delete [] array;
+			}
+			++listi;
+		}
+	}
+//cerr << "ElementPresentInPathFirstItem: did not find tag" << endl;
+	return false;
+}
+
 // Recursively descends from root into items of a top level sequence ... can be very slow :(
 // This doesn't work when called within a macro, which doesn't really have access
 // to the rootlist at all :(
@@ -143,6 +230,119 @@ static bool ElementPresentInPathFromRoot(AttributeList *list,Tag tag,Tag sequenc
 		delete [] array;
 	}
 //cerr << "ElementPresentInPathFromRoot: did not find tag" << endl;
+	return false;
+}
+
+// Recursively descends from root into items of a top level sequence ... can be very slow :(
+// This doesn't work when called within a macro, which doesn't really have access
+// to the rootlist at all :(
+static bool SequencePresentInPathFromRootHasItems(AttributeList *list,Tag tag,Tag sequencetag)
+{
+//cerr << "SequencePresentInPathFromRootHasItems:" << endl;
+//cerr << "SequencePresentInPathFromRootHasItems: sequencetag " << hex << sequencetag.getGroup() << "," << sequencetag.getElement() << dec << endl;
+//cerr << "SequencePresentInPathFromRootHasItems: tag " << hex << tag.getGroup() << "," << tag.getElement() << dec << endl;
+//if (sequencetag.getElement() == 0x9222) {
+//TextOutputStream terr(cerr);
+//AttributeListIterator i(*list);
+//	while (!i) {
+//		Attribute *a=i();
+//		Assert(a);
+//		a->write(terr,NULL);
+//		terr << endl;
+//		++i;
+//	}
+//}
+	Assert(list);
+	Attribute *a=(*list)[sequencetag];
+	if (a && a->isSequence()) {
+//cerr << "SequencePresentInPathFromRootHasItems: found sequence" << endl;
+		SequenceAttribute *aseq=(SequenceAttribute *)a;
+		Assert(aseq);
+		AttributeList **array;
+		int n;
+		if ((n=aseq->getLists(&array)) > 0) {
+//cerr << "SequencePresentInPathFromRootHasItems: found " << n << " items" << endl;
+			int i; for (i=0; i<n; ++i) {
+//cerr << "SequencePresentInPathFromRootHasItems: item " << dec << i << endl;
+				AttributeList *list=array[i];
+				if (SequencePresentInPathHasItems(list,tag)) {	// recurses if necessary
+//cerr << "SequencePresentInPathFromRootHasItems: back from SequencePresentInPathHasItems having found tag " << endl;
+					delete [] array;
+					return true;
+				}
+			}
+		}
+		delete [] array;
+	}
+//cerr << "ElementPresentInPathFromRoot: did not find tag" << endl;
+	return false;
+}
+
+// Recursively descends from root into first items of a top level sequence.
+// Optimization to use when ElementPresentInPathFromRoot() is too slow :(
+// E.g., for many frames in PerFrameFunctionalGroupsSequence and (?) can assume all items the same :(
+static bool ElementPresentInPathFromRootFirstItem(AttributeList *list,Tag tag,Tag sequencetag)
+{
+//cerr << "ElementPresentInPathFromRootFirstItem:" << endl;
+//cerr << "ElementPresentInPathFromRootFirstItem: sequencetag " << hex << sequencetag.getGroup() << "," << sequencetag.getElement() << dec << endl;
+//cerr << "ElementPresentInPathFromRootFirstItem: tag " << hex << tag.getGroup() << "," << tag.getElement() << dec << endl;
+	Assert(list);
+	Attribute *a=(*list)[sequencetag];
+	if (a && a->isSequence()) {
+//cerr << "ElementPresentInPathFromRootFirstItem: found sequence" << endl;
+		SequenceAttribute *aseq=(SequenceAttribute *)a;
+		Assert(aseq);
+		AttributeList **array;
+		int n;
+		if ((n=aseq->getLists(&array)) > 0) {
+//cerr << "ElementPresentInPathFromRootFirstItem: found " << n << " items" << endl;
+			{
+//cerr << "ElementPresentInPathFromRoot: item " << dec << 0 << endl;
+				AttributeList *list=array[0];
+				if (ElementPresentInPathFirstItem(list,tag)) {	// recurses if necessary
+//cerr << "ElementPresentInPathFromRootFirstItem: back from ElementPresentInPathFirstItem having found tag" << endl;
+					delete [] array;
+					return true;	
+				}
+			}
+		}
+		delete [] array;
+	}
+//cerr << "ElementPresentInPathFromRootFirstItem: did not find tag" << endl;
+	return false;
+}
+
+// Recursively descends from root into first items of a top level sequence.
+// Optimization to use when ElementPresentInPathFromRoot() is too slow :(
+// E.g., for many frames in PerFrameFunctionalGroupsSequence and (?) can assume all items the same :(
+static bool SequencePresentInPathFromRootFirstItemHasItems(AttributeList *list,Tag tag,Tag sequencetag)
+{
+//cerr << "SequencePresentInPathFromRootFirstItemHasItems:" << endl;
+//cerr << "SequencePresentInPathFromRootFirstItemHasItems: sequencetag " << hex << sequencetag.getGroup() << "," << sequencetag.getElement() << dec << endl;
+//cerr << "SequencePresentInPathFromRootFirstItemHasItems: tag " << hex << tag.getGroup() << "," << tag.getElement() << dec << endl;
+	Assert(list);
+	Attribute *a=(*list)[sequencetag];
+	if (a && a->isSequence()) {
+//cerr << "SequencePresentInPathFromRootFirstItemHasItems: found sequence" << endl;
+		SequenceAttribute *aseq=(SequenceAttribute *)a;
+		Assert(aseq);
+		AttributeList **array;
+		int n;
+		if ((n=aseq->getLists(&array)) > 0) {
+//cerr << "SequencePresentInPathFromRootFirstItemHasItems: found " << n << " items" << endl;
+			{
+//cerr << "SequencePresentInPathFromRootFirstItemHasItems: item " << dec << 0 << endl;
+				AttributeList *list=array[0];
+				if (SequencePresentInPathHasItems(list,tag)) {	// recurses if necessary
+//cerr << "SequencePresentInPathFromRootFirstItemHasItems: back from SequencePresentInPathHasItems having found tag" << endl;
+					delete [] array;
+					return true;
+				}
+			}
+		}
+		delete [] array;
+	}
+//cerr << "SequencePresentInPathFromRootFirstItemHasItems: did not find tag" << endl;
 	return false;
 }
 
@@ -348,6 +548,21 @@ static bool SequenceHasOneItem(AttributeList *list,Tag tag)
 		SequenceAttribute *aseq=(SequenceAttribute *)a;
 		Assert(aseq);
 		if (aseq->isOne()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+static bool SequenceHasTwoItems(AttributeList *list,Tag tag)
+{
+	bool present=false;
+	Assert(list);
+	Attribute *a=(*list)[tag];
+	if (a && a->isSequence()) {
+		SequenceAttribute *aseq=(SequenceAttribute *)a;
+		Assert(aseq);
+		if (aseq->isTwo()) {
 			return true;
 		}
 	}

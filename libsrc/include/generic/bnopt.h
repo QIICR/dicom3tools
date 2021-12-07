@@ -1,4 +1,4 @@
-/* bnopt.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* bnopt.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_bnopt__
 #define __Header_bnopt__
 

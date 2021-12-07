@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)attrtypo.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)attrtypo.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attr.h"
 #include "attrtypo.h"
 #include "attrtag.h"
@@ -104,6 +104,27 @@ OtherByteSmallNonPixelAttributeBase::setValue(const unsigned char *values,Uint32
 	Assert(data);
 	memcpy(data,values,size_t(length));
 	lengthinbytes=length;
+}
+
+void
+OtherByteSmallNonPixelAttributeBase::addValues(const char *values)
+{
+	Assert(lengthinbytes == 0);
+	Assert(data == 0);
+	Uint32 length = strlen(values);
+	if (length%2 == 0) {	// DICOM likes even things
+		data=new unsigned char[length];
+		Assert(data);
+		memcpy(data,values,size_t(length));
+		lengthinbytes=length;
+	}
+	else {
+		data=new unsigned char[length+1];
+		Assert(data);
+		memcpy(data,values,size_t(length));
+		data[length]=0x20;	// pad wth space not zero, since supplied value is supposedly a string
+		lengthinbytes=length+1;
+	}
 }
 
 OtherWordSmallNonPixelAttributeBase::OtherWordSmallNonPixelAttributeBase(Tag t)

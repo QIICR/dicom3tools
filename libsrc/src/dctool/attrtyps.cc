@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)attrtyps.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)attrtyps.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <cctype>	// for isspace()
 #else
@@ -445,7 +445,7 @@ TextAttribute::addValue(const char *value)
 // and may never have a VM of more than 1
 
 void
-LongTextAttributeBase::setValue(unsigned index,const char *value)
+TextAttributeBase::setValue(unsigned index,const char *value)
 {
 	Assert(value);
 	Assert(index == 0);
@@ -453,7 +453,7 @@ LongTextAttributeBase::setValue(unsigned index,const char *value)
 }
 
 void
-LongTextAttributeBase::addValue(const char *value)
+TextAttributeBase::addValue(const char *value)
 {
 	Assert(value);
 	Assert(getVM() == 0);
@@ -461,7 +461,7 @@ LongTextAttributeBase::addValue(const char *value)
 }
 
 void
-LongTextAttributeBase::addValues(const char *vptr)
+TextAttributeBase::addValues(const char *vptr)
 {
 	Assert(vptr);
 	addValue(vptr);

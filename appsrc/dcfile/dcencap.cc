@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dcencap.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dcencap.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attrmxls.h"
 #include "mesgtext.h"
 #include "getoptns.h"
@@ -97,7 +97,7 @@ main(int argc, char *argv[])
 	bool success=true;
 	TextOutputStream  log(cerr);
 	if (veryverbose) log << "******** While reading DICOM dataset ... ********" << endl; 
-	list.read(din1,&log,veryverbose,0xffffffff,true,dicom_input_options1.uselengthtoend,dicom_input_options1.ignoreoutofordertags);
+	list.read(din1,false/*newformat*/,&log,veryverbose,0xffffffff,true,dicom_input_options1.uselengthtoend,dicom_input_options1.ignoreoutofordertags);
 	
 	if (!list.good()) {
 		log << list.errors()

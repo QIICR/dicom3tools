@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)attrmxls.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)attrmxls.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attrtype.h"
 #include "attrlsln.h"
 #include "attrmxls.h"
@@ -9,6 +9,16 @@ static const char *CopyrightIdentifier(void) { return "@(#)attrmxls.cc Copyright
 #include "elmconst.h"
 #include "mesgtext.h"
 #include "bnchar.h"
+
+static bool inline
+iscntrlok(char c) {	// Per PS 3.5 6.1.3
+	return (c == 0x1b /*ESC*/ || c == 0x0a /*LF*/ || c == 0x0c /*FF*/ || c == 0x0d /*CR*/);
+}
+
+static bool inline
+isescape(char c) {	// Per PS 3.5 6.1.3
+	return (c == 0x1b /*ESC*/);
+}
 
 static bool
 loopOverListsInSequences(Attribute *a,bool (*func)(AttributeList &))
@@ -47,8 +57,8 @@ loopOverListsInSequencesWithFlag(Attribute *a,bool flag,bool (*func)(AttributeLi
 }
 
 static bool
-loopOverListsInSequencesWithLog(Attribute *a,TextOutputStream &log,
-		bool (*func)(AttributeList &,TextOutputStream &))
+loopOverListsInSequencesWithLog(Attribute *a,bool verbose,bool newformat,TextOutputStream &log,
+		bool (*func)(AttributeList &,bool,bool,TextOutputStream &))
 {
 	bool succeeded=true;
 	if (strcmp(a->getVR(),"SQ") == 0) {
@@ -57,7 +67,7 @@ loopOverListsInSequencesWithLog(Attribute *a,TextOutputStream &log,
 		if ((n=a->getLists(&al)) > 0) {
 			int i;
 			for (i=0; i<n; ++i) {
-				if (!(*func)(*al[i],log)) succeeded=false;
+				if (!(*func)(*al[i],verbose,newformat,log)) succeeded=false;
 			}
 			delete [] al;
 		}
@@ -66,8 +76,8 @@ loopOverListsInSequencesWithLog(Attribute *a,TextOutputStream &log,
 }
 
 static bool
-loopOverListsInSequencesWithSpecificCharacterSetInfoAndLog(Attribute *a,SpecificCharacterSetInfo *specificCharacterSetInfo,TextOutputStream &log,
-		bool (*func)(AttributeList &,SpecificCharacterSetInfo *specificCharacterSetInfo,TextOutputStream &))
+loopOverListsInSequencesWithSpecificCharacterSetInfoAndLog(Attribute *a,SpecificCharacterSetInfo *specificCharacterSetInfo,bool verbose,bool newformat,TextOutputStream &log,
+		bool (*func)(AttributeList &,SpecificCharacterSetInfo *specificCharacterSetInfo,bool,bool,TextOutputStream &))
 {
 	bool succeeded=true;
 	if (strcmp(a->getVR(),"SQ") == 0) {
@@ -76,7 +86,7 @@ loopOverListsInSequencesWithSpecificCharacterSetInfoAndLog(Attribute *a,Specific
 		if ((n=a->getLists(&al)) > 0) {
 			int i;
 			for (i=0; i<n; ++i) {
-				if (!(*func)(*al[i],specificCharacterSetInfo,log)) succeeded=false;
+				if (!(*func)(*al[i],specificCharacterSetInfo,verbose,newformat,log)) succeeded=false;
 			}
 			delete [] al;
 		}
@@ -85,7 +95,7 @@ loopOverListsInSequencesWithSpecificCharacterSetInfoAndLog(Attribute *a,Specific
 }
 
 static bool
-validateVR(AttributeList& list,SpecificCharacterSetInfo *parentSpecificCharacterSetInfo,TextOutputStream &log)
+validateVR(AttributeList& list,SpecificCharacterSetInfo *parentSpecificCharacterSetInfo,bool verbose,bool newformat,TextOutputStream &log)
 {
 	SpecificCharacterSetInfo *specificCharacterSetInfo = list.getSpecificCharacterSetInfo();
 	if (!specificCharacterSetInfo) {
@@ -103,9 +113,9 @@ validateVR(AttributeList& list,SpecificCharacterSetInfo *parentSpecificCharacter
 	while (!listi) {
 		Attribute *a=listi();
 		Assert(a);
-		if (!::loopOverListsInSequencesWithSpecificCharacterSetInfoAndLog(a,specificCharacterSetInfo,log,&::validateVR))
+		if (!::loopOverListsInSequencesWithSpecificCharacterSetInfoAndLog(a,specificCharacterSetInfo,verbose,newformat,log,&::validateVR))
 			succeeded=false;
-		if (a->getVL() > 0 && !a->validateVR(log,specificCharacterSetInfo,list.getDictionary()))
+		if (a->getVL() > 0 && !a->validateVR(verbose,newformat,log,specificCharacterSetInfo,list.getDictionary()))
 			succeeded=false;
 		++listi;
 	}
@@ -113,23 +123,23 @@ validateVR(AttributeList& list,SpecificCharacterSetInfo *parentSpecificCharacter
 }
 
 bool
-ManagedAttributeList::validateVR(TextOutputStream &log)
+ManagedAttributeList::validateVR(bool verbose,bool newformat,TextOutputStream &log)
 {
 //cerr << "ManagedAttributeList::validateVR" << endl;
-	return ::validateVR(*this,NULL,log);
+	return ::validateVR(*this,NULL,verbose,newformat,log);
 }
 
 static bool
-validateRetired(AttributeList& list,TextOutputStream &log)
+validateRetired(AttributeList& list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool succeeded=true;
 	AttributeListIterator listi(list);
 	while (!listi) {
 		Attribute *a=listi();
 		Assert(a);
-		if (!::loopOverListsInSequencesWithLog(a,log,&::validateRetired))
+		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::validateRetired))
 			succeeded=false;
-		if (!a->validateRetired(log,list.getDictionary()))
+		if (!a->validateRetired(verbose,newformat,log,list.getDictionary()))
 			succeeded=false;
 		++listi;
 	}
@@ -137,14 +147,14 @@ validateRetired(AttributeList& list,TextOutputStream &log)
 }
 
 bool
-ManagedAttributeList::validateRetired(TextOutputStream &log)
+ManagedAttributeList::validateRetired(bool verbose,bool newformat,TextOutputStream &log)
 {
 //cerr << "ManagedAttributeList::validateRetired" << endl;
-	return ::validateRetired(*this,log);
+	return ::validateRetired(*this,verbose,newformat,log);
 }
 
 static bool
-validateUsed(AttributeList& list,TextOutputStream &log)
+validateUsed(AttributeList& list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool succeeded=true;
 	AttributeListIterator listi(list);
@@ -152,8 +162,12 @@ validateUsed(AttributeList& list,TextOutputStream &log)
 		Attribute *a=listi();
 		Assert(a);
 		Tag t = a->getTag();
-		if (!t.isPrivateGroup()) {
-			if (!::loopOverListsInSequencesWithLog(a,log,&::validateUsed))
+		if (!t.isPrivateGroup()
+		  && t != TagFromName(ModifiedAttributesSequence)
+		  && t != TagFromName(UnassignedSharedConvertedAttributesSequence)
+		  && t != TagFromName(UnassignedPerFrameConvertedAttributesSequence)
+		  ) {	// any Attribute may be present in ModifiedAttributesSequence (000533), UnassignedSharedConvertedAttributesSequence or UnassignedPerFrameConvertedAttributesSequence (000534), so do not warn about them
+			if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::validateUsed))
 				succeeded=false;
 		}
 		bool used = a->isUsed();
@@ -169,16 +183,26 @@ validateUsed(AttributeList& list,TextOutputStream &log)
 				if (dictionary) {
 					const char *vrd = dictionary->getValueRepresentation(t);
 					if (!vrd) {
-						log << EMsgDC(AttributeIsNotARecognizedStandardAttribute) << " - ";
-						t.write(log,dictionary);
-						log << endl;
+						if (newformat) {
+							log << Attribute::EMsgDCF(MMsgDC(AttributeIsNotARecognizedStandardAttribute),a) << endl;
+						}
+						else {
+							log << EMsgDC(AttributeIsNotARecognizedStandardAttribute) << " - ";
+							t.write(log,dictionary);
+							log << endl;
+						}
 						succeeded=false;
 					}
 				}
-				log << WMsgDC(AttributeIsNotUsedInIOD) << " - ";
-				t.write(log,dictionary);
-				log << endl;
-				succeeded=false;
+				if (newformat) {
+					log << Attribute::WMsgDCF(MMsgDC(AttributeIsNotUsedInIOD),a) << endl;
+				}
+				else {
+					log << WMsgDC(AttributeIsNotUsedInIOD) << " - ";
+					t.write(log,dictionary);
+					log << endl;
+				}
+				succeeded=false;	// needed to trigger summary message in dciodvfy when not newformat
 			}
 		}
 		++listi;
@@ -187,14 +211,14 @@ validateUsed(AttributeList& list,TextOutputStream &log)
 }
 
 bool
-ManagedAttributeList::validateUsed(TextOutputStream &log)
+ManagedAttributeList::validateUsed(bool verbose,bool newformat,TextOutputStream &log)
 {
 //cerr << "ManagedAttributeList::validateUsed" << endl;
-	return ::validateUsed(*this,log);
+	return ::validateUsed(*this,verbose,newformat,log);
 }
 
 static bool
-validatePrivate(AttributeList& list,TextOutputStream &log)
+validatePrivate(AttributeList& list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool succeeded=true;
 	AttributeListIterator listi(list);
@@ -202,16 +226,18 @@ validatePrivate(AttributeList& list,TextOutputStream &log)
 		Attribute *a=listi();
 		Assert(a);
 		Tag t = a->getTag();
-		if (!::loopOverListsInSequencesWithLog(a,log,&::validatePrivate))
+		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::validatePrivate))
 			succeeded=false;
 		if ((t.getGroup() % 2) == 1 && !t.isValidPrivateGroup()) {
-			ElementDictionary *dictionary = list.getDictionary();
-			if (dictionary) {
-				log << EMsgDC(AttributeIsNotInALegalPrivateGroup) << " - ";
-				t.write(log,dictionary);
-				log << endl;
-				succeeded=false;
+			if (newformat) {
+				log << Attribute::EMsgDCF(MMsgDC(AttributeIsNotInALegalPrivateGroup),a) << endl;
 			}
+			else {
+				log << EMsgDC(AttributeIsNotInALegalPrivateGroup) << " - ";
+				t.write(log,list.getDictionary());
+				log << endl;
+			}
+			succeeded=false;
 		}
 		++listi;
 	}
@@ -219,10 +245,10 @@ validatePrivate(AttributeList& list,TextOutputStream &log)
 }
 
 bool
-ManagedAttributeList::validatePrivate(TextOutputStream &log)
+ManagedAttributeList::validatePrivate(bool verbose,bool newformat,TextOutputStream &log)
 {
 //cerr << "ManagedAttributeList::validatePrivate" << endl;
-	return ::validatePrivate(*this,log);
+	return ::validatePrivate(*this,verbose,newformat,log);
 }
 
 static bool
@@ -1076,6 +1102,7 @@ cerr << "ManagedAttributeList::~ManagedAttributeList" << endl;
 
 bool
 ManagedAttributeList::read(DicomInputStream& stream,
+		bool newformat,
 		TextOutputStream *log,
 		bool verbose,
 		Uint32 length,
@@ -1089,7 +1116,7 @@ ManagedAttributeList::read(DicomInputStream& stream,
 {
 	return ReadableAttributeList::read(
 		stream,getDictionary(),
-		log,verbose,length,
+		newformat,log,verbose,length,
 		metaheadercheck,uselengthtoend,ignoretagsoutoforder,useUSVRForLUTDataIfNotExplicit,
 		false/*forceImplicit*/,
 		useStopAtTag,stopAtTag,

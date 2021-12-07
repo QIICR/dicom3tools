@@ -314,4 +314,10 @@ StringValues="MammographyPositionerAndDetectorMotion" {
 	COMPLEX_CONT = Complex motion, continuous during acquisition
 }
 
+StringValues="EntranceDoseDerivation"	{
+	IAK,
+	ESAK,
+	ESDBS,
+	ESDNOBS
+}
 

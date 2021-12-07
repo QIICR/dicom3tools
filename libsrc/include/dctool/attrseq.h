@@ -1,4 +1,4 @@
-/* attrseq.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attrseq.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_attrseq__
 #define __Header_attrseq__
 
@@ -49,6 +49,7 @@ public:
 
 	bool	isEmpty(void) const		{ return /*getVM() == 0;*/ listoflists.isEmpty(); }
 	bool	isOne(void) const		{ return /*getVM() == 1;*/ listoflists.isOne(); }
+	bool	isTwo(void) const		{ return /*getVM() == 2;*/ listoflists.isTwo(); }
 	bool	isMultiple(void) const		{ return /*getVM() > 1;*/  listoflists.isMultiple(); }
 	// isEmptyOrHasAnyEmptyValue() from attr.h should work fine
 	// isEmptyOrHasAllEmptyValues() from attr.h should work fine
@@ -57,16 +58,15 @@ public:
 
 	// Methods unique to this class ...
 
-	void operator +=(AttributeList *item)
-		{
-			listoflists+=item;
-		}
+	void operator +=(AttributeList *item);
 
 	Uint32 getNumberOfItems (void) const;
 
+	Uint32 whatItemNumberIsList(AttributeList *item);
+
 	void reviseVL(void)	{}
 
-	bool verifyVM(const char *module,const char *element,TextOutputStream& log,ElementDictionary *dict,Uint32 multiplicityMin=0,Uint32 multiplicityMax=0,const char *source=NULL) const;
+	bool verifyVM(const char *module,const char *element,bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict,Uint32 multiplicityMin=0,Uint32 multiplicityMax=0,const char *source=NULL) const;
 };
 
 #endif /* __Header_attrseq__ */

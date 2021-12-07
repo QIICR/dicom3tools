@@ -46,7 +46,8 @@ StringValues="TimeDistributionProtocol" {
 	NTP  = Network Time Protocol,
 	IRIG = InterRange Instrument Group,
 	GPS  = Global Positioning System,
-	SNTP  = Simple Network Time Protocol
+	SNTP = Simple Network Time Protocol,
+	PTP  = IEEE 1588 Precision Time Protocol
 }
 
 StringValues="DisplayShadingFlag" {

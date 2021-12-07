@@ -1,3 +1,579 @@
+211009:	libsrc/include,src/dctool/ie.h,standard/condn.tpl,sopcl.tpl,iodcomp,module,strval/vl.tpl: Add Microscopy Bulk Simple Annotations (Sup 222)
+
+211005:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Tomotherapeutic and Robotic-Arm Treatment Modalities (Sup 176)
+
+211001:	libsrc/include/dctool/attr.h,,attrlist.h,src/dctool/attrlist.cc,attrvrfy.cc,support/module.awk: Avoid seg fault in verify message when building full path to attribute when checking attribute value when attribute not present (000567)
+
+210906: libsrc/standard/elmdict/dicom3.tpl:	Data elements for RT Patient Setup and Delivery Instruction (Sup 160)
+
+210903: libsrc/standard/elmdict/dicom3.tpl,iodcomp,module,strval/vl.tpl: Add Whole Slide Microscopy Image Flavor of THUMBNAIL and retire LOCALIZER (incl. retire Multi-Resolution Navigation Module and data elements) (CP 2102)
+
+210831:	libsrc/standard/condn.tpl,iodcomp,module,strval/softcopy.tpl: Add Extended Presentation States (Sup 120)
+
+210830:	libsrc/standard/module,strval/vl.tpl: Add calculation comments for intraocular lens calculations to Intraocular Lens Calculations IOD (CP 1812)
+
+210830:	libsrc/standard/condn.tpl,module,strval/vl.tpl: Add concept of Toric Intraocular Lenses to Intraocular Lens Calculations IOD (CP 1813)
+
+210830:	libsrc/standard/module/vl.tpl: Add corneal measurement values sequence to Intraocular Lens Calculations IOD (IOL) (CP 1814)
+
+210830:	libsrc/standard/condn.tpl,module/dx.tpl: Add Breast Biopsy Target functional group macro to Breast Tomo (CP 1709)
+
+210830:	libsrc/standard/module/xaxrf.tpl: Add PositionerPrimaryAngle, PositionerSecondaryAngle missing from PerProjectionAcquisitionSequence in XRay3DAngiographicAcquisition
+
+210830:	libsrc/standard/module/rt.tpl: Adding missing condition for DepthValueAveragingFlag in RTBeams
+
+210830:	libsrc/standard/module/xaxrf.tpl: Add Table Information to X-Ray 3D IODs (CP 1346)
+
+210830:	libsrc/standard/module/xaxrf.tpl: Add missing Filter Beam Path Length Minimum, Maximum to XRay3DAngiographicAcquisition (CP 837)
+
+210830:	libsrc/standard/condn.tpl,base.tpl: Use of Segmentation and Parametric Maps with Whole Slide Imaging (CP 1830), Add Slide Orientation and Total Pixel Matrix information to Segmentation and Parametric Maps for TILED_FULL (CP 1984)
+
+210830:	libsrc/standard/condn.tpl,elmdict/dicom3.tpl,iodcomp,module/vl.tpl,strval/base.tpl,vl.tpl: Add Ophthalmic Optical Coherence Tomography for Angiographic Imaging Storage SOP Classes (Sup 197)
+
+210830:	libsrc/standard/module/vl.tpl: Add Attribute to convey OPT Scan Patterns in OPT IOD (CP 1663)
+
+210830:	libsrc/standard/module/ct.tpl: Correct Multi-energy Sequence Nesting (CP 1977)
+
+210830:	libsrc/standard/condn.tpl,module,strval/mr.tpl: Add Water Reference and Echo Top (Peak) Position to the Enhanced Spectroscopy object (CP 1294)
+
+210830:	libsrc/standard/condn.tpl,module/base.tpl,mr.tpl: Add settling phases information and Synch pulse for Functional MRI (includes adding Functional MR Functional Groups Macro) (CP 1476)
+
+210830:	libsrc/standard/module/dx.tpl: Add compression pressure to mammography, breast tomosynthesis and projection objects (CP 1679)
+
+210830:	libsrc/standard/module/dx.tpl: Remove redundant RecognizableVisualFeatures in DX Image Module that is not in standard
+
+210829:	libsrc/standard/condn.tpl,module,strval/rt.tpl: RT Ion Beams Scan Spot Ordering (CP 1013), also add missing ScanSpotTuneID, NumberOfScanSpotPositions
+
+210829:	libsrc/standard/module/rt.tpl: RT Ion Beams Correction for Scan Spot Size Record (CP 1971)
+
+210829:	libsrc/standard/module/rt.tpl: Add Ion Range and Modulation (CP 1460)
+
+210829:	libsrc/standard/module/rt.tpl: Add missing RangeShifterID to RT Ion Beams Session Record Module
+
+210829:	libsrc/standard/elmdict/dicom3.tpl,module,strval/rt.tpl: Additional Tags For Ion Eye Treatment (CP 1531)
+
+210829:	libsrc/standard/module/rt.tpl: PDR Pulse Details in RT Brachy Session Record (CP 1203)
+
+210829:	libsrc/standard/module/rt.tpl: Add BolusID to RTBeamsSessionRecord (CP 483)
+
+210829:	libsrc/standard/condn.tpl,module/rt.tpl: Consolidate Brachytherapy Applicator Geometry Definitions (CP 1657)
+
+210829:	libsrc/standard/module/rt.tpl: Additional SSD Information (CP 1434)
+
+210829:	libsrc/standard/module/rt.tpl: Move ApplicatorDescription position in RT Beams and Session Record Modules
+
+210829:	libsrc/standard/module/rt.tpl: Correct nesting of GeneralAccessorySequence in RT (and Ion) Beams and Session Record Modules
+
+210829:	libsrc/standard/module/rt.tpl: Add Compensator Type to RT Plan object (CP 135)
+
+210829:	libsrc/standard/module/rt.tpl: Add Effective Wedge Angle (CP 1399)
+
+210829:	libsrc/standard/module/rt.tpl: Referenced Dose Reference UID is missing from Referenced Brachy Application Setup Sequence (CP 2007)
+
+210829:	libsrc/standard/module/rt.tpl: Treatment Time in RT Plan (Add BeamDeliveryDurationLimit) (CP 1331)
+
+210829:	libsrc/standard/module/rt.tpl: Treatment Time in RT Plan (Add BeamDeliveryDurationLimit) (CP 1331)
+
+210829:	libsrc/standard/module/rt.tpl: Dose Reference Beam Dose Verification (CP 1658) and Fix Omitted Attribute in Verification Control Points (CP 1762)
+
+210829:	libsrc/standard/module/rt.tpl: Retire Beam Dose Specification Point (CP 1879)
+
+210829:	libsrc/standard/strval/rt.tpl: Dose Measurement Type in RTSTRUCT (Add DOSE_MEASUREMENT to RT ROI Interpreted Type) (CP 1660)
+
+210829:	libsrc/standard/strval/rt.tpl: Add OAR to RT ROI Interpreted Type (CP 2150)
+
+210829:	libsrc/standard/module/rt.tpl: Add Category Code Sequence to RT Structure Set (CP 1314)
+
+210829:	libsrc/standard/module/rt.tpl: Add Anatomic Region Sequence to RT Structure Set (CP 1864)
+
+210829:	libsrc/standard/iod/rt.tpl: Add FoR Module to RTSS IOD (CP 1398)
+
+210829:	libsrc/standard/module/rt.tpl: Deprecation of multiple FORs in Structure Set (Remove FrameOfReferenceRelationshipSequence from Structure Set Module) (CP 1249)
+
+210829:	libsrc/standard/module/rt.tpl: Additional Derivation Codes For Dose Composition (CP 1291)
+
+210829:	libsrc/standard/condn.tpl,module,strval/rt.tpl: Add Indication For Dose Of Delivery (Add DoseSummationType of RECORD and ReferencedTreatmentRecordSequence) (CP 1329)
+
+210829:	libsrc/standard/condn.tpl,module,strval/rt.tpl: RT Applicator Enhancements (CP 1010)
+
+210829:	libsrc/standard/module/rt.tpl: RT Image Attribute Completion (add AccessoryCode to ApplicatorSequence) (CP 1330)
+
+210829:	libsrc/standard/module/rt.tpl: Add Integrated RT Image Parameters (CP 1034)
+
+210829:	libsrc/standard/module/rt.tpl: Add XRayImageReceptorTranslation (CP 171)
+
+210829:	libsrc/standard/module/base.tpl: Add Document Class Code Sequence (to SC Image Module; already in Encapsulated Document Module per CP 1811) (CP 1078)
+
+210829:	libsrc/standard/iodcomp/base.tpl,module/base.tpl,strval/us.tpl: Active image region overlay (CP 1975)
+
+210829:	libsrc/standard/module/base.tpl,pet.tpl,strval/base.tpl: Add ScanProgressionDirection (CP 1347)
+
+210829:	libsrc/standard/module,strval/base.tpl: Add RTC functional group macros and modules (Sup 202)
+
+210829:	libsrc/standard/module/ct.tpl: Correct Type of Unassigned Shared and PerFrame ConvertedAttributesMacro to match Type 1C (with no condition, since real-world) not Type 2 in standard, unchanged since Sup 157
+
+210829:	libsrc/standard/condn.tpl: Correct condition on Slice Thickness in Pixel Measures Macro to match standard, unchanged since Sup 49
+
+210829:	libsrc/standard/module/base.tpl: Add Contrast Relaxivity (MR) information to Enhanced Contrast/Bolus module (CP 1325)
+
+210829:	libsrc/standard/module/base.tpl: Factor out Image Pixel Description Macro Attributes (to support documentation of STOW-RS media types) - affects messages (which Macro) but not semantics (CP 1582)
+
+210829:	libsrc/standard/condn.tpl,module/base.tpl: Add ExtendedOffsetTable (CP 1818)
+
+210829:	libsrc/standard/condn.tpl,module/base.tpl: Factor out Spacing Between Slices into Image Plane Module, and check for negative when not permitted by NM (CP 2061)
+
+210829:	libsrc/standard/condn.tpl,module/base.tpl: Do not revert to invocation of General Anatomy Optional macro in General Image Module (CP 1744) after cancellation of change to reconcile with Type 2 in DX Image (cancelled CP 1885), but do verify that if AnatomicRegionSequence is not overridden with Type 2 (i.e., not DX), an item should be present (may produce redundant messages with more specific modules that invoke Type 3 or Type 1 usage)
+
+210829:	libsrc/standard/module/base.tpl,xarf.tpl: Move Protocol Reference to Image Level for CT and XA/XRF (CP 2093)(Sup 212)
+
+210829:	libsrc/standard/strval/waveform.tpl: Add term for IEEE 1588 Precision Time Protocol (CP 1082)
+
+210829:	libsrc/standard/module/base.tpl: Add Reason for Visit (CP 1837)
+
+210829:	libsrc/standard/condn.tpl,module,strval/base.tpl: Add various macros to support RT C-Arm (Sup 175)
+
+210828:	libsrc/standard/condn.tpl,module/base.tpl: Add Conceptual Volume and related macros (Sup 147)
+
+210828:	libsrc/standard/base.tpl: Add Assertion Macro (Sup 192)
+
+210828:	libsrc/standard/condn.tpl,module,strval/base.tpl: Add Reference Location and Protocol Element Identification Macros (Sup 121)
+
+210828:	libsrc/include/dctool/attrseq.h,generic/listsimp.h,src/dctool/condn.cc,standard/condn.tpl,module,strval/base.tpl,support/condn.awk: Add Attribute Value and Constraint Macros (Sup 185)
+
+210828:	libsrc/standard/cond.tpl,module/base.tpl,rt.tpl,strval/rt.tpl: Add Device Motion Control Macro (CP 1430)
+
+210828:	libsrc/standard/module/base.tpl: Add Numeric Value Macro (Sup 152)
+
+210828:	libsrc/standard/module/base.tpl,vl.tpl: Replace DataSetIdentificationMacro with ExternallySourcedDataSetIdentificationMacro (CP 1817)
+
+210828:	libsrc/standard/module/base.tpl: Add PerformedProcedureStepEndDate and Time missing from PerformedProcedureStepSummaryMacro
+
+210828:	libsrc/standard/module/base.tpl: Add Enhanced and Extended Content Identification Macros (Sup 147)
+
+210828:	libsrc/standard/module/base.tpl: Allow multiple finding sites for segmentations (CP 1591)
+
+210828:	libsrc/standard/condn.tpl,module/base.tpl: Add Storage Macro (CP 1441)
+
+210828:	libsrc/standard/condn.tpl,module/acqctx.tpl,base.tpl,strval/base.tpl: Use Content Item with Modifier Macro in Acquisition Context (CP 2045)
+
+210828:	libsrc/standard/module/base.tpl: Add Telecom Addresses (CP 1321)
+
+210828:	appsrc/dcfile/dciodvfy.cc,libsrc/src/dctool/attrmxrd.cc,attrseq.cc,attrtypv.cc,attrvrfy.cc,locale/mesgtext.tpl,support/module.awk: Consistently use different delimiter ('=') to show value than separate message parts ('-') in new messages, show value number in path for all new messages (incl. ad hoc (template) and VR-related messages), and show the correct value number (from 1, not 0) in old and new VR-related messages (000564)(000565)(000566)
+
+210828: libsrc/standard/module/acqctx.tpl,base.tpl,sr.tpl: change dciodvfy messages to say shall not rather than may not (old and new formats) (000563)
+
+210828:	libsrc/src/dctool/attrmxrd.cc: report explicit VR when unrecognized data element (not in dictionary), be consistent about delimiters around VR when shown (000561)(000562)
+
+210802:	libsrc/include/dctool/attr.h,attrlist.h,attrmxls.h,attrseq.h,attrtype.h,iodcomp.h,module.h,generic/strtype.h,txstream.h,locale/mesgtext.h,src/dctool/attr.cc,attrlist.cc,attrmxls.cc,libsrc/src/dctool/attrmxrd.cc,attrseq.cc,attrtypv.cc,attrvrfy.cc,modulev.cc,generic/txstream.cc,mesgtext.cc,support/iodcomp.awk,module.awk,appsrc/dcfile/dciodvfy.cc,*.cc: Add new format option for dciodvfy messages that includes full path to offending attribute, and uses standardized order of type of error or warning, path to attribute, message, value (if any) and additional information, which requires tracking of parent sequence attribute and enclosing attribute list to build full path, and passage of newformat option through many reading and parsing functions (000559) (000560)
+
+210801: libsrc/standard/module,src/locale/mesgtext.tpl: Improve consistency of capitalization and use of keywords (no spaces) rather than descriptions in messages (000558)
+
+210711:	libsrc/standard/elmdict/dicom3.tpl: Add microscopy bulk annotation data elements (Sup 222)
+
+210711:	libsrc/standard/elmdict/dicom3.tpl,module/rt.tpl: Allow a Brachy Applicator to reference an ROI (CP 2079)
+
+210621:	libsrc/standard/elmdict/diconde.tpl: Add DICONDE Linearity and Beam Hardening Correction Technique data elements, correct DICONDE Image Quality related data element VM to 1-n
+
+210527:	appsrc/misc/jpegdump.cc: Improve description of extension markers and debugging of bad JPEG-LS bitstreams
+
+210415:	libsrc/standard/module/base.tpl: Add SpatialLocationsPreserved and PatientOrientation missing from SourceImageSequence in DerivationImageMacro (Sup 165)
+
+210325:	libsrc/standard/elmdict/dicom3.tpl,module/base.tpl,ct.tpl: Retire Estimated Dose Saving (CP 1227)
+
+210306:	libsrc/standard/condn.tpl,iodcomp,module,strval/vl.tpl: Add Dermoscopic Photography Image (Sup 221)
+
+210306:	libsrc/standard/binval.tpl,iodcomp,module,strval/vl.tpl: Add Visible Light Photography Attributes corresponding to EXIF 2.31 and TIFF/EP (CP 1736)
+
+210206:	libsrc/standard/condn.tpl: Include SCT codes when determining Laterality Required, using 2021a as refernce, including some updated codes (000555)
+
+210121:	libsrc/standard/elmdict/dicom3.tpl: Add new data elements for XA Protocol (Sup 212)
+
+210119:	libsrc/standard/elmdict/dicom3.tpl: Add new data elements (CPACK 109)
+
+210104:	libsrc/standard/elmdict/other.tpl: Update PixelMed private WSI bulk annotation data elements with Annotation Group UID (sup222_08_WSIAnnotations)
+
+210102:	libsrc/standard/elmdict/dicom3.tpl,module/rt.tpl: Source Pixel Plane Characteristics for Contours (CP 2006); Extend RT Structure Set ROI Color (CP 1395)
+
+201208:	appsrc/dcfile/dciodvfy.cc: Check sanity of tile dimensions and number of frames in whole slide images (000553)
+
+201208: libsrc/standard/elmdict/other.tpl: Add more observed 3DHISTECH private data elements
+
+201208: libsrc/standard/condn.tpl: Do not report zero length ViewModifierCodeSequence error for non Mammo DX when ViewModifierCodeSequence not present (regression caused by 000549) (000552)
+
+201208: libsrc/standard/condn.tpl: Do not complain about presence of ReferencedSeriesSequence or StudiesContainingOtherReferencedInstancesSequence (Common Instance Reference Module) if SegmentSurfaceSourceInstanceSequence is present (000551)
+
+201208: libsrc/src/dctool/condn.cc,standard/condn.tpl,support/condn.awk: Do not complain about absence of ReferencedSeriesSequence and StudiesContainingOtherReferencedInstancesSequence (Common Instance Reference Module) when valid empty (no item) ReferencedImageSequence (000550)
+
+201205: libsrc/standard/condn.tpl,module/dx.tpl: Do not report error on zero length ViewModifierCodeSequence if Mammo, since Type 2 specializes DX Positioning Module Type 3 (regression caused by change on 2013/06/26) (000549)
+
+201117:	libsrc/standard/elmdict/dicom3.tpl: Add OV, SV and UV Selector Attributes (CP 2042)
+
+201117:	libsrc/standard/elmdict/dicom3.tpl: SR Table data elements (CP 2041)
+
+201115:	libsrc/standard/sopcl.tpl,elmdict/dicom3.tpl: Dermoscopy data elements (Sup 221)
+
+200920:	libsrc/standard/module/base.tpl: Make Frame Anatomy in Parametric Map Optional (CP 2004)
+
+200919:	libsrc/standard/condn.tpl,elmdict/dicom3.tpl,module/base.tpl,us.tpl: Add ultrasound Probe ID in Transducer Identification Sequence (CP 1951); depended on adding Device Identification Sequence Macro (from Sup 147)
+
+200915:	libsrc/standard/elmdict/other.tpl: Update PixelMed private WSI bulk annotation data elements (supnnn_05_WSIAnnotations)
+
+200829:	libsrc/standard/condn.tpl,iodcomp,module/base.tpl: Check CommonInstanceReference Module presence conditional on references being present (000547) and attributes only present when references are present (000548)
+
+200822:	libsrc/standard/elmdict/dicom3.tpl: Render MakeNote as string even though OB
+
+200806:	standard/condn.tpl,module/base.tpl,mr.tpl,vl.tpl: Do not complain about YBR_RCT for .90 Transfer Syntax (000546)
+
+200726:	libsrc/standard/strval/vl.tpl: Correct NUMERIC value type in Acquisition Context (000545)
+
+200724:	libsrc/standard/module/mr.tpl: Fix incorrect condition for Real World Value Mapping Macro in Shared Functional Group Sequence for Legacy Converted MR (000544)
+
+200719:	libsrc/standard/condn.tpl,elmdict/dicom3.tpl,diconde.tpl: Correct VRs, VMs and keywords to match 2020c (Peros)
+
+200716:	libsrc/standard/elmdict/siemens.tpl: Correct duplicate and incorrect private data elements (Vrinda, Conformance Statement)
+
+200716:	libsrc/standard/elmdict/gems.tpl: Correct duplicate and incorrect private data elements (Vrinda, Conformance Statement)
+
+200716:	libsrc/standard/elmdict/agfa.tpl: Correct duplicate and incorrect private data elements (Vrinda, Conformance Statement)
+
+200716:	libsrc/standard/condn.tpl: Correct KVP CT Image Module condition when multi-energy (000543)
+
+200716:	libsrc/standard/module/ct.tpl: Use ReferencedXRaySourceIndex not ReferencedPathIndex for multi-energy CT Exposure Sequence (000542)
+
+200716:	libsrc/standard/elmdict/dicom3.tpl: Add data elements and SOP Class UIDs for latest release (includng catching up on 2nd Gen RT UIDs) (2020c)
+
+200622:	libsrc/include,src/dctool/attrtypo.h,.cc: Allow insertion of strings in OB using addValues(), e.g., for dccp (000541)
+
+200620:	libsrc/src/dctool/dcopto.cc: Allow insertion of empty sequence during dccp (000540)
+
+200610:	libsrc/standard/elmdict/philips.tpl,siemens.tpl: Update observed private data elements, including OB rendered as string for some
+
+200610:	libsrc/include/dctool/ie.h,src/dctool/ie.cc,support/module.awk: Fix dcentvfy SeriesInstanceUID broken by addition of ReferencedInstancesAndAccessMacro for Patient Photo by overwriting IE for attribute set during module parsing when depth in the hierarchy is lower (000539)
+
+200608:	libsrc/standard/condn.tpl,elmdict/dicom3.tpl,module,strval/base.tpl: Update Encapsulated Document Module (CP 1811 and Sup 208, including new data elements)
+
+200605:	libsrc/standard/elmdict/other.tpl: Add Merge Unity PACS (DR Systems) data elements as described in DCS v11.2 and encountered
+
+200605:	libsrc/standard/elmdict/other.tpl: Add Philips/Stentor iSite data elements as encountered
+
+200604:	libsrc/standard/elmdict/other.tpl: Add Samsung CR private data elements as encountered, as UT
+
+200604:	libsrc/standard/elmdict/gems.tpl: More private GEMS_PARM_01 group 0043 GE MR data elements from DV26, PX26.0, SV25.1, PX26.1 DCS
+
+200526:	libsrc/standard/elmdict/elscint.tpl: Correct VR of (5001,0070) from SQ to US and other related elements based on observed GSPS - may be conflict with ELSCINT1 creator [fragile]
+
+200520:	libsrc/standard/elmdict/toshiba.tpl: Add more private data elements from CT Conformance Statements
+
+200519:	libsrc/standard/module/base.tpl: Add Series Date and Time to Encapsulated Document Series Module (CP 1932)
+
+200512:	libsrc/standard/module/base.tpl: Frame of Reference UID and Referenced Image Sequence may be present without condition satisfied in Spatial Fiducials (000538)
+
+200512:	libsrc/standard/condn.tpl,module/rt.tpl: PixelIntensityRelationship should be optional PixelIntensityRelationshipSign conditional in RT Image (000537)
+
+200430:	libsrc/src/standard/module/base.tpl,strval/base.tpl,xaxrf.tpl: Remove 99SDM for NM/PET including where code meaning is optional (CP 1850)
+
+200418:	libsrc/standard/condn.tpl,module/base.tpl,mr.tpl,vl.tpl,strval/base.tpl,xaxrf.tpl: Apply only PS3.5 constraints in ImagePixelMacro and move other CP 1653 related conditions to modality-specific modules; prevents dciodvfy incorrectly reporting RGB not allowed for J2K Secondary Capture (000536)
+
+200417:	libsrc/standard/elmdict/other.tpl: add observed Eigen private data elements
+
+200414:	libsrc/include/dctool/attrtype.h,attrtyps.h,src/dctool/attrtyps.cc: Do not treat backslash as value delimiter in ST attributes (000535)
+
+200222:	libsrc/standard/module/base.tpl: Add device identification attributes from Unique device identification consistency and de-identification (CP 1856) and Second Generation Radiotherapy C-Arm RT Treatment Modalities (Sup 175)
+
+200222:	libsrc/standard/module/base.tpl: Add attributes related to Patient Study and General Series Module from CT Protocol Storage (Sup 121)
+
+200222:	libsrc/standard/condn.tpl,module,strval/base.tpl: Add Referenced Instances and Access Macro Attributes (Sup 96) and Add Patient Photo to Patient Identification Modules (CP 1343)
+
+200222:	libsrc/standard/condn.tpl,elmdict/dicom3.tpl,module,strval/base.tpl: Alternative Calender and Archeological Patient (CP 1492)
+
+200217:	libsrc/standard/condn.tpl,strval/vl.tpl: add WSI OVERVIEW ImageType Value 3 (CP 1829), and require it to be single frame (cp_dac541_WSIOverviewSingleFrame)
+
+200214:	libsrc/standard/elmdict/other.tpl: add Eigen Artemis prostate biopsy system private data elements
+
+200205:	libsrc/src/dctool/attrmxls.cc: Do not warn about unused attributes in UnassignedSharedConvertedAttributesSequence or UnassignedPerFrameConvertedAttributesSequence (000534)
+
+200124: libsrc/standard/elmdict/gems.tpl: add GE private data elements with encountered VR
+
+200124: libsrc/standard/elmdict/elscint.tpl,philips.tpl: add Philips private GSPS-related data elements with encountered VR
+
+200124: libsrc/standard/elmdict/gems.tpl: add GE private GSPS-related data elements with encountered VR
+
+200124: libsrc/standard/elmdict/other.tpl: add/update IMS private data elements with encountered VR
+
+200122:	libsrc/standard/elmdict/other.tpl: add UIH private data elements with encountered VR
+
+191225:	libsrc/src/dctool/attrmxls.cc: Do not warn about unused attributes in ModifiedAttributesSequence (000533)
+
+191210:	libsrc/standard/condn.tpl,iodcomp,module,strval/base.tpl,ct.tpl: Add Multi-energy CT Images (Sup 188)
+
+191110:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Add Laterality to Treatment Site Code (CP 1906)
+
+191109:	libsrc/standard/elmdict/dicom3.tpl,module/file.tpl: Add presentation address to file meta information for DULP and Web Services (CP 1895)
+
+191108:	libsrc/standard/elmdict/dicom3.tpl,module/rt.tpl: Clarification of Distances in Ion Beams (CP 1721)
+
+191002:	libsrc/standard/elmdict/dicom3.tpl: Add data elements (2019d including Sup 202)
+
+190815:	libsrc/standard/strval/file.tpl: Add missing RADIOTHERAPY directory record type that is required by other directory record related additions from Sup 147
+
+190814:	libsrc/standard/elmdict/dicom3.tpl: Correct element tag for Referenced RT Prescription Sequence (Sup 175 FT3)
+
+190810:	libsrc/standard/elmdict/dicom3.tpl: Correct element descriptions with "Date Time" to "DateTime" (2019d)
+
+190715:	libsrc/module/base.tpl: Add data elements for Second Generation Radiotherapy C-Arm RT Treatment Modalities (Sup 175)
+
+190621:	libsrc/standard/module/mr.tpl: Frame of Reference Module should be U not M in Raw data IOD (000530)
+
+190616:	libsrc/standard/condn.tpl: Add SRT to deprecated coding schemes (CP 1850)
+
+190611:	libsrc/standard/module/base.tpl: Restore VR of Referenced Frame Numbers inadvertently removed in initial CP 1842 application (CP 1842)
+
+190509:	libsrc/standard/module/base.tpl: Add length of encapsulated document when not even (CP 1851)
+
+190430:	libsrc/standard/elmdict/philips.tpl: Add/correct private data elements for Philips MR (encountered and DCS MR Release 5.6.0 Systems)
+
+190412:	libsrc/standard/condn.tpl: Detect valid MBPO OpticalPathIdentificationSequence in SharedFunctionalGroupSequence; since CP 1713 (000528)
+
+190412:	libsrc/standard/condn.tpl,module/base.tpl,vl.tpl: Remove Dimension Index Sequence requirement for WSI when Dimensions implicitly defined by TILED_FULL (CP 1822)
+
+190405:	libsrc/module/base.tpl: Correct Content Item Value type from defined terms to enumerated values (000527)
+
+190327:	libsrc/standard/elmdict/dicom3.tpl: Add data element for length of encapsulated document when not even (CP 1851)
+
+190323:	libsrc/standard/condn.tpl,module,strval/base.tpl: Allow compressed RGB for WSI (CP 1841)
+
+190323:	libsrc/standard/condn.tpl,elmdict/dicom3.tpl,module/acqctx.tpl: Referenced Frame Numbers used in Acquisition Context is limited by 16 bit VR (CP 1842)
+
+190323:	libsrc/standard/condn.tpl,elmdict/dicom3.tpl,module/base.tpl: Extend Original Attributes Sequence (CP 1766); depended on adding Selector Attribute Macro (Sup 74); also added Extended Selector Attribute Macro (Sup 185)
+
+190317:	libsrc/standard/elmdict/other.tpl,siemens.tpl: Add more encountered VRs for private data elements for Siemens and Intelerad
+
+190211:	ibsrc/standard/condn.tpl,module/base.tpl,rt.tpl,vl.tpl,xaxrf.tpl: Report errors when Pixel Spacing values are zero (000115), (000159), (000524)
+
+190211:	libsrc/module/vl.tpl: Make AcquisitionDuration optional for WSI (CP 1821)
+
+190127:	libsrc/support/elmietoxml.awk,libsrc/standard/Imakefile: Add utility to make XML of dictionary IEs and switch to using that and elmdict.xml for install.java
+
+190127:	libsrc/standard/condn.tpl,module/base.tpl,vl.tpl: Update VL Image Module with Image Laterality et al (CP 652, CP 1736, CP 1744) and General Image Module with Image Laterality and General Anatomy (CP 1744) but coping with Type 2 v. 3 conflict (cp_dac490)
+
+190125:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Reason for Visit (CP 1837)
+
+190124:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Extended Offset Table (CP 1818)
+
+190124:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for corneal measurement values sequence (CP 1814)
+
+190123:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Toric Intraocular Lenses (CP 1813)
+
+190123:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for calculation comments for intraocular lens calculations (CP 1812)
+
+190121:	libsrc/standard/module/base.tpl: Add TypeOfPatientID to top level in Patient Module and BarcodeValue to SOP Common Module (CP 1828)
+
+190118:	libsrc/standard/elmdict/dicom3.tpl: Add EXIF mapped data elements (CP 1736)
+
+190105:	libsrc/standard/condn.tpl: do not require laterality if measurement laterality is present (CP 1385)
+
+190102:	libsrc/standard/elmdict/dicom3.tpl: Update name of Software Versions (0018,1020) (2019a)
+
+181222:	libsrc/standard/elmdict/dicom3.tpl: Correct keyword for Manufacturer's Model Version (3010,001A)
+
+181220:	libsrc/standard/elmdict/dicom3.tpl: Correct keyword for Effective Dose Calculation Method Description (3010,0005)
+
+181129:	libsrc/standard/elmdict/other.tpl: Add private DicomUtils data elements to dictionary
+
+181129:	libsrc/standard/elmdict/other.tpl: Add private pyramid data element to dictionary
+
+181122:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for sup 147 FT2
+
+181118:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for sup 147
+
+181111:	libsrc/standard/elmdict/dicom3.tpl,module/base.tpl,rt.tpl,sr.tpl: Add Institutional Department Type Code Sequence (CP 1809)
+
+181111:	libsrc/standard/elmdict/dicom3.tpl,module/vl.tpl: Add Source of Data details for Corneal Size measurement values used in Intraocular Lens Calculations IOD (IOL) (CP 1803)
+
+181110:	libsrc/standard/elmdict/dicom3.tpl: Add Multi-energy CT data elements to dictionary (Sup 188)
+
+181103:	libsrc/standard/condn.tpl: Correct condition on TestPointNormalsDataFlag
+
+181102:	libsrc/standard/condn.tpl,module,strval/base.tpl: Add attributes describing safe or unsafe private elements (CP 1411)
+
+181102:	libsrc/standard/condn.tpl,iodcomp,module,strval/vl.tpl,module/base.tpl: Add validation of Ophthalmic Visual Field (OPV) Static Perimetry Measurements (Sup 146)
+
+181018:	libsrc/standard/module/vl.tpl: Correct name of WholeSlideMicroscopyImageFrameTypeMacro (000523)
+
+180917:	libsrc/standard/condn.tpl,module/base.tpl,rt.tpl: Constituent Mapping Macro (CP 1617)
+
+180917:	libsrc/standard/elmdict/dicom3.tpl,module/rt.tpl: Add Algorithm Identification Macro to RT Structure Set (CP 1784)
+
+180917:	libsrc/standard/elmdict/dicom3.tpl,module,strval/base.tpl: Add flag to segmentation object indicating segments are nonoverlapping (CP 1780)
+
+180807:	appsrc/acrnema/andump.cc: Add skipiftoolong flag for ancreate mode, rather than abort, and include value with ellipsis (000521)
+
+180707:	libsrc/standard/elmdict/gems.tpl: Correct missing opening parenthesis in GE private data element (3101,0010)
+
+180627:	libsrc/src/dctool/attrmxrd.cc:	Report pixel data compressed fragment items have odd length during read (000514)
+
+180626:	libsrc/standard/elmdict/dicom3.tpl: Add Beam Dose Point Source to External Contour Distance data element (CP 1762)
+
+180626:	libsrc/standard/module,strval/base.tpl,elmdict/dicom3.tpl: Add flag to distinguish studies imported from outside (CP 1760)
+
+180626:	libsrc/standard/module/vl.tpl: RWVM functional group Real World Value Map only permitted for monochrome Whole Slide Images (CP 1759)
+
+180626:	libsrc/standard/iod/mr.tpl: Move Specimen Module to Image level in Tractography Results (CP 1753)
+
+180626:	libsrc/standard/strval/base.tpl: Update General Series modality values with OPTBSV and OPTENF (CP 1750)
+
+180626:	libsrc/standard/condn.tpl: Do not require Patient Orientation for Whole Slide Images (CP 1757)
+
+180622: appsrc/dcfile/dciodvfy.cc,libsrc/src/locale/mesgtext.tpl: Report reference segment numbers that have no segment sequence item (000520)
+
+180622: appsrc/dcfile/dciodvfy.cc,libsrc/src/locale/mesgtext.tpl: Check that SegmentNumber values start at 1 and increase by 1 (000439)
+
+180603: libsrc/standard/elmdict/other.tpl: Add observed 3DHISTECH private data elements in REGIONLOCALIZER image type
+
+180603:	libsrc/standard/module/vl.tpl: Defined terms rather than enumerated values for WSI ImageType values 3 and 4 (000519)
+
+180415:	libsrc/standard/module/base.tpl: Add Consulting Physician (CP 1322)
+
+180414:	libsrc/standard/condn.tpl,module/base.tpl: Report if InConcatenationTotalNumber is less than or equal to one (000517), and use presence of any concatenation attribute as need for UID (000518)
+
+180413:	libsrc/standard/condn.tpl: Change condition in General Series for Laterality to not flag its absence when unpaired body part is implicit because it is a waveform SOP Class or Modality, i.e., cardiac, respiratory, voice audio (000308)
+
+180413:	libsrc/standard/strval/base.tpl: Update coding scheme list to include all in current standard including caDSR, DC, MDC, MSH, NBD, NBG, NEU, NICIP, PUBCHEM_CID (DICOM 2018b, includes CPs 1079, 1167, 1259, 1408, 1622)
+
+180403:	libsrc/standard/condn.tpl,sopcl.tpl,elmdict/dicom3.tpl,iodcomp,module,strval/base.tpl: Add DICOM Encapsulation of STL Models for 3D Manufacturing (Sup 205)
+
+180401:	libsrc/standard/module/base.tpl: Add Scheduled Procedure Step Expiration DateTime data element (CP 1224)
+
+180328:	libsrc/standard/module/base.tpl,vl.tpl: WSI is missing Frame Type (CP 1740)
+
+180328:	libsrc/standard/condn.tpl,elmdict/dicom3.tpl,module/base.tpl,vl.tpl,strval/base.tpl: More compact use of Per-Frame Functional Group Macros in Non-Sparse VL Whole Slide Microscopy Image IOD (CP 1713)
+
+180313:	libsrc/standard/elmdict/elscint.tpl: Update Philips CT data element descriptions from Revolution CT DCS 2015
+
+180313:	libsrc/standard/elmdict/gems.tpl: Update GE CT data element descriptions from Revolution CT DCS 2015
+
+180222: libsrc/standard/elmdict/other.tpl: Update Intelerad private data elements
+
+180204: libsrc/standard/elmdict/other.tpl: Add observed explicit VR for CureMetrix private data elements
+
+180123: libsrc/standard/module/base.tpl: Data elements for Constituent Mapping Macro (CP 1617)
+
+171230:	libsrc/support/DicomDictionary_header.txt,elmtojava_TagFromName.awk: Update copyright in emitted Java dictionary and remove old toolkit keywords prior to CP 850 establishment of official keywords
+
+171228:	appsrc/dcfile/dciodvfy.cc,libsrc/src/locale/mesgtext.tpl: Warn if example ISO root used in UID since not valid in production objects (000516)
+
+171221:	libsrc/standard/elmdict/other.tpl: Add CTP StudyYear private data element used by NCI script
+
+171209:	libsrc/standard/elmdict/other.tpl: Add observed explicit VR of more Brainlab private data elements
+
+171209:	libsrc/standard/module/mr.tpl: Correct number of sequence items in ReferencedInstanceSequence in Tractography Module (000515)
+
+171120:	libsrc/standard/condn.tpl,module/ct.tpl,mr.tpl,pet.tpl,us.tpl: Add usage of Temporal Position Macro as needed for Enhanced MR, Enhanced CT, Enhanced PET and related Legacy objects (CP 1189)
+
+171115:	libsrc/include/dctool/ie.h,src/dctool/ie.cc,standard/condn.tpl,elmdict/dicom3.tpl,iodcomp,module/mr.tpl: Add Tractography Results Storage SOP Class (Sup 181) as well as missing IE descriptions
+
+170919:	libsrc/standard/module/base.tpl: Clarify condition for Repetition Time (0018,0080) (CP 1696)
+
+170818:	libsrc/standard/elmdict/dicom3.tpl: Flag data elements as retired for Retirement of Radiation Dose Module from Modality Performed Procedure Step (Sup 201)
+
+170918:	libsrc/standard/condn.tpl,,module,strval/base.tpl: Add study longitudinal temporal offset from event for clinical trials (CP 1693)
+
+170917:	libsrc/standard/module/base.tpl: Add Identical Documents Sequence to the Encapsulated Document Module (CP 1629)
+
+170914:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Add study longitudinal temporal offset from event for clinical trials (CP 1693)
+
+170914:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Query Key for Anatomic Regions in Study (CP 1690)
+
+170914:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Add compression pressure to mammography, breast tomosynthesis and projection objects (CP 1679)
+
+170914:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Progress Parameters in UPS Progress Module (CP 1664)
+
+170914:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Dose Reference Beam Dose Verification (CP 1658)
+
+170914:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Consolidate Brachytherapy Applicator Geometry Definitions (CP 1657)
+
+170912:	libsrc/src/dctool/attrtypv.cc: Detect illegal ACR-NEMA chars in DA and TM VR, forbidden since CP 714 (000513)
+
+170811:	libsrc/src/dctool/condn.cc,standard/condn.tpl,support/condn.awk,module.awk:	Only check first item of PerFrameFunctionalGroups when evaluating conditions for mutually exclusive presence of functional groups to improve glacial performance if many frames (000509)
+
+170811:	libsrc/standard/strval/base.tpl: Use empty value flag in list for PatientSex since Type 2 but may be padded with spaces (000510)
+
+170805:	libsrc/standard/condn.tpl,iod/vl.tpl: Handle MPBO for Slide Label Module in WSI (000508)
+
+170717:	libsrc/standard/elmdict/other.tpl: Add observed group 0x0023 Emageon private data elements nested without creator inside group 0x0009 sequence and recognizes "inherited" creator even though different group and block
+
+170709:	libsrc/standard/condn.tpl,module/vl.tpl: Check IlluminationWaveLength value is valid (greater than zero) (000507)
+
+170626: libsrc/standard/elmdict/dicom3.tpl: Add data elements for Protocol Approval (Sup 192)
+
+170621:	libsrc/standard/elmdict/dicom3.tpl,module,strval/base.tpl: Enhance Coding Schemes Table (CP 1603)
+
+170612:	libsrc/standard/condn.tpl,module/base.tpl: Warn when rescale attributes unexpected in legacy MR images, error when window width is less than 1 without exact or sigmoid function, or zero when sigmoid function (000506)
+
+170612:	libsrc/standard/elmdict/gems.tpl: Add VR for private data element observed in GE MR diffusion images
+
+170607:	libsrc/standard/elmdict/dicom3.tpl: Mark Input Availability Flag (0040,4020) as retired, since no longer used in any IOD or service (PS3.6 editorial change)
+
+170508:	libsrc/standard/module/base.tpl,mr.tpl: Add Document Laterality to Encapsulated Document and Raw Data Module (CP 1039)
+
+170421:	libsrc/standard/sopcl.tpl,elmdict/dicom3.tpl: Add Volume Rendering Volumetric Presentation States data elements and SOP Classes (Sup 190 FT)
+
+170418:	libsrc/standard/module/acqctx.tpl,base.tpl: Add Observation DateTime to Acquisition Context (CP 1666)
+
+170418:	libsrc/standard/elmdict/dicom3.tpl,module/rt.tpl: Add Dose Reference UID To Fraction Scheme (CP 1659)
+
+170418:	libsrc/standard/module/rt.tpl: Add Content Date and Time to RT Dose Module (CP 1656)
+
+170418:	libsrc/standard/elmdict/dicom3.tpl,module/base.tpl: Retire Other Patient IDs and Medical Record Locator per Clarify use of Other Patient IDs Sequence with Issuer and related Attributes as Query keys (CP 1649)
+
+170418:	libsrc/standard/condn.tpl,module/ct.tpl,mr.tpl,pet.tpl: Correct requirement for conversion source in legacy converted images and tractography results (CP 1648)
+
+170418:	libsrc/standard/condn.tpl,module/base.tpl: Add Unassigned Shared and Per-Frame Converted Attributes functional groups to Parametric Map (CP 1645)
+
+170418:	libsrc/standard/elmdict/module/vl.tpl: Change type of Signal Noise Ratio for Ophthalmic Axial Measurements Related Information Macro (CP 1643)
+
+170418:	libsrc/standard/elmdict/module/vl.tpl: Change multiplicity for Ophthalmic Axial Length Measurements Segmental Length Sequence (CP 1642)
+
+170417:	libsrc/standard/elmdict/module/softcopy.tpl: Add Tracking ID to Presentation State (CP 1627)
+
+170417:	libsrc/standard/elmdict/module/base.tpl: Fix Type of Dimension Organization UID (within the Dimension Index Sequence) (CP 1604)
+
+170416:	libsrc/standard/elmdict/dicom3.tpl,module,strval/dx.tpl: Add Entrance Dose Derivation data element and to modules (CP 1513)
+
+170405:	libsrc/standard/sopcl.tpl,elmdict/dicom3.tpl: Add Advanced Blending Presentation State Storage data elements and SOP Classes (Sup 189 FT)
+
+170405:	libsrc/standard/sopcl.tpl: Add Patient Radiation Dose Structured Report SOP Classes (Sup 191 FT)
+
+170404:	libsrc/standard/sopcl.tpl,elmdict/dicom3.tpl: Add Ophthalmic Optical Coherence Tomography for Angiographic Imaging data elements and SOP Classes (Sup 197 FT)
+
+170403:	libsrc/standard/elmdict/gems.tpl: Add more observed GE cardiac CT private data elements
+
+170329:	libsrc/standard/elmdict/philips.tpl: Add more observed Philips US private data elements
+
+170325:	libsrc/standard/elmdict/other.tpl: Expand and describe UCSF BIRP MR breast private data elements using dictionary at 'https://wiki.cancerimagingarchive.net/display/Public/I+SPY-1+DCE+MRI+Data+Sharing+DICOM+Dictionary'
+
+170226:	libsrc/standard/elmdict/other.tpl: Add EOS private data elements from conformance statement
+
+170223:	libsrc/standard/elmdict/elscint.tpl,other.tpl: Add encountered ELSCINT and MEDCON private elements
+
+170222:	libsrc/standard/elmdict/other.tpl,strval/base.tpl: Add NUMA R-RDSR private data elements and private coding scheme
+
+170207:	libsrc/standard/condn.tpl,module/base.tpl,iod/base.tpl: Add Palette Color LUT to IOD to finish applying Palette Color in Parametric Map (CP 1584)
+
+170130:	libsrc/standard/elmdict/dicom3.tpl,module/base.tpl: Add genetic modifications to patient (CP 1619)
+
+170130:	libsrc/standard/condn.tpl,module/base.tpl,ct.tpl: Should warn if optional phantom type is missing for CTDIvol (000505)
+
+170130:	libsrc/standard/condn.tpl,module/base.tpl,ct.tpl: Add water equivalent diameter to CT (CP 1525)
+
+170130:	libsrc/standard/module/base.tpl,ct.tpl: Add Dose Area Product to CT (CP 1455)
+
+170127:	libsrc/standard/module/base.tpl: Correct TR condition in legacy MR image to match current standard, i.e., if SK rather than if no SK (per discussion of cp_wc09); not yet mbpo until CP approved (000504)
+
+170118:	libsrc/standard/module/vl.tpl: Move Horizontal Field of View in Ophthalmic Acquisition Parameters Macro to Ophthalmic Photography Acquisition Parameters Module (NB. was incorrectly omitted from Ophthalmic Photography Acquisition Parameters Module in 2011 when factoring out per Sup 110 but will be put back in 2017a)
+
+170109:	libsrc/standard/elmdict/other.tpl: Update Sound Eklin TruDR private data elements ... conflict in different statements (TruDR vs. VetPACS) whether owner is "Sound Eklin" or "Sound Technologies", and whether VR for acquisition elements is LO or CS ... assume longer VR, and duplicate all for both owner strings
+
 170109:	libsrc/standard/elmdict/other.tpl: Add Sound Eklin TruDR private data elements from conformance statement and sample
 
 161206:	libsrc/src/standard/iodcomp,module/sr.tpl: Add IHEXDSIManifest profile option for dciodvy to check for additional retrieve location attributes required by IHE XDS-I Profile Manifest (000501)

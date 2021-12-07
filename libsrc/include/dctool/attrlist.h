@@ -1,4 +1,4 @@
-/* attrlist.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attrlist.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_attrlist__
 #define __Header_attrlist__
 
@@ -18,6 +18,7 @@ private:
 protected:
 	ElementDictionary *	dictionary;		// only ever set by inherited classes
 	class SpecificCharacterSetInfo *specificCharacterSetInfo;
+	Attribute *parentSequenceAttribute;
 public:
 	AttributeList(void);
 	virtual ~AttributeList();
@@ -28,11 +29,18 @@ public:
 	void	operator-=(Attribute *p);
 	void	operator-=(AttributeList& deletelist);
 	void	operator+=(AttributeList& replacelist);
+	
+	void	   setParentSequenceAttribute(Attribute* a) { parentSequenceAttribute=a; }
+	Attribute *getParentSequenceAttribute(void) { return parentSequenceAttribute; }
 
 	ElementDictionary *getDictionary(void)	     { return dictionary; } // Should all be const
 	
 	SpecificCharacterSetInfo *getSpecificCharacterSetInfo() { return specificCharacterSetInfo; }
 	void setSpecificCharacterSetInfo(SpecificCharacterSetInfo *info) { specificCharacterSetInfo = info; }
+
+	//const char*	MMsgDCF(const char *index,const char *keyword);
+	const char*	EMsgDCF(const char *index,const char *keyword);
+	const char*	WMsgDCF(const char *index,const char *keyword);
 };
 
 class AttributeListIterator {

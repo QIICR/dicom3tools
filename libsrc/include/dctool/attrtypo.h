@@ -1,4 +1,4 @@
-/* attrtypo.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attrtypo.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_attrtypo__
 #define __Header_attrtypo__
 
@@ -86,6 +86,8 @@ public:
 	void	setValue(const unsigned char *values,Uint32 length);
 	void	setValue(const Uint16 *values,Uint32 lengthinwords)
 								{ Attribute::setValue(values,lengthinwords); }
+
+	void	addValues(const char *);
 };
 
 class OtherWordSmallNonPixelAttributeBase : public OtherNonPixelAttribute {

@@ -1,4 +1,4 @@
-/* listsimp.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* listsimp.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_listsimp__
 #define __Header_listsimp__
 
@@ -107,7 +107,8 @@ public:
 
 	bool	isEmpty(void) const		{ return head == NULL; }
 	bool	isOne(void) const		{ return head != NULL && head->next == NULL; }
-	bool	isMultiple(void) const		{ return head != NULL && head->next != NULL; }
+	bool	isTwo(void) const		{ return head != NULL && head->next != NULL && head->next->next == NULL; }
+	bool	isMultiple(void) const	{ return head != NULL && head->next != NULL; }
 };
 
 template<class T>

@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dccomb.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dccomb.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attrmxls.h"
 #include "attrothr.h"
 #include "attrval.h"
@@ -257,9 +257,9 @@ main(int argc, char *argv[])
 	bool success=true;
 	TextOutputStream  log(cerr);
 	if (verbose) log << "******** While reading 1st dataset ... ********" << endl; 
-	list1.read(din1,&log,verbose,0xffffffff,true,dicom_input_options1.uselengthtoend,dicom_input_options1.ignoreoutofordertags);
+	list1.read(din1,false/*newformat*/,&log,verbose,0xffffffff,true,dicom_input_options1.uselengthtoend,dicom_input_options1.ignoreoutofordertags);
 	if (verbose) log << "******** While reading 2nd dataset ... ********" << endl; 
-	list2.read(din2,&log,verbose,0xffffffff,true,dicom_input_options2.uselengthtoend,dicom_input_options2.ignoreoutofordertags);
+	list2.read(din2,false/*newformat*/,&log,verbose,0xffffffff,true,dicom_input_options2.uselengthtoend,dicom_input_options2.ignoreoutofordertags);
 
 	if (!list1.good()) {
 		log << list1.errors()

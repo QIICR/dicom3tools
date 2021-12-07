@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dcdirmk.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dcdirmk.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <fstream>
 #include <cctype>
@@ -869,7 +869,7 @@ public:
 				Attribute *a=new CodeStringFileComponentAttribute(TagFromName(ReferencedFileID),filename);
 				(*list)+=a;
 				Assert(a);
-				if (validatefilenamevr) a->validateVR(log,NULL,&staticDictionary);
+				if (validatefilenamevr) a->validateVR(false/*verbose*/,false/*newformat*/,log,NULL,&staticDictionary);
 			}
 
 			if (strcmp(directoryRecordType,"IMAGE") == 0) {
@@ -1817,7 +1817,7 @@ static void handleOneFile(const char *filename,
 		ManagedAttributeList list;
 
 		if (veryverbose) log << "******** While reading ... " << filename << " ... ********" << endl;
-		list.read(din,&log,veryveryverbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
+		list.read(din,false/*newformat*/,&log,veryveryverbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
 
 		if (!list.good()) {
 			log << list.errors()

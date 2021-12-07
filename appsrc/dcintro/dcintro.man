@@ -1,4 +1,4 @@
-.TH DCINTRO 1 "6 Mar 2014" "DICOM PS3" "DICOM PS3 - Introduction and Options"
+.TH DCINTRO 1 "30 Jul 2021" "DICOM PS3" "DICOM PS3 - Introduction and Options"
 .SH NAME
 dcintro \- ACR/NEMA DICOM PS3 ... Introduction and options
 .SH SYNOPSIS
@@ -112,7 +112,7 @@ Output options are:
 Don't write an output meta-information header and preamble.
 .RE
 .TP
-.B \-n|\-justmeta|\-output-justmeta
+.B \-justmeta|\-output-justmeta
 .RS
 Write only a meta-information header and preamble, and not the
 data set itself.
@@ -285,7 +285,7 @@ Print a version string to stderr, and exit if there are no other arguments.
 \ 
 .SH AUTHOR
 .LP
-Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 .LP
 Though redirection from a file on standard input should work, certain libraries give incorrect results, rather than actually failing with a seek error ... this has been observed with libg++ 2.7.0 and is a bit worrying. The use of standard input redirection has not been removed however, for use in those environments in which it does work.

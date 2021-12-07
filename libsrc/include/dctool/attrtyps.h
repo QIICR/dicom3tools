@@ -1,4 +1,4 @@
-/* attrtyps.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attrtyps.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_attrtyps__
 #define __Header_attrtyps__
 
@@ -216,13 +216,13 @@ public:
 
 };
 
-class LongTextAttributeBase : public TextAttribute {
+class TextAttributeBase : public TextAttribute {
 public:
-	LongTextAttributeBase(Tag t) : TextAttribute(t) {}
-	LongTextAttributeBase(Tag t,const char *v)
+	TextAttributeBase(Tag t) : TextAttribute(t) {}
+	TextAttributeBase(Tag t,const char *v)
 		: TextAttribute(t)	{ addValue(v); }
 
-	virtual ~LongTextAttributeBase()	{}
+	virtual ~TextAttributeBase()	{}
 
 	void	setValue(unsigned index,Uint16 value)		{ TextAttribute::setValue(index,value); }
 	void	setValue(unsigned index,Uint32 value)		{ TextAttribute::setValue(index,value); }

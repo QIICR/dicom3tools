@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)attrmxvr.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)attrmxvr.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attrtype.h"
 #include "attrmxls.h"
 #include "attrval.h"

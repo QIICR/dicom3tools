@@ -1,4 +1,4 @@
-/* ie.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* ie.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_ie__
 #define __Header_ie__
 
@@ -31,10 +31,13 @@ enum InformationEntity {
 	ModalityLUTIE,
 	VOILUTIE,
 	ColorPaletteIE,
-	SurfaceIE
+	SurfaceIE,
+	TractographyResultsIE,
+	AnnotationIE
 };
 
 InformationEntity getInformationEntityFromDescription(const char *d);
 const char *describeInformationEntity(InformationEntity ie);
+int getDepthOfInformationEntity(InformationEntity ie);
 
 #endif // __Header_ie__

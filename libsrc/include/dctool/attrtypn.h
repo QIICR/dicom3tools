@@ -1,4 +1,4 @@
-/* attrtypn.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attrtypn.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_attrtypn__
 #define __Header_attrtypn__
 

@@ -1,4 +1,4 @@
-/* attrmxls.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attrmxls.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_attrmxls__
 #define __Header_attrmxls__
 
@@ -15,6 +15,7 @@ private:
 	DicomInputStream *	stream;
 	TextOutputStream *	log;
 	bool			verbose;
+	bool			newformat;
 	Uint32 			byteoffset;
 
 	TextOutputStream& 	writebase(const Tag tag,const char *vr,
@@ -23,10 +24,13 @@ private:
 	const char *	getValueRepresentation(Tag tag,char *vre,bool& readAsImplicitRegardless);
 	Uint32			getValueLength(const char *vr,bool readAsImplicitRegardless);
 	void			skipEncapsulatedData(void);
-	SequenceAttribute *	readNewSequenceAttribute(Tag tag,Uint32 length,bool ignoreoutofordertags,bool useUSVRForLUTDataIfNotExplicit,bool undefinedLengthUNTreatedAsSequence,const char *sequenceOwner,bool fixBitsDuringRead,bool havePixelRepresentation,Uint16 vPixelRepresentation);
+	SequenceAttribute *	readNewSequenceAttribute(Tag tag,Uint32 length,bool ignoreoutofordertags,bool useUSVRForLUTDataIfNotExplicit,bool undefinedLengthUNTreatedAsSequence,const char *sequenceOwner,bool fixBitsDuringRead,bool havePixelRepresentation,Uint16 vPixelRepresentation,AttributeList *parentlist);
 	bool			replaceWithPixelRepresentation(
 					const Tag &t,const char *name,
 					bool havePixelRepresentation,bool usesigned);
+	char*			EOrWMsgDCFT(const char *index,Tag tag,bool isErrorNotWarning);
+	char*			EMsgDCFT(const char *index,Tag tag);
+	char*			WMsgDCFT(const char *index,Tag tag);
 protected:
 	bool			setValueRepresentationForThisList(bool havePixelRepresentation,Uint16 vPixelRepresentation);
 	bool			setValueRepresentationForThisListAndNestedSequences(bool havePixelRepresentation,Uint16 vPixelRepresentation);
@@ -37,6 +41,7 @@ public:
 
 	bool read(DicomInputStream& stream,
 		ElementDictionary* dict,
+		bool newformat=false,
 		TextOutputStream *log=0,
 		bool verbose=false,
 		Uint32 length=0xffffffff,
@@ -114,6 +119,7 @@ public:
 	bool finalize(DicomOutputStream& stream);
 
 	bool read(DicomInputStream& stream,
+		bool newformat=false,
 		TextOutputStream *log=0,
 		bool verbose=false,
 		Uint32 length=0xffffffff,
@@ -128,10 +134,10 @@ public:
 	DicomOutputStream& write(DicomOutputStream& stream);
 	TextOutputStream&  write(TextOutputStream& stream,bool verbose=false,bool showUsedAndIE=false);
 
-	bool validateVR(TextOutputStream &log);
-	bool validateRetired(TextOutputStream &log);
-	bool validateUsed(TextOutputStream &log);
-	bool validatePrivate(TextOutputStream &log);
+	bool validateVR(bool verbose,bool newformat,TextOutputStream &log);
+	bool validateRetired(bool verbose,bool newformat,TextOutputStream &log);
+	bool validateUsed(bool verbose,bool newformat,TextOutputStream &log);
+	bool validatePrivate(bool verbose,bool newformat,TextOutputStream &log);
 
 	flag_types set(flag_types f)	{ return flags=flag_types(flags|f); }
 	flag_types reset(flag_types f)	{ return flags=flag_types(flags&~f); }

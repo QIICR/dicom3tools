@@ -1,5 +1,6 @@
 StringValues="OverlaySubtypeUS" {
 	ACTIVE 2D/BMODE IMAGE AREA = Identification of the active area of a 2D/B-mode image
+	ACTIVE VOLUME FLOW IMAGE AREA = Identification of the active area of volume flow in an image
 }
 
 StringValues="USPhotometricInterpretation" {

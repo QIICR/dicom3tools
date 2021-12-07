@@ -124,7 +124,7 @@ Use short names without special characters for all files created, e.g., for reco
 .BR dcsort(1) ,
 .BR dctable(1)
 .SH AUTHOR
-Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 .LP
 Currently only single-frame CT images have been tested. A different set of sub-keys below position would

@@ -1,4 +1,4 @@
-/* shimcl.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* shimcl.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #include "ptyhdr.h"
 #include "shimhdrm.h"
 #include "shimhdrp.h"

@@ -9,6 +9,7 @@ StringValues="DirectoryRecordType" {
 	STUDY,
 	SERIES,
 	IMAGE,
+	RADIOTHERAPY,
 	RT DOSE,
 	RT STRUCTURE SET,
 	RT PLAN,

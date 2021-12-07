@@ -108,7 +108,7 @@ IMAGES/IM0002
 .BR dcintro(1), 
 .BR dcdtchg(1)
 .SH AUTHOR
-Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 .LP
 There is a fixed length of buffer used for reading each line from the list of filenames file.

@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dcopto.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dcopto.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <fstream>
 #else
@@ -281,7 +281,9 @@ DicomOutputOptions::DicomOutputOptions(GetNamedOptions &options)
 				if(!vr) vr="UN";
 				Attribute *a=newAttribute(vr,tag);
 				Assert(a);
-				a->addValues(args[1]);
+				if (strcmp(vr,"SQ") != 0) {		// allow any suppliied string as value, in order to insert empty sequence (000540)
+					a->addValues(args[1]);
+				}
 				if (!replacebeforelist) {
 					replacebeforelist=new AttributeList;
 					Assert(replacebeforelist);
@@ -314,7 +316,9 @@ DicomOutputOptions::DicomOutputOptions(GetNamedOptions &options)
 				if(!vr) vr="UN";
 				Attribute *a=newAttribute(vr,tag);
 				Assert(a);
-				a->addValues(args[1]);
+				if (strcmp(vr,"SQ") != 0) {		// allow any suppliied string as value, in order to insert empty sequence (000540)
+					a->addValues(args[1]);
+				}
 				if (!replaceafterlist) {
 					replaceafterlist=new AttributeList;
 					Assert(replaceafterlist);

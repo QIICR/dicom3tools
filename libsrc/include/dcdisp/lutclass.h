@@ -1,4 +1,4 @@
-/* lutclass.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* lutclass.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_lutclass__
 #define __Header_lutclass__
 

@@ -1,4 +1,4 @@
-/* rdcmyk.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* rdcmyk.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_rdcmyk__
 #define __Header_rdcmyk__
 

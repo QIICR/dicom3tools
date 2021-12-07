@@ -509,7 +509,7 @@ InstallManPage(dcckovly,$(INSTALLMANDIR)/man1)
 
 DependCCTarget()
 
-test:: testdchist testy2k testpbmtoovl testdcfile testdccp testantodc testpnmtodc testdcdirdmp testdcdump testdciodvfy testdcposn testpack testdcsrdump testdcunrgb
+test:: testdchist testy2k testpbmtoovl testdcfile testdccp testantodc testpnmtodc testdcdirdmp testdcdump testdciodvfy testdciodvfynew testdcposn testpack testdcsrdump testdcunrgb
 
 testpbmtoovl:
 	@$(TOP)/support/testapp testlist ./pbmtoovl "-overlaygroup 0 -r SOPClassUID 0 -r SOPInstanceUID 0" $(TOP)/images/ovltest $(TOP)/test/$(CURRENT_DIR) compare pbmtoovl
@@ -569,6 +569,14 @@ testdciodvfy:
 	@if [ -f $(TOP)/images/disc95am/cine01. ];           then $(TOP)/support/testapp testlist ./dciodvfy ""                $(TOP)/images/disc95am $(TOP)/test/$(CURRENT_DIR) compare iodvfy; fi
 	@if [ -f $(TOP)/images/osiriscd/dicom/ctspine.dcm ]; then $(TOP)/support/testapp testlist ./dciodvfy ""                $(TOP)/images/osiriscd $(TOP)/test/$(CURRENT_DIR) compare iodvfy; fi
 	@if [ -d $(TOP)/images/wuerlim/version3 ];           then $(TOP)/support/testapp testlist ./dciodvfy ""                $(TOP)/images/wuerlim  $(TOP)/test/wuerlim/$(CURRENT_DIR) compare iodvfy; fi
+
+testdciodvfynew:
+	@$(TOP)/support/testapp testlist ./dciodvfy "-new"                $(TOP)/images/acrnema $(TOP)/test/$(CURRENT_DIR) compare iodvfynew
+	@$(TOP)/support/testapp testlist ./dciodvfy "-new"                $(TOP)/images/dicom   $(TOP)/test/$(CURRENT_DIR) compare iodvfynew
+	@if [ -f $(TOP)/images/disc95/us000001. ];           then $(TOP)/support/testapp testlist ./dciodvfy "-new"                $(TOP)/images/disc95   $(TOP)/test/$(CURRENT_DIR) compare iodvfynew; fi
+	@if [ -f $(TOP)/images/disc95am/cine01. ];           then $(TOP)/support/testapp testlist ./dciodvfy "-new"                $(TOP)/images/disc95am $(TOP)/test/$(CURRENT_DIR) compare iodvfynew; fi
+	@if [ -f $(TOP)/images/osiriscd/dicom/ctspine.dcm ]; then $(TOP)/support/testapp testlist ./dciodvfy "-new"                $(TOP)/images/osiriscd $(TOP)/test/$(CURRENT_DIR) compare iodvfynew; fi
+	@if [ -d $(TOP)/images/wuerlim/version3 ];           then $(TOP)/support/testapp testlist ./dciodvfy "-new"                $(TOP)/images/wuerlim  $(TOP)/test/wuerlim/$(CURRENT_DIR) compare iodvfynew; fi
 
 testdcfile:
 	@$(TOP)/support/testapp testlist ./dcfile ""                  $(TOP)/images/acrnema $(TOP)/test/$(CURRENT_DIR) compare file
@@ -647,7 +655,7 @@ $(TOP)/images/dicom/testrgb:	$(TOP)/images/dicom/testlist
 testdcunrgb:	$(TOP)/images/dicom/testrgb
 	@$(TOP)/support/testapp testrgb ./dcunrgb.script ""      $(TOP)/images/dicom $(TOP)/test/$(CURRENT_DIR) compare todc
 
-test.create:: testdchist.create testy2k.create testpbmtoovl.create testdcfile.create testdccp.create testantodc.create testpnmtodc.create testdcdirdmp.create testdcdump.create testdciodvfy.create testdcposn.create testpack.create testdcsrdump.create testdcunrgb.create
+test.create:: testdchist.create testy2k.create testpbmtoovl.create testdcfile.create testdccp.create testantodc.create testpnmtodc.create testdcdirdmp.create testdcdump.create testdciodvfy.create testdciodvfynew.create testdcposn.create testpack.create testdcsrdump.create testdcunrgb.create
 
 testy2k.create:
 	./testy2k.sh $(TOP)/test/$(CURRENT_DIR) create
@@ -707,6 +715,14 @@ testdciodvfy.create:
 	@if [ -f $(TOP)/images/disc95am/cine01. ];           then $(TOP)/support/testapp testlist ./dciodvfy ""                $(TOP)/images/disc95am $(TOP)/test/$(CURRENT_DIR) create iodvfy; fi
 	@if [ -f $(TOP)/images/osiriscd/dicom/ctspine.dcm ]; then $(TOP)/support/testapp testlist ./dciodvfy ""                $(TOP)/images/osiriscd $(TOP)/test/$(CURRENT_DIR) create iodvfy; fi
 	@if [ -d $(TOP)/images/wuerlim/version3 ];           then $(TOP)/support/testapp testlist ./dciodvfy ""                $(TOP)/images/wuerlim  $(TOP)/test/wuerlim/$(CURRENT_DIR) create iodvfy; fi
+
+testdciodvfynew.create:
+	@$(TOP)/support/testapp testlist ./dciodvfy "-new"                $(TOP)/images/acrnema $(TOP)/test/$(CURRENT_DIR) create iodvfynew
+	@$(TOP)/support/testapp testlist ./dciodvfy "-new"                $(TOP)/images/dicom   $(TOP)/test/$(CURRENT_DIR) create iodvfynew
+	@if [ -f $(TOP)/images/disc95/us000001. ];           then $(TOP)/support/testapp testlist ./dciodvfy "-new"                $(TOP)/images/disc95   $(TOP)/test/$(CURRENT_DIR) create iodvfynew; fi
+	@if [ -f $(TOP)/images/disc95am/cine01. ];           then $(TOP)/support/testapp testlist ./dciodvfy "-new"                $(TOP)/images/disc95am $(TOP)/test/$(CURRENT_DIR) create iodvfynew; fi
+	@if [ -f $(TOP)/images/osiriscd/dicom/ctspine.dcm ]; then $(TOP)/support/testapp testlist ./dciodvfy "-new"                $(TOP)/images/osiriscd $(TOP)/test/$(CURRENT_DIR) create iodvfynew; fi
+	@if [ -d $(TOP)/images/wuerlim/version3 ];           then $(TOP)/support/testapp testlist ./dciodvfy "-new"                $(TOP)/images/wuerlim  $(TOP)/test/wuerlim/$(CURRENT_DIR) create iodvfynew; fi
 
 testdcfile.create:
 	@$(TOP)/support/testapp testlist ./dcfile ""                  $(TOP)/images/acrnema $(TOP)/test/$(CURRENT_DIR) create file

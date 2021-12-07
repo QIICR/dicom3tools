@@ -142,5 +142,19 @@ StringValues="RescaleTypeHounsfieldUnits" {
 	HU = Hounsfield Units
 }
 
+StringValues="MultienergySourceTechnique" {
+	SWITCHING_SOURCE,
+	CONSTANT_SOURCE
+}
 
+StringValues="MultienergyDetectorType" {
+	INTEGRATING,
+	MULTILAYER,
+	PHOTON_COUNTING
+}
 
+StringValues="DecompositionMethod" {
+	PROJECTION_BASED,
+	IMAGE_BASED,
+	HYBRID
+}

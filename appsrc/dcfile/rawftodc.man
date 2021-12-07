@@ -133,5 +133,5 @@ Specifies the planar configuration. Required if samples not 1 (explicitly or ded
 .BR dciodvfy(1) ,
 .BR dcintro(1)
 .SH AUTHOR
-Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS

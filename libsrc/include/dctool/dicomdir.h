@@ -1,4 +1,4 @@
-/* dicomdir.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* dicomdir.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_dicomdir__
 #define __Header_dicomdir__
 

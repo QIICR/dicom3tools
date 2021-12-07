@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)attrmxrd.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)attrmxrd.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attrtype.h"
 #include "attrnew.h"
 #include "attrmxls.h"
@@ -42,6 +42,44 @@ skipBytes(istream *stream,Uint32 nSkip) {
 	return totalSkipped;
 }
 
+char*
+ReadableAttributeList::EOrWMsgDCFT(const char *index,Tag tag,bool isErrorNotWarning) {
+	char *tagname = Attribute::getCopyOfKeywordOrPrivateTagRepresentation(tag,dictionary);
+	Attribute *parent = getParentSequenceAttribute();
+	char *path;
+	if (parent) {
+//cerr << "ReadableAttributeList::EOrWMsgDCFT: list has parent sequence attribute" << endl;
+		AttributeList *parentlist = parent->getParentAttributeList();
+//cerr << "ReadableAttributeList::EOrWMsgDCFT: parent sequence attribute has list = " << parentlist << endl;
+		ElementDictionary *parentdictionary = parentlist ? parentlist->getDictionary() : NULL;		// since may have private owner
+//cerr << "ReadableAttributeList::EOrWMsgDCFT: parent sequence attribute list has dictionary = " << parentdictionary << endl;
+		char *parentpath = parent->buildFullPathInInstanceToCurrentAttribute(parentdictionary ? parentdictionary : dictionary);
+		char *pathwithslash = String_Cat(parentpath,"/");
+		delete[] parentpath;
+		path = String_Cat(pathwithslash,tagname);
+		delete[] pathwithslash;
+	}
+	else {
+//cerr << "ReadableAttributeList::EOrWMsgDCFT: list does not have parent sequence attribute" << endl;
+		path = String_Cat("/",tagname);
+	}
+	delete[] tagname;
+	char *result = isErrorNotWarning
+				 ? EMSGDC_Instance.error(index,path)
+				 : EMSGDC_Instance.warning(index,path);		//delete[] path is performed by EMSGDC_Instance.error() or warning();
+	return result;
+}
+
+char*
+ReadableAttributeList::EMsgDCFT(const char *index,Tag tag) {
+	return EOrWMsgDCFT(index,tag,true/*isErrorNotWarning*/);
+}
+
+char*
+ReadableAttributeList::WMsgDCFT(const char *index,Tag tag) {
+	return EOrWMsgDCFT(index,tag,false/*isErrorNotWarning*/);
+}
+
 TextOutputStream& 
 ReadableAttributeList::writebase(const Tag tag,const char *vr,Uint32 vl)
 {
@@ -80,16 +118,26 @@ ReadableAttributeList::getValueRepresentation(Tag tag,char *vrbuf,bool& readAsIm
 		if (stream->fail()) return 0;
 		if (vrbuf[0] == '-' && vrbuf[1] == '-') {	// illegal proprietary equivalent of UN VR used by Australian Central Data Networks (CDN) PACS
 			TextOutputStream terr(errorstream.rdbuf());
-			tag.write(terr,dictionary);
-			errorstream << EMsgDC(IllegalCDNHyphenVR) << endl;
+			if (newformat) {
+				terr << String_Use(EMsgDCFT(MMsgDC(IllegalCDNHyphenVR),tag)) << endl;
+			}
+			else {
+				tag.write(terr,dictionary);
+				terr << EMsgDC(IllegalCDNHyphenVR) << endl;
+			}
 			byteoffset+=2;
 			vrbuf[0]=vrbuf[1]=vrbuf[2]=0;		// ignore whatever was read (vrbuf contents are tested by caller)
 			vre=0;								// will trigger return value based on dictionary lookup
 		}
 		else if (vrbuf[0] == 0 && vrbuf[1] == 0) {	// illegal two bytes of zero VR encountered in Sante de-identifier output (followed by two byte length)
 			TextOutputStream terr(errorstream.rdbuf());
-			tag.write(terr,dictionary);
-			errorstream << EMsgDC(IllegalZeroBytesWhenExplicitVRExpected) << endl;
+			if (newformat) {
+				terr << String_Use(EMsgDCFT(MMsgDC(IllegalZeroBytesWhenExplicitVRExpected),tag)) << endl;
+			}
+			else {
+				tag.write(terr,dictionary);
+				terr << EMsgDC(IllegalZeroBytesWhenExplicitVRExpected) << endl;
+			}
 			byteoffset+=2;
 			vrbuf[0]=vrbuf[1]=vrbuf[2]=0;		// ignore whatever was read (vrbuf contents are tested by caller)
 			vre=0;								// will trigger return value based on dictionary lookup
@@ -97,15 +145,27 @@ ReadableAttributeList::getValueRepresentation(Tag tag,char *vrbuf,bool& readAsIm
 		}
 		else if (vrbuf[0] < 'A' || vrbuf[1] < 'A') {		// DicomWorks bug ... occasional implicit VR attribute even though explicit transfer syntax
 			TextOutputStream terr(errorstream.rdbuf());
-			tag.write(terr,dictionary);
-			errorstream << EMsgDC(TagReadFailed) << " - " << MMsgDC(ImplicitVREncodingWhenExplicitRequired) << endl;
+			if (newformat) {
+				terr << String_Use(EMsgDCFT(MMsgDC(TagReadFailed),tag));
+			}
+			else {
+				tag.write(terr,dictionary);
+				terr << EMsgDC(TagReadFailed);
+			}
+			terr << " - " << MMsgDC(ImplicitVREncodingWhenExplicitRequired) << endl;
 //cerr << "ReadableAttributeList::getValueRepresentation(): implicit VR encoding even though supposed to be explicit" << endl;
 			good_flag=false;
 			// backup so that we treat the VR bytes as VL, and do not advance byteoffset
 			stream->seekg(-2l,ios::cur);
 			if (stream->fail()) {
-				tag.write(terr,dictionary);
-				errorstream << EMsgDC(TagReadFailed) << " - " << EMsgDC(SeekFailed) << endl;
+				if (newformat) {
+					terr << String_Use(EMsgDCFT(MMsgDC(TagReadFailed),tag));
+				}
+				else {
+					tag.write(terr,dictionary);
+					terr << EMsgDC(TagReadFailed);
+				}
+				terr << " - " << EMsgDC(SeekFailed) << endl;
 				good_flag=false;
 				return 0;
 			}
@@ -126,12 +186,23 @@ ReadableAttributeList::getValueRepresentation(Tag tag,char *vrbuf,bool& readAsIm
 
 	if (!vrd && vre) {
 		TextOutputStream terr(errorstream.rdbuf());
-		tag.write(terr,dictionary);
 		if (strncmp(vre,"UN",2) == 0) {
-			errorstream << " - " << WMsgDC(NoDictionaryVRUseExplicitUN) << endl;
+			if (newformat) {
+				terr << String_Use(WMsgDCFT(MMsgDC(NoDictionaryVRUseExplicitUN),tag)) << endl;
+			}
+			else {
+				tag.write(terr,dictionary);
+				terr << " - " << WMsgDC(NoDictionaryVRUseExplicitUN) << endl;
+			}
 		}
 		else {
-			errorstream << " - " << WMsgDC(NoDictionaryVRUseExplicit) << endl;
+			if (newformat) {
+				terr << String_Use(WMsgDCFT(MMsgDC(NoDictionaryVRUseExplicit),tag)) << " [" << vre << "]"  << endl;
+			}
+			else {
+				tag.write(terr,dictionary);
+				terr << " - " << WMsgDC(NoDictionaryVRUseExplicit) << endl;
+			}
 		}
 	}
 
@@ -180,8 +251,15 @@ ReadableAttributeList::getValueRepresentation(Tag tag,char *vrbuf,bool& readAsIm
 		}
 		else {
 			vru=vre;	// Explicit overrides dictionary
-			tag.write(terr,dictionary);
-			errorstream << " - " << WMsgDC(MismatchDictionaryVR) << "; Explicit <" << vre << "> Dictionary <" << vrd << ">" << endl;
+			if (newformat) {
+				terr << String_Use(WMsgDCFT(MMsgDC(MismatchDictionaryVR),tag))
+					 << " - [" << vre << "] Dictionary [" << vrd << "]" << endl;
+			}
+			else {
+				tag.write(terr,dictionary);
+				terr << " - " << WMsgDC(MismatchDictionaryVR)
+					 << "; Explicit <" << vre << "> Dictionary <" << vrd << ">" << endl;
+			}
 		}
 	}
 	else if (vrd) {
@@ -197,8 +275,15 @@ ReadableAttributeList::getValueRepresentation(Tag tag,char *vrbuf,bool& readAsIm
 	if (tag.isPrivateGroup() && tag.isPrivateOwner()) {
 		if (strncmp(vru,"LO",2) != 0) {
 			vru="LO";
-			tag.write(terr,dictionary);
-			errorstream << " - " << EMsgDC(PrivateCreatorIsNotLOVR) << "; Explicit <" << vre << "> " << MMsgDC(OverridingVR) << " with <LO>" << endl;
+			if (newformat) {
+				terr << String_Use(EMsgDCFT(MMsgDC(PrivateCreatorIsNotLOVR),tag))
+					 << " - [" << vre << "] " << MMsgDC(OverridingVR) << " with [LO]" << endl;
+			}
+			else {
+				tag.write(terr,dictionary);
+				terr << " - " << EMsgDC(PrivateCreatorIsNotLOVR)
+					 << "; Explicit <" << vre << "> " << MMsgDC(OverridingVR) << " with <LO>" << endl;
+			}
 		}
 	}
 	return vru;
@@ -271,6 +356,7 @@ ReadableAttributeList::skipEncapsulatedData(void)
 {
 //cerr << "ReadableAttributeList::skipEncapsulatedData: start" << endl;
 	bool showoffset=verbose;
+	bool oddlengthfragmentencountered=false;
 	// See libsrc/include/pixeldat/unencap.h for details of GE bug
 	while (1) {
 //cerr << "ReadableAttributeList::skipEncapsulatedData: looping" << endl;
@@ -293,6 +379,11 @@ ReadableAttributeList::skipEncapsulatedData(void)
 			return;
 		}
 		byteoffset+=4;
+		
+		if (!oddlengthfragmentencountered && vl%2 != 0) {
+			errorstream << WMsgDC(EncapsulatedPixelDataFragmentNotEvenLength) << endl;	// (000514)
+			oddlengthfragmentencountered=true;	// only report this once
+		}
 
 		if (verbose) {
 			writebase(tag,"",vl); (*log) << endl;
@@ -330,13 +421,14 @@ ReadableAttributeList::skipEncapsulatedData(void)
 }
 
 SequenceAttribute *
-ReadableAttributeList::readNewSequenceAttribute(Tag stag,Uint32 length,bool ignoreoutofordertags,bool useUSVRForLUTDataIfNotExplicit,bool undefinedLengthUNTreatedAsSequence,const char *sequenceOwner,bool fixBitsDuringRead,bool havePixelRepresentation,Uint16 vPixelRepresentation)
+ReadableAttributeList::readNewSequenceAttribute(Tag stag,Uint32 length,bool ignoreoutofordertags,bool useUSVRForLUTDataIfNotExplicit,bool undefinedLengthUNTreatedAsSequence,const char *sequenceOwner,bool fixBitsDuringRead,bool havePixelRepresentation,Uint16 vPixelRepresentation,AttributeList *parentlist)
 {
 //cerr << "readNewSequenceAttribute(): start: undefinedLengthUNTreatedAsSequence = " << (undefinedLengthUNTreatedAsSequence ? "T" : "F") << endl;
 //cerr << "readNewSequenceAttribute(): start: length = " << dec << length << endl;
 //cerr << "readNewSequenceAttribute(): start: sequenceOwner = \"" << (sequenceOwner ? sequenceOwner : "--NULL--") << "\"" << endl;
 	bool showoffset=verbose;
 	SequenceAttribute *a=new SequenceAttribute(stag);
+	a->setParentAttributeList(parentlist);	// may be set again later when newly created SequenceAttribute is added to list by caller, but need to do it now else can't walk back error message path during reading
 //cerr << "readNewSequenceAttribute(): created empty tag - isEmpty()=" << a->isEmpty() << endl;
 //cerr << "readNewSequenceAttribute(): created empty tag - isOne()=" << a->isOne() << endl;
 //cerr << "readNewSequenceAttribute(): created empty tag - isMultiple()=" << a->isMultiple() << endl;
@@ -391,9 +483,10 @@ ReadableAttributeList::readNewSequenceAttribute(Tag stag,Uint32 length,bool igno
 //cerr << "readNewSequenceAttribute(): Item" << endl;
 			ReadableAttributeList *item=new ReadableAttributeList();
 			Assert(item);
+			(*a)+=item;		// add new item list to sequence attribute immediately, so we can walk back parents for error messages encountered during item->read()
 			ElementDictionary *newdict=new ElementDictionary();
 			Assert(newdict);
-			bool result=item->read(*stream,newdict,log,verbose,vl,false/*metaheadercheck*/,false/*uselengthtoend*/,ignoreoutofordertags,useUSVRForLUTDataIfNotExplicit,undefinedLengthUNTreatedAsSequence/*forceImplicit*/,false/*useStopAtTag*/,Tag(0,0)/*stopAtTag*/,true/*nestedWithinSequence*/,sequenceOwner,fixBitsDuringRead,havePixelRepresentation,vPixelRepresentation);
+			bool result=item->read(*stream,newdict,newformat,log,verbose,vl,false/*metaheadercheck*/,false/*uselengthtoend*/,ignoreoutofordertags,useUSVRForLUTDataIfNotExplicit,undefinedLengthUNTreatedAsSequence/*forceImplicit*/,false/*useStopAtTag*/,Tag(0,0)/*stopAtTag*/,true/*nestedWithinSequence*/,sequenceOwner,fixBitsDuringRead,havePixelRepresentation,vPixelRepresentation);
 			const char *e=item->errors();
 			if (e) errorstream << e;	// may be warnings
 			if (!result) {
@@ -403,26 +496,42 @@ ReadableAttributeList::readNewSequenceAttribute(Tag stag,Uint32 length,bool igno
 				return 0;
 			}
 			byteoffset+=item->getByteOffset();
-			(*a)+=item;
+			//(*a)+=item;		// if we leave adding new item list to sequence until here, cannot walk balk parents for error messages :(
 //cerr << "readNewSequenceAttribute(): added item - isEmpty()=" << a->isEmpty() << endl;
 //cerr << "readNewSequenceAttribute(): added item - isOne()=" << a->isOne() << endl;
 //cerr << "readNewSequenceAttribute(): added item - isMultiple()=" << a->isMultiple() << endl;
 			if (vl != 0xffffffff && byteoffset != itemstartbyteoffset+vl) {
 				TextOutputStream terr(errorstream.rdbuf());
-				stag.write(terr,dictionary);
-				errorstream << " - " << EMsgDC(BadSequenceItemValueLength)
-					<< " - " << MMsgDC(ActualLength) << " " << hex << (byteoffset-itemstartbyteoffset)
-					<< " " << MMsgDC(NotEqualTo) << " " << MMsgDC(SpecifiedLength) << " " << vl << dec
-					<< endl;
+				if (newformat) {
+					terr << String_Use(EMsgDCFT(MMsgDC(BadSequenceItemValueLength),stag));
+				}
+				else {
+					stag.write(terr,dictionary);
+					terr << " - " << EMsgDC(BadSequenceItemValueLength);
+				}
+				terr << " - " << MMsgDC(ActualLength) << " " << hex << (byteoffset-itemstartbyteoffset)
+					 << " " << MMsgDC(NotEqualTo) << " " << MMsgDC(SpecifiedLength) << " " << vl << dec
+					 << endl;
 				good_flag=false;
 			}
 //cerr << "readNewSequenceAttribute(): Item done" << endl;
 		}
 		else {
 			TextOutputStream terr(errorstream.rdbuf());
-			stag.write(terr,dictionary);
-			terr << " - " << EMsgDC(BadTagInSequence) << " - got - ";
-			tag.write(terr,dictionary);
+			if (newformat) {
+				terr << String_Use(EMsgDCFT(MMsgDC(BadTagInSequence),stag));
+				terr << " - (";
+				writeZeroPaddedHexNumberWithoutShowBase(terr,tag.getGroup(),4);
+				terr << ",";
+				writeZeroPaddedHexNumberWithoutShowBase(terr,tag.getElement(),4);
+				terr << ")";
+			}
+			else {
+				stag.write(terr,dictionary);
+				terr << " - " << EMsgDC(BadTagInSequence);
+				terr << " - got - ";
+				tag.write(terr,dictionary);
+			}
 			terr << " - " << MMsgDC(ExpectingItemOrSequenceDelimiter);
 			long bytesToSkip = 0;
 			if (length == 0xffffffff) {
@@ -446,11 +555,16 @@ ReadableAttributeList::readNewSequenceAttribute(Tag stag,Uint32 length,bool igno
 	}
 	if (length != 0xffffffff && byteoffset != startbyteoffset+length) {
 		TextOutputStream terr(errorstream.rdbuf());
-		stag.write(terr,dictionary);
-		errorstream << " - " << EMsgDC(BadSequenceValueLength)
-			    << " - " << MMsgDC(ActualLength) << " " << hex << (byteoffset-startbyteoffset)
-			    << " " << MMsgDC(NotEqualTo) << " " << MMsgDC(SpecifiedLength) << " " << length << dec
-			    << endl;
+		if (newformat) {
+			terr << String_Use(EMsgDCFT(MMsgDC(BadSequenceValueLength),stag));
+		}
+		else {
+			stag.write(terr,dictionary);
+			terr << " - " << EMsgDC(BadSequenceValueLength);
+		}
+		terr << " - " << MMsgDC(ActualLength) << " " << hex << (byteoffset-startbyteoffset)
+			 << " " << MMsgDC(NotEqualTo) << " " << MMsgDC(SpecifiedLength) << " " << length << dec
+			 << endl;
 		good_flag=false;
 	}
 	//if (stream->fail()) good_flag=false;		// this seems to fail on AMD64 Linux with Siemens PDI 2004 DICOMDIR :(
@@ -477,7 +591,7 @@ cerr << "ReadableAttributeList::~ReadableAttributeList" << endl;
 }
 
 bool
-ReadableAttributeList::read(DicomInputStream& str,ElementDictionary* dict,TextOutputStream* l,bool v,Uint32 length,
+ReadableAttributeList::read(DicomInputStream& str,ElementDictionary* dict,bool nf,TextOutputStream* l,bool v,Uint32 length,
 	bool metaheadercheck,bool uselengthtoend,bool ignoreoutofordertags,bool useUSVRForLUTDataIfNotExplicit,bool forceImplicit,bool useStopAtTag,Tag stopAtTag,bool nestedWithinSequence,const char *sequenceOwner,bool fixBitsDuringRead,bool havePixelRepresentation,Uint16 vPixelRepresentation)
 {
 //cerr << "ReadableAttributeList::read - start: forceImplicit = " << (forceImplicit ? "T" : "F") << endl;
@@ -488,6 +602,7 @@ ReadableAttributeList::read(DicomInputStream& str,ElementDictionary* dict,TextOu
 	dictionary=dict;
 	log=l;
 	verbose=v;
+	newformat=nf;
 
 	bool showoffset=v;
 
@@ -658,11 +773,21 @@ cerr << ")"
 		if (tag.isPrivateGroup() && !tag.isLengthElement() && !tag.isPrivateOwner() && !dictionary->hasOwner(tag)) {
 //cerr << "ReadableAttributeList::read - tag is private without owner, have sequenceOwner = " << (sequenceOwner ? sequenceOwner : "--NULL--") << "\"" << endl;
 			TextOutputStream terr(errorstream.rdbuf());
-			tag.write(terr,dictionary);
-			errorstream << " - " << WMsgDC(PrivateTagWithoutOwner);
-			
+			if (newformat) {
+				terr << String_Use(WMsgDCFT(MMsgDC(PrivateTagWithoutOwner),tag));
+			}
+			else {
+				tag.write(terr,dictionary);
+				errorstream << " - " << WMsgDC(PrivateTagWithoutOwner);
+			}
 			if (sequenceOwner != NULL) {
-				errorstream << " - use owner of parent sequence \"" << (sequenceOwner ? sequenceOwner : "--NULL--") << "\"";
+				errorstream << " - use owner of parent sequence ";
+				if (newformat) {
+					errorstream << "<" << sequenceOwner << ">";
+				}
+				else {
+					errorstream << "\"" << sequenceOwner << "\"";
+				}
 				// need to make a simulated private owner that specifies the block used by the current tag
 				dictionary->addOwner(Tag(tag.getGroup(),(tag.getElement()>>8)&0xff),sequenceOwner);
 			}
@@ -749,8 +874,14 @@ cerr << ")"
 			vrtest[2] = 0;
 			if (isKnownExplicitValueRepresentation(vrtest)) {
 				TextOutputStream terr(errorstream.rdbuf());
-				tag.write(terr,dictionary);
-				terr << " - " << WMsgDC(DataElementEncodedAsExplicitInImplicitVRTransferSyntax) << " - ignoring explicit VR <" << vrtest << "> and trying to recover short VL" << endl;
+				if (newformat) {
+					terr << String_Use(WMsgDCFT(MMsgDC(DataElementEncodedAsExplicitInImplicitVRTransferSyntax),tag));
+				}
+				else {
+					tag.write(terr,dictionary);
+					terr << " - " << WMsgDC(DataElementEncodedAsExplicitInImplicitVRTransferSyntax);
+				}
+				terr << " - ignoring explicit VR <" << vrtest << "> and trying to recover short VL" << endl;
 				vl = (vl >> 16) &0xffff;
 				// ignore "explicit" VR, since experience suggests that it will be "wrong" when this bug occurs
 			}
@@ -758,8 +889,15 @@ cerr << ")"
 		
 		if (vl != 0xffffffff & vl%2 != 0) {
 			TextOutputStream terr(errorstream.rdbuf());
-			tag.write(terr,dictionary);
-			terr << " - " << EMsgDC(BadValueLengthNotEven) << " - VL is " << hex << vl << " should be " << (vl+1) << dec << endl;
+			if (newformat) {
+				terr << String_Use(EMsgDCFT(MMsgDC(BadValueLengthNotEven),tag));
+				terr << " - VL = <" << hex << vl << "> should be <" << (vl+1) << dec << ">" << endl;
+			}
+			else {
+				tag.write(terr,dictionary);
+				terr << " - " << EMsgDC(BadValueLengthNotEven);
+				terr << " - VL is " << hex << vl << " should be " << (vl+1) << dec << endl;
+			}
 			good_flag=false;
 		}
 //cerr << "ReadableAttributeList::read VL  = 0x" << hex << vl << dec << endl;
@@ -781,7 +919,8 @@ cerr << ")"
 				forceImplicit || treatedUnknownVRAsSequence,		/* once inside UN SQ, always implicit, even if nested */
 				useSequenceOwner,									/* in case nested lists are missing owner, propagate owner of the sequence tag itself, if private, or its parent, if missing its own owner */
 				fixBitsDuringRead,
-				havePixelRepresentation,vPixelRepresentation
+				havePixelRepresentation,vPixelRepresentation,
+				this/*parentlist*/
 				);
 //cerr << "ReadableAttributeList::read - back from readNewSequenceAttribute() with a = " << (a == NULL ? "null" : "valid") << endl;
 //cerr << "ReadableAttributeList::read - back from readNewSequenceAttribute() with stream->fail() = " << stream->fail() << endl;
@@ -806,15 +945,28 @@ cerr << ")"
 				if (!vBitsStored) vBitsStored=vBitsAllocated;
 				if (!vHighBit) vHighBit=vBitsStored-1u;
 				if (vHighBit > (vBitsStored-1u)) {
-					errorstream << WMsgDC(BadAttributeValue)
-						    << " - High Bit = " << vHighBit
-						    << " " << MMsgDC(Exceeds) << " " << (vBitsStored-1u)
-						    << endl;
+					if (newformat) {
+						errorstream << String_Use(WMsgDCFT(MMsgDC(BadAttributeValue),TagFromName(HighBit)))
+									<< " - <" << vHighBit << ">"
+									<< " " << MMsgDC(Exceeds) << " BitsStored " << vBitsStored << " - 1" << endl;
+					}
+					else {
+						errorstream << WMsgDC(BadAttributeValue)
+									<< " - High Bit = " << vHighBit
+									<< " " << MMsgDC(Exceeds) << " " << (vBitsStored-1u) << endl;
+					}
 				}
 				if (vHighBit > (vBitsAllocated-1u)) {
-					errorstream << EMsgDC(BadAttributeValue)
-						    << " - High Bit = " << vHighBit
-						    << " " << MMsgDC(Exceeds) << " " << (vBitsAllocated-1u);
+					if (newformat) {
+						errorstream << String_Use(EMsgDCFT(MMsgDC(BadAttributeValue),TagFromName(HighBit)))
+									<< " - <" << vHighBit << ">"
+									<< " " << MMsgDC(Exceeds) << " BitsAllocated " << vBitsAllocated << " - 1";
+					}
+					else {
+						errorstream << EMsgDC(BadAttributeValue)
+									<< " - High Bit = " << vHighBit
+									<< " " << MMsgDC(Exceeds) << " " << (vBitsAllocated-1u);
+					}
 					if (fixBitsDuringRead) {
 						errorstream << " " << MMsgDC(Using) << " " << (vBitsAllocated-1u);
 					}
@@ -828,9 +980,15 @@ cerr << ")"
 					}
 				}
 				if (vHighBit < (vBitsStored-1u)) {
-					errorstream << EMsgDC(BadAttributeValue)
-						    << " - Bits Stored = " << vBitsStored
-						    << " " << MMsgDC(Exceeds) << " High Bit " << vHighBit << " + 1";
+					if (newformat) {
+						errorstream << String_Use(EMsgDCFT(MMsgDC(BadAttributeValue),TagFromName(BitsStored)))
+									<< " - <" << vBitsStored << ">";
+					}
+					else {
+						errorstream << EMsgDC(BadAttributeValue)
+									<< " - Bits Stored = " << vBitsStored;
+					}
+					errorstream << " " << MMsgDC(Exceeds) << " High Bit " << vHighBit << " + 1";
 					if (fixBitsDuringRead) {
 						errorstream << " " << MMsgDC(Using) << " " << (vHighBit+1u);
 					}
@@ -873,7 +1031,12 @@ cerr << ")"
 				else {
 //cerr << "ReadableAttributeList::read Pixel Data has defined length VL" << endl;
 					if (stream->getTransferSyntaxInUse()->isEncapsulated() && !nestedWithinSequence) {
-						errorstream << EMsgDC(IllegalVLForPixelDataInEncapsulatedTransferSyntaxInTopLevelDataset) << endl;
+						if (newformat) {
+							errorstream << String_Use(EMsgDCFT(MMsgDC(IllegalVLForPixelDataInEncapsulatedTransferSyntaxInTopLevelDataset),TagFromName(PixelData))) << endl;
+						}
+						else {
+							errorstream << EMsgDC(IllegalVLForPixelDataInEncapsulatedTransferSyntaxInTopLevelDataset) << endl;
+						}
 						if (verbose && showoffset) (*log) << endl;
 						// do not return false but keep going anyway, and do not negate good_flag, since should be able to read it and no need to fail reading of entire dataset
 					}
@@ -881,10 +1044,14 @@ cerr << ")"
 //cerr << "ReadableAttributeList::read vl=" << hex << vl << dec << endl;
 						Uint16 bytesinword = (Uint16)(vr[1] == 'W' ? 2 : (vr[1] == 'B' ? 1 : 0));
 						if (vBitsAllocated > 8 && isOtherByteVR(vr) && stream->getTransferSyntaxInUse()->isExplicitVR()) {
+							if (newformat) {
+								errorstream << String_Use(EMsgDCFT(MMsgDC(BadValueRepresentation),TagFromName(PixelData)))
+											<< " - VR = OB, Explicit VR, Bits Allocated = " << vBitsAllocated << " " << MMsgDC(Exceeds) << " 8" << endl;
+							}
+							else {
 								errorstream << EMsgDC(BadValueRepresentation)
-								    << " - Pixel Data - VR = OB, Explicit VR, Bits Allocated = " << vBitsAllocated
-								    << " " << MMsgDC(Exceeds) << " 8"
-								    << endl;
+											<< " - Pixel Data - VR = OB, Explicit VR, Bits Allocated = " << vBitsAllocated << " " << MMsgDC(Exceeds) << " 8" << endl;
+							}
 							bytesinword=2;		// force OW to make it usable
 						}
 						a=new OtherUnspecifiedLargeAttributeCopied(
@@ -919,8 +1086,14 @@ cerr << ")"
 			else {
 //cerr << "ReadableAttributeList::read PixelData not OX" << endl;
 				TextOutputStream terr(errorstream.rdbuf());
-				tag.write(terr,dictionary);
-				terr << EMsgDC(IllegalVRForPixelData) << endl;
+				if (newformat) {
+					terr << String_Use(EMsgDCFT(MMsgDC(IllegalVRForPixelData),tag));
+				}
+				else {
+					tag.write(terr,dictionary);
+					terr << EMsgDC(IllegalVRForPixelData);
+				}
+				terr << endl;
 				good_flag=false;
 				if (verbose && showoffset) (*log) << endl;
 				return false;
@@ -933,10 +1106,14 @@ cerr << ")"
 				Uint16 vWaveformBitsAllocated=AttributeValue(operator[](TagFromName(WaveformBitsAllocated)));
 				if (vWaveformBitsAllocated > 8) {
 					if (isOtherByteVR(vr) && stream->getTransferSyntaxInUse()->isExplicitVR()) {
-						errorstream << EMsgDC(BadValueRepresentation)
-							<< " - Waveform Data - VR = OB, Explicit VR, Waveform Bits Allocated = " << vWaveformBitsAllocated
-							<< " " << MMsgDC(Exceeds) << " 8"
-							<< endl;
+						if (newformat) {
+							errorstream << String_Use(EMsgDCFT(MMsgDC(BadValueRepresentation),TagFromName(WaveformData)))
+										<< " - VR = OB, Explicit VR, Waveform Bits Allocated = " << vWaveformBitsAllocated << " " << MMsgDC(Exceeds) << " 8" << endl;
+						}
+						else {
+							errorstream << EMsgDC(BadValueRepresentation)
+										<< " - Waveform Data - VR = OB, Explicit VR, Waveform Bits Allocated = " << vWaveformBitsAllocated << " " << MMsgDC(Exceeds) << " 8" << endl;
+						}
 						if (stream->getTransferSyntaxInUse()->isLittleEndian()) {
 //cerr << "ReadableAttributeList::forcing WaveformData VR from OB to OW since > 8 bit, explicit VR and little endian" << endl;
 							vr="OW";
@@ -1043,16 +1220,30 @@ cerr << ")"
 				a=newAttribute(vr,tag);
 				if (!a) {
 					TextOutputStream terr(errorstream.rdbuf());
-					tag.write(terr,dictionary);
-					errorstream << WMsgDC(VRUnsupported) << " - <" << vr[0] << vr[1] << ">" << endl;
+					if (newformat) {
+						terr << String_Use(WMsgDCFT(MMsgDC(VRUnsupported),tag));
+					}
+					else {
+						tag.write(terr,dictionary);
+						terr << WMsgDC(VRUnsupported);
+					}
+					terr << " - <" << vr[0] << vr[1] << ">" << endl;
 				}
 			}
 
 			if (a) {
 				if (vl%a->getValueSize() != 0) {
 					TextOutputStream terr(errorstream.rdbuf());
-					tag.write(terr,dictionary);
-					terr << " - " << EMsgDC(VLDoesNotMatchVR) << " - value length = " << dec << vl << " dec - expected multiple of " << a->getValueSize() << " - skipping value length bytes to next data element" << endl;
+					if (newformat) {
+						terr << String_Use(EMsgDCFT(MMsgDC(VLDoesNotMatchVR),tag))
+							 << " <" << dec << vl << " dec>";
+					}
+					else {
+						tag.write(terr,dictionary);
+						terr << " - " << EMsgDC(VLDoesNotMatchVR)
+							 << " - value length = " << dec << vl << " dec";
+					}
+					terr << " - expected multiple of " << a->getValueSize() << " - skipping value length bytes to next data element" << endl;
 					good_flag=false;
 					if (verbose && showoffset) (*log) << endl;
 					// do not give up though - just skip it
@@ -1068,8 +1259,15 @@ cerr << ")"
 					a->read(*stream,vl);
 					if (!isLongValueLengthInExplicitValueRepresentation(vr) && a->getValueSize()*a->getVM() >= 65536) {
 						TextOutputStream terr(errorstream.rdbuf());
-						tag.write(terr,dictionary);
-						terr << " - " << WMsgDC(VLExceedsExplicitVRMaximium) << " - value length = " << dec << vl << endl;
+						if (newformat) {
+							terr << String_Use(WMsgDCFT(MMsgDC(VLExceedsExplicitVRMaximium),tag))
+						 		 << " <" << dec << vl << " dec>";
+						}
+						else {
+							tag.write(terr,dictionary);
+							terr << " - " << WMsgDC(VLExceedsExplicitVRMaximium)
+								 << " - value length = " << dec << vl << endl;
+						}
 					}
 				}
 				if (stream->fail()) {
@@ -1104,7 +1302,16 @@ cerr << ")"
 				if (tag == TagFromName(TransferSyntaxUID)) {
 					const char *newTransferSyntaxUID = AttributeValue(a);
 					if (donewithmetaheader) {
-						errorstream << EMsgDC(UnexpectedTransferSyntaxUIDOutsideMetaInformationHeader) << " - ignoring - " << newTransferSyntaxUID << endl;
+						if (newformat) {
+							//errorstream << Attribute::EMsgDCF(MMsgDC(UnexpectedTransferSyntaxUIDOutsideMetaInformationHeader),a)
+							errorstream << String_Use(EMsgDCFT(MMsgDC(UnexpectedTransferSyntaxUIDOutsideMetaInformationHeader),tag))
+										<< " - ignoring - <" << newTransferSyntaxUID << ">";
+						}
+						else {
+							errorstream << EMsgDC(UnexpectedTransferSyntaxUIDOutsideMetaInformationHeader)
+										<< " - ignoring - " << newTransferSyntaxUID;
+						}
+						errorstream << endl;
 					}
 					else if (newTransferSyntaxUID && strlen(newTransferSyntaxUID) > 0) {
 //cerr << "ReadableAttributeList::read() encountered TransferSyntaxUID - before changing getTransferSyntaxInUse()->isEncapsulated() " << (stream->getTransferSyntaxInUse()->isEncapsulated() ? "true" : "false") << endl;
@@ -1141,7 +1348,12 @@ cerr << ")"
 					 || length != 2
 					 || *value != 0x00
 					 || *(value+1) != 0x01) {
-						errorstream << WMsgDC(BadFileMetaInformationVersion) << endl;
+					 	if (newformat) {
+							errorstream << String_Use(WMsgDCFT(MMsgDC(BadFileMetaInformationVersion),tag)) << endl;
+						}
+						else {
+							errorstream << WMsgDC(BadFileMetaInformationVersion) << endl;
+						}
 					}
 				}
 				else if (tag.isLengthElement()) {
@@ -1160,16 +1372,29 @@ cerr << ")"
 //cerr << "ReadableAttributeList::read adding owner" << endl;
 						if (tag.getElement() < 0x0010) {
 							TextOutputStream terr(errorstream.rdbuf());
-							tag.write(terr,dictionary);
-							errorstream << " - " << EMsgDC(BadPrivateOwner) << " - element must be greater than or equal to 0x0010" << endl;
+							if (newformat) {
+								terr << String_Use(EMsgDCFT(MMsgDC(BadPrivateOwner),tag));
+							}
+							else {
+								tag.write(terr,dictionary);
+								terr << " - " << EMsgDC(BadPrivateOwner);
+							}
+							terr << " - element must be greater than or equal to 0x0010" << endl;
 						}
 						char *s=AttributeValue(a);
-						if (s && *s) 
+						if (s && *s) {
 							dictionary->addOwner(tag,s);
+						}
 						else {
 							TextOutputStream terr(errorstream.rdbuf());
-							tag.write(terr,dictionary);
-							errorstream << " - " << WMsgDC(BadPrivateOwner) << " - empty value" << endl;
+							if (newformat) {
+								terr << String_Use(EMsgDCFT(MMsgDC(BadPrivateOwner),tag));
+							}
+							else {
+								tag.write(terr,dictionary);
+								terr << " - " << WMsgDC(BadPrivateOwner);
+							}
+							terr << " - empty value" << endl;
 						}
 						if (s) delete[] s;
 					}
@@ -1196,8 +1421,13 @@ cerr << ")"
 			}
 			else {
 				TextOutputStream terr(errorstream.rdbuf());
-				tag.write(terr,dictionary);
-				errorstream << WMsgDC(UnrecognizedOrUnsupportedTag) << endl;
+				if (newformat) {
+					terr << String_Use(WMsgDCFT(MMsgDC(UnrecognizedOrUnsupportedTag),tag)) << endl;
+				}
+				else {
+					tag.write(terr,dictionary);
+					terr << WMsgDC(UnrecognizedOrUnsupportedTag) << endl;
+				}
 				if (verbose && showoffset) (*log) << endl;
 				//stream->seekg(vl,ios::cur);
 				//if (stream->fail()) {

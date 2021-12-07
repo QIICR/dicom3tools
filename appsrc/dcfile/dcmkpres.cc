@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dcmkpres.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dcmkpres.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attrtype.h"
 #include "attrothr.h"
 #include "attrmxls.h"
@@ -699,7 +699,7 @@ main(int argc,char **argv)
 	bool success=true;
 	TextOutputStream  log(cerr);
 	if (verbose) log << "******** While reading ... ********" << endl; 
-	input_list.read(din,&log,verbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
+	input_list.read(din,false/*newformat*/,&log,verbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
 
 	if (!input_list.good()) {
 		log << input_list.errors()

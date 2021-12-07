@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dcuncat.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dcuncat.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <fstream>
 #else
@@ -601,7 +601,7 @@ main(int argc, char *argv[])
 	const char *inputFilename = dicom_input_options.filename ? dicom_input_options.filename : "";
 	ManagedAttributeList list;
 	if (verbose) log << "******** While reading ... ********" << endl; 
-	list.read(din,&log,verbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
+	list.read(din,false/*newformat*/,&log,verbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
 	if (!list.good()) {
 		if (!ignorereaderrors) {
 			log << list.errors();

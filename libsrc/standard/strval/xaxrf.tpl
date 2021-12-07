@@ -22,10 +22,6 @@ StringValues="XRayImageScanOptions" {
 	ROTA = Rotation
 }
 
-StringValues="PhotometricInterpretationMonochrome2" {
-	MONOCHROME2
-}
-
 StringValues="PixelIntensityRelationship" {
 	LIN = Approximately proportional to X-Ray beam intensity,
 	LOG = Non-linear Log Function,
@@ -45,21 +41,6 @@ StringValues="InterventionStatus" {
 	INTERMEDIATE,
 	POST,
 	NONE
-}
-
-StringValues="XADeviceCodingSchemeDesignators" {
-	99DEV = X-Ray Angiographic IOD Interim Intervention Device List,
-	99SDM = SNOMED DICOM Microglossary
-}
-
-StringValues="XATherapyCodingSchemeDesignators" {
-	99THR = X-Ray Angiographic IOD Interim Intervention Therapy List,
-	99SDM = SNOMED DICOM Microglossary
-}
-
-StringValues="XAAnatomyCodingSchemeDesignators" {
-	99ANA = X-Ray Angiographic IOD Interim Anatomic Term List,
-	99SDM = SNOMED DICOM Microglossary
 }
 
 StringValues="DeviceDiameterUnits" {

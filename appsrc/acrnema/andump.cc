@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)andump.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)andump.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <iostream>
 #include <iomanip>
@@ -257,7 +257,7 @@ doFloatValues(DicomInputStream& in,TextOutputStream& log,Uint32 vl,size_t size)
 }
 
 static bool
-readAll(DicomInputStream& stream,TextOutputStream& log,ElementDictionary& dict,bool showoffset,ios::fmtflags showoffsetbase,bool ancreate,bool extractCSA)
+readAll(DicomInputStream& stream,TextOutputStream& log,ElementDictionary& dict,bool showoffset,ios::fmtflags showoffsetbase,bool ancreate,bool extractCSA,bool skipiftoolong)
 {
 	Uint32 n=stream.haveMetaHeader() ? 132 : 0;
 	Uint32 length=0xffffffff;
@@ -486,8 +486,13 @@ log << ")"
 				}
 			}
 			else {
-				Assert(!ancreate);
-				log << "\t[]\t# skipping ...";		
+				Assert(!ancreate || skipiftoolong);
+				if (ancreate) {
+					log << "\t[...]";
+				}
+				else {
+					log << "\t[]\t# skipping ...";
+				}
 				stream.seekg(vl,ios::cur);
 				if (stream.fail()) {
 					cerr << EMsgDC(SeekFailed) << endl;
@@ -516,6 +521,7 @@ main(int argc, char *argv[])
 	bool showfilename=options.get("filename");
 	bool ancreate=options.get("ancreate");
 	bool extractCSA=options.get("extractCSA");
+	bool skipiftoolong=options.get("skipiftoolong");
 	bool showoffset=false;
 	ios::fmtflags showoffsetbase;
 	if (options["showoffset"]||options["showoffset-hex"])
@@ -543,6 +549,7 @@ main(int argc, char *argv[])
 			<< input_options.usage()
 			<< " [-ancreate]"
 			<< " [-extractCSA]"
+			<< " [-skipiftoolong]"
 			<< " [-showoffset|-showoffset-hex"
 			<< "|-showoffset-octal|-showoffset-oct"
 			<< "|-showoffset-decimal|-showoffset-dec]"
@@ -565,5 +572,5 @@ main(int argc, char *argv[])
 
 	ElementDictionary dictionary;
 
-	readAll(din,log,dictionary,showoffset,showoffsetbase,ancreate,extractCSA);
+	readAll(din,log,dictionary,showoffset,showoffsetbase,ancreate,extractCSA,skipiftoolong);
 }

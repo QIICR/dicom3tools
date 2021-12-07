@@ -1,4 +1,4 @@
-/* pqhdrc.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* pqhdrc.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 // For the Picker PQ CT format, the header is not simple enough to use
 // the template based header mechanism
 

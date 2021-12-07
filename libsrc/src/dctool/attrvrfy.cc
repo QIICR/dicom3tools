@@ -1,12 +1,100 @@
-static const char *CopyrightIdentifier(void) { return "@(#)attrvrfy.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)attrvrfy.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attr.h"
+#include "attrlist.h"
+#include "attrseq.h"
 #include "mesgtext.h"
 #include "elmdict.h"
 #include "elmtype.h"
+// the following is for buildFullPathInInstanceToCurrentAttribute() only ...
+//#include "strtype.h"
+
+const char*
+Attribute::MMsgDCF(const char *index,const Attribute *a) {
+	const char *result = "";
+	if (a) {
+		AttributeList *list = a->getParentAttributeList();
+		if (list) {
+			ElementDictionary *dict = list->getDictionary();
+			char *name = a->buildFullPathInInstanceToCurrentAttribute(dict);
+			result = EMSGDC_Instance.message(index,name);	// no String_Use() like macro ? memory leak :(
+		}
+	}
+	return result;
+}
+
+const char*
+Attribute::MMsgDCF(const char *index,const Attribute *a,int valuenumber) {
+	const char *result = "";
+	if (a) {
+		AttributeList *list = a->getParentAttributeList();
+		if (list) {
+			ElementDictionary *dict = list->getDictionary();
+			char *name = a->buildFullPathInInstanceToValueOfCurrentAttribute(dict,valuenumber);
+			result = EMSGDC_Instance.message(index,name);	// no String_Use() like macro ? memory leak :(
+		}
+	}
+	return result;
+}
+
+const char*
+Attribute::EMsgDCF(const char *index,const Attribute *a) {
+	const char *result = "";
+	if (a) {
+		AttributeList *list = a->getParentAttributeList();
+		if (list) {
+			ElementDictionary *dict = list->getDictionary();
+			char *name = a->buildFullPathInInstanceToCurrentAttribute(dict);
+			result = EMSGDC_Instance.error(index,name);	// no String_Use() like macro ? memory leak :(
+		}
+	}
+	return result;
+}
+
+const char*
+Attribute::EMsgDCF(const char *index,const Attribute *a,int valuenumber) {
+	const char *result = "";
+	if (a) {
+		AttributeList *list = a->getParentAttributeList();
+		if (list) {
+			ElementDictionary *dict = list->getDictionary();
+			char *name = a->buildFullPathInInstanceToValueOfCurrentAttribute(dict,valuenumber);
+			result = EMSGDC_Instance.error(index,name);	// no String_Use() like macro ? memory leak :(
+		}
+	}
+	return result;
+}
+
+const char*
+Attribute::WMsgDCF(const char *index,const Attribute *a) {
+	const char *result = "";
+	if (a) {
+		AttributeList *list = a->getParentAttributeList();
+		if (list) {
+			ElementDictionary *dict = list->getDictionary();
+			char *name = a->buildFullPathInInstanceToCurrentAttribute(dict);
+			result = EMSGDC_Instance.warning(index,name);	// no String_Use() like macro ? memory leak :(
+		}
+	}
+	return result;
+}
+
+const char*
+Attribute::WMsgDCF(const char *index,const Attribute *a,int valuenumber) {
+	const char *result = "";
+	if (a) {
+		AttributeList *list = a->getParentAttributeList();
+		if (list) {
+			ElementDictionary *dict = list->getDictionary();
+			char *name = a->buildFullPathInInstanceToValueOfCurrentAttribute(dict,valuenumber);
+			result = EMSGDC_Instance.warning(index,name);	// no String_Use() like macro ? memory leak :(
+		}
+	}
+	return result;
+}
 
 bool
 Attribute::verifyDefinedTerms(char *(*method)(char *value),
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
 	int which) const
 {
@@ -23,22 +111,37 @@ Attribute::verifyDefinedTerms(char *(*method)(char *value),
 				char *desc;
 				if (value && (desc=(*method)(value))) {
 					if (verbose) {
-						log << MMsgDC(RecognizedDefinedTerm)
-						    << " <" << value << "> " << MMsgDC(Is) << " <" << desc
+						if (newformat) {
+							log << MMsgDCF(MMsgDC(RecognizedDefinedTerm),this,i+1)
+								<< " = <" << value << "> " << MMsgDC(Is) << " <" << desc
+								<< ">" << endl;
+						}
+						else {
+							log << MMsgDC(RecognizedDefinedTerm)
+							    << " <" << value << "> " << MMsgDC(Is) << " <" << desc
+							    << "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
+							    << " " << MMsgDC(OfAttribute) << " <"
+							    << (dict ? dict->getDescription(getTag()) : "")
+								<< ">" << endl;
+						}
+					}
+					delete desc;
+				}
+				else {
+					if (newformat) {
+						log << WMsgDCF(MMsgDC(UnrecognizedDefinedTerm),this,i+1)
+						    << " = <" << (value ? value : "")
+						    << ">"
+						    << endl;
+					}
+					else {
+						log << WMsgDC(UnrecognizedDefinedTerm)
+						    << " <" << (value ? value : "")
 						    << "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
 						    << " " << MMsgDC(OfAttribute) << " <"
 						    << (dict ? dict->getDescription(getTag()) : "")
 							<< ">" << endl;
 					}
-					delete desc;
-				}
-				else {
-					log << WMsgDC(UnrecognizedDefinedTerm)
-					    << " <" << (value ? value : "")
-					    << "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
-					    << " " << MMsgDC(OfAttribute) << " <"
-					    << (dict ? dict->getDescription(getTag()) : "")
-						<< ">" << endl;
 					// does NOT cause failure (cf. EnumValues)
 				}
 				delete value;
@@ -50,10 +153,15 @@ Attribute::verifyDefinedTerms(char *(*method)(char *value),
 		}
 	}
 	else {
-		log << EMsgDC(TriedToVerifyDefinedTermsForNonStringAttribute) << " "
-		    << MMsgDC(ForAttribute) << " <"
-		    << (dict ? dict->getDescription(getTag()) : "")
-		    << ">" << endl;
+		if (newformat) {
+			log << EMsgDCF(MMsgDC(TriedToVerifyDefinedTermsForNonStringAttribute),this) << endl;
+		}
+		else {
+			log << EMsgDC(TriedToVerifyDefinedTermsForNonStringAttribute) << " "
+			    << MMsgDC(ForAttribute) << " <"
+			    << (dict ? dict->getDescription(getTag()) : "")
+			    << ">" << endl;
+		}
 		success=false;
 	}
 //cerr << "Attribute::verifyDefinedTerms: return " << (success ? "T" : "F") << endl;
@@ -62,7 +170,7 @@ Attribute::verifyDefinedTerms(char *(*method)(char *value),
 
 bool
 Attribute::verifyEnumValues(char *(*method)(char *value),
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
 	int which) const
 {
@@ -85,22 +193,37 @@ Attribute::verifyEnumValues(char *(*method)(char *value),
 //if (value) cerr << "Attribute::verifyEnumValues: value=" << value << endl;
 				if (value && (desc=(*method)(value))) {
 					if (verbose) {
-						log << MMsgDC(RecognizedEnumeratedValue)
-						    << " <" << value << "> " << MMsgDC(Is) << " <" << desc
-							<< "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
-						    << " " << MMsgDC(OfAttribute) << " <"
-						    << ">" << (dict ? dict->getDescription(getTag()) : "")
-							<< endl;
+						if (newformat) {
+							log << MMsgDCF(MMsgDC(RecognizedEnumeratedValue),this,i+1)
+							    << " = <" << value << "> " << MMsgDC(Is) << " <" << desc
+							    << ">" << endl;
+						}
+						else {
+							log << MMsgDC(RecognizedEnumeratedValue)
+							    << " <" << value << "> " << MMsgDC(Is) << " <" << desc
+								<< "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
+							    << " " << MMsgDC(OfAttribute) << " <"
+							    << ">" << (dict ? dict->getDescription(getTag()) : "")
+								<< endl;
+						}
 					}
 					delete desc;
 				}
 				else {
-					log << EMsgDC(UnrecognizedEnumeratedValue)
-					    << " <" << (value ? value : "")
-					    << "> " << MMsgDC(ForValue) << " " << dec << (i+1)
-					    << " " << MMsgDC(OfAttribute) << " <"
-					    << (dict ? dict->getDescription(getTag()) : "")
-						<< ">" << endl;
+					if (newformat) {
+						log << EMsgDCF(MMsgDC(UnrecognizedEnumeratedValue),this,i+1)
+						    << " = <" << (value ? value : "")
+						    << ">"
+						    << endl;
+					}
+					else {
+						log << EMsgDC(UnrecognizedEnumeratedValue)
+						    << " <" << (value ? value : "")
+						    << "> " << MMsgDC(ForValue) << " " << dec << (i+1)
+						    << " " << MMsgDC(OfAttribute) << " <"
+						    << (dict ? dict->getDescription(getTag()) : "")
+							<< ">" << endl;
+					}
 					success=false;
 				}
 				delete value;
@@ -112,10 +235,15 @@ Attribute::verifyEnumValues(char *(*method)(char *value),
 		}
 	}
 	else {
-		log << EMsgDC(TriedToVerifyEnumeratedValueForNonStringAttribute) << " "
-		    << MMsgDC(ForAttribute) << " <"
-		    << (dict ? dict->getDescription(getTag()) : "")
-		    << ">" << endl;
+		if (newformat) {
+			log << EMsgDCF(MMsgDC(TriedToVerifyEnumeratedValueForNonStringAttribute),this) << endl;
+		}
+		else {
+			log << EMsgDC(TriedToVerifyEnumeratedValueForNonStringAttribute) << " "
+			    << MMsgDC(ForAttribute) << " <"
+			    << (dict ? dict->getDescription(getTag()) : "")
+			    << ">" << endl;
+		}
 		success=false;
 	}
 //cerr << "Attribute::verifyEnumValues: return " << (success ? "T" : "F") << endl;
@@ -124,7 +252,7 @@ Attribute::verifyEnumValues(char *(*method)(char *value),
 
 bool
 Attribute::verifyEnumValues(char *(*method)(Uint16 value),
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
 	int which) const
 {
@@ -147,22 +275,36 @@ Attribute::verifyEnumValues(char *(*method)(Uint16 value),
 				char *desc=(*method)(value);
 				if (desc) {
 					if (verbose) {
-						log << MMsgDC(RecognizedEnumeratedValue)
-						    << " <" << hex << value << dec << "> " << MMsgDC(Is) << " <" << desc
-						    << "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
-							<< " " << MMsgDC(OfAttribute) << " <"
-						    << (dict ? dict->getDescription(getTag()) : "")
-							<< ">" << endl;
+						if (newformat) {
+							log << MMsgDCF(MMsgDC(RecognizedEnumeratedValue),this,i+1)
+								<< " = <" << hex << value << dec << "> " << MMsgDC(Is) << " <" << desc
+							    << ">" << endl;
+						}
+						else {
+							log << MMsgDC(RecognizedEnumeratedValue)
+							    << " <" << hex << value << dec << "> " << MMsgDC(Is) << " <" << desc
+							    << "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
+								<< " " << MMsgDC(OfAttribute) << " <"
+							    << (dict ? dict->getDescription(getTag()) : "")
+								<< ">" << endl;
+						}
 					}
 					delete desc;
 				}
 				else {
-					log << EMsgDC(UnrecognizedEnumeratedValue)
-					    << " <" << hex << value << dec
-					    << "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
-					    << " " << MMsgDC(OfAttribute) << " <"
-					    << (dict ? dict->getDescription(getTag()) : "")
-						<< ">" << endl;
+					if (newformat) {
+						log << EMsgDCF(MMsgDC(UnrecognizedEnumeratedValue),this,i+1)
+						    << " = <" << hex << value << dec
+						    << ">" << endl;
+					}
+					else {
+						log << EMsgDC(UnrecognizedEnumeratedValue)
+						    << " <" << hex << value << dec
+						    << "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
+						    << " " << MMsgDC(OfAttribute) << " <"
+						    << (dict ? dict->getDescription(getTag()) : "")
+							<< ">" << endl;
+					}
 					success=false;
 				}
 			}
@@ -173,10 +315,15 @@ Attribute::verifyEnumValues(char *(*method)(Uint16 value),
 		}
 	}
 	else {
-		log << EMsgDC(TriedToVerifyEnumeratedValueForNonNumericAttribute) << " "
-		    << MMsgDC(ForAttribute) << " <"
-		    << (dict ? dict->getDescription(getTag()) : "")
-		    << ">" << endl;
+		if (newformat) {
+			log << EMsgDCF(MMsgDC(TriedToVerifyEnumeratedValueForNonNumericAttribute),this) << endl;
+		}
+		else {
+			log << EMsgDC(TriedToVerifyEnumeratedValueForNonNumericAttribute) << " "
+			    << MMsgDC(ForAttribute) << " <"
+			    << (dict ? dict->getDescription(getTag()) : "")
+			    << ">" << endl;
+		}
 		success=false;
 	}
 //cerr << "Attribute::verifyEnumValues: return " << (success ? "T" : "F") << endl;
@@ -185,7 +332,7 @@ Attribute::verifyEnumValues(char *(*method)(Uint16 value),
 
 bool
 Attribute::verifyBitMap(char *(*method)(Uint16 value),
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
 	int which) const
 {
@@ -202,22 +349,36 @@ Attribute::verifyBitMap(char *(*method)(Uint16 value),
 				char *desc=(*method)(value);
 				if (desc) {
 					if (verbose) {
-						log << MMsgDC(RecognizedBitMap)
-						    << " <" << hex << value << dec << "> " << MMsgDC(Is) << " <" << desc
+						if (newformat) {
+							log << MMsgDCF(MMsgDC(RecognizedBitMap),this,i+1)
+							    << " = <" << hex << value << dec << "> " << MMsgDC(Is) << " <" << desc
+								<< ">" << endl;
+						}
+						else {
+							log << MMsgDC(RecognizedBitMap)
+							    << " <" << hex << value << dec << "> " << MMsgDC(Is) << " <" << desc
+								<< "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
+							    << " " << MMsgDC(OfAttribute) << " <"
+							    << (dict ? dict->getDescription(getTag()) : "")
+							    << ">" << endl;
+						}
+					}
+					delete desc;
+				}
+				else {
+					if (newformat) {
+						log << EMsgDCF(MMsgDC(UnrecognizedBitMap),this,i+1)
+						    << " = <" << hex << value << dec
+							<< ">" << endl;
+					}
+					else {
+						log << EMsgDC(UnrecognizedBitMap)
+						    << " <" << hex << value << dec
 							<< "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
 						    << " " << MMsgDC(OfAttribute) << " <"
 						    << (dict ? dict->getDescription(getTag()) : "")
 						    << ">" << endl;
 					}
-					delete desc;
-				}
-				else {
-					log << EMsgDC(UnrecognizedBitMap)
-					    << " <" << hex << value << dec
-						<< "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
-					    << " " << MMsgDC(OfAttribute) << " <"
-					    << (dict ? dict->getDescription(getTag()) : "")
-					    << ">" << endl;
 					success=false;
 				}
 			}
@@ -228,10 +389,15 @@ Attribute::verifyBitMap(char *(*method)(Uint16 value),
 		}
 	}
 	else {
-		log << EMsgDC(TriedToVerifyBitMapForNonNumericAttribute) << " "
-		    << MMsgDC(ForAttribute) << " <"
-		    << (dict ? dict->getDescription(getTag()) : "")
-		    << ">" << endl;
+		if (newformat) {
+			log << EMsgDCF(MMsgDC(TriedToVerifyBitMapForNonNumericAttribute),this) << endl;
+		}
+		else {
+			log << EMsgDC(TriedToVerifyBitMapForNonNumericAttribute) << " "
+			    << MMsgDC(ForAttribute) << " <"
+			    << (dict ? dict->getDescription(getTag()) : "")
+			    << ">" << endl;
+		}
 		success=false;
 	}
 //cerr << "Attribute::verifyBitMap: return " << (success ? "T" : "F") << endl;
@@ -241,7 +407,7 @@ Attribute::verifyBitMap(char *(*method)(Uint16 value),
 
 bool
 Attribute::verifyEnumValues(char *(*method)(Uint16 group,Uint16 element),
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
 	int which) const
 {
@@ -266,22 +432,36 @@ Attribute::verifyEnumValues(char *(*method)(Uint16 group,Uint16 element),
 				char *desc=(*method)(group,element);
 				if (desc) {
 					if (verbose) {
-						log << MMsgDC(RecognizedEnumeratedValue)
-						    << " (" << hex << group << "," << element << ") " << dec << MMsgDC(Is) << " <" << desc
-							<< "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
-						    << " " << MMsgDC(OfAttribute) << " <"
-						    << (dict ? dict->getDescription(getTag()) : "")
-						    << ">" << endl;
+						if (newformat) {
+							log << MMsgDCF(MMsgDC(RecognizedEnumeratedValue),this,i+1)
+							    << " = (" << hex << group << "," << element << ") " << dec << MMsgDC(Is) << " <" << desc
+								<< ">" << endl;
+						}
+						else {
+							log << MMsgDC(RecognizedEnumeratedValue)
+							    << " (" << hex << group << "," << element << ") " << dec << MMsgDC(Is) << " <" << desc
+								<< "> " << MMsgDC(ForValue) << " "  << dec << (i+1)
+							    << " " << MMsgDC(OfAttribute) << " <"
+							    << (dict ? dict->getDescription(getTag()) : "")
+							    << ">" << endl;
+						}
 					}
 					delete desc;
 				}
 				else {
-					log << EMsgDC(UnrecognizedEnumeratedValue)
-					    << " (" << hex << group << "," << element << ") " << dec
-						<< MMsgDC(ForValue) << " "  << dec << (i+1)
-					    << " " << MMsgDC(OfAttribute) << " <"
-					    << (dict ? dict->getDescription(getTag()) : "")
-					    << ">" << endl;
+					if (newformat) {
+						log << EMsgDCF(MMsgDC(UnrecognizedEnumeratedValue),this,i+1)
+						    << " = (" << hex << group << "," << element << ") " << dec
+							<< endl;
+					}
+					else {
+						log << EMsgDC(UnrecognizedEnumeratedValue)
+						    << " (" << hex << group << "," << element << ") " << dec
+							<< MMsgDC(ForValue) << " "  << dec << (i+1)
+						    << " " << MMsgDC(OfAttribute) << " <"
+						    << (dict ? dict->getDescription(getTag()) : "")
+						    << ">" << endl;
+					}
 					success=false;
 				}
 			}
@@ -292,10 +472,15 @@ Attribute::verifyEnumValues(char *(*method)(Uint16 group,Uint16 element),
 		}
 	}
 	else {
-		log << EMsgDC(TriedToVerifyEnumeratedValueForNonTagAttribute) << " "
-		    << MMsgDC(ForAttribute) << " <"
-		    << (dict ? dict->getDescription(getTag()) : "")
-		    << ">" << endl;
+		if (newformat) {
+			log << EMsgDCF(MMsgDC(TriedToVerifyEnumeratedValueForNonTagAttribute),this) << endl;
+		}
+		else {
+			log << EMsgDC(TriedToVerifyEnumeratedValueForNonTagAttribute) << " "
+			    << MMsgDC(ForAttribute) << " <"
+			    << (dict ? dict->getDescription(getTag()) : "")
+			    << ">" << endl;
+		}
 		success=false;
 	}
 //cerr << "Attribute::verifyEnumValues: return " << (success ? "T" : "F") << endl;
@@ -304,7 +489,7 @@ Attribute::verifyEnumValues(char *(*method)(Uint16 group,Uint16 element),
 
 bool
 Attribute::verifyNotZero(
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
 	int which,
 	bool warningNotError) const
@@ -326,12 +511,25 @@ Attribute::verifyNotZero(
 			if (getValue(i,value)) {
 //cerr << "Attribute::verifyNotZero: value=" << dec << value << endl;
 				if (value == 0) {
-					log << (warningNotError ? WMsgDC(ZeroValue) : EMsgDC(ZeroValue))
-						<< " " << MMsgDC(ForValue) << " "  << dec << (i+1)
-					    << " " << MMsgDC(OfAttribute) << " <"
-					    << (dict ? dict->getDescription(getTag()) : "")
-					    << ">" << endl;
-					success=false;
+					if (newformat) {
+						if (warningNotError) {
+							log << WMsgDCF(MMsgDC(ZeroValue),this,i+1)
+								<< endl;
+						}
+						else {
+							log << EMsgDCF(MMsgDC(ZeroValue),this,i+1)
+								<< endl;
+							success=false;
+						}
+					}
+					else {
+						log << (warningNotError ? WMsgDC(ZeroValue) : EMsgDC(ZeroValue))
+							<< " " << MMsgDC(ForValue) << " "  << dec << (i+1)
+						    << " " << MMsgDC(OfAttribute) << " <"
+						    << (dict ? dict->getDescription(getTag()) : "")
+						    << ">" << endl;
+						success=false;
+					}
 				}
 			}
 			else {
@@ -341,10 +539,15 @@ Attribute::verifyNotZero(
 		}
 	}
 	else {
-		log << EMsgDC(TriedToVerifyNotZeroForNonNumericAttribute) << " "
-		    << MMsgDC(ForAttribute) << " <"
-		    << (dict ? dict->getDescription(getTag()) : "")
-		    << ">" << endl;
+		if (newformat) {
+			log << EMsgDCF(MMsgDC(TriedToVerifyNotZeroForNonNumericAttribute),this) << endl;
+		}
+		else {
+			log << EMsgDC(TriedToVerifyNotZeroForNonNumericAttribute) << " "
+			    << MMsgDC(ForAttribute) << " <"
+			    << (dict ? dict->getDescription(getTag()) : "")
+			    << ">" << endl;
+		}
 		success=false;
 	}
 //cerr << "Attribute::verifyNotZero: return " << ((warningNotError || success) ? "T" : "F") << endl;
@@ -353,7 +556,7 @@ Attribute::verifyNotZero(
 
 bool
 Attribute::verifyVR(const char *module,const char *element,
-	TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict) const
 {
 	Assert(dict);
@@ -368,10 +571,16 @@ Attribute::verifyVR(const char *module,const char *element,
 	const char *vre=getVR();
 
 	if (!vrd) {
-		log << EMsgDC(NoSuchElementInDictionary) << " ";
-		if (element) log << MMsgDC(Element) << "=<" << element << ">";
-		if (module)  log << MMsgDC(Module)  << "=<" << module  << ">";
-		log << endl;
+		if (newformat) {
+			log << EMsgDCF(MMsgDC(NoSuchElementInDictionary),this);
+			if (module) log << " " << MMsgDC(Module)  << "=<" << module  << ">" << endl;
+		}
+		else {
+			log << EMsgDC(NoSuchElementInDictionary) << " ";
+			if (element) log << MMsgDC(Element) << "=<" << element << ">";
+			if (module)  log << MMsgDC(Module)  << "=<" << module  << ">";
+			log << endl;
+		}
 		return false;
 	}
 	else {
@@ -394,12 +603,21 @@ Attribute::verifyVR(const char *module,const char *element,
 		              || strncmp(vre,"SL",2) == 0)
 		        )
 		    ) {
-			log << EMsgDC(BadValueRepresentation)
-			    << " " << vre << " (" << vrd
-			    << " " << MMsgDC(Required) << ")";
-			if (element) log << " " << MMsgDC(Element) << "=<" << element << ">";
-			if (module)  log << " " << MMsgDC(Module)  << "=<" << module  << ">";
-			log << endl;
+		    if (newformat) {
+				log << EMsgDCF(MMsgDC(BadValueRepresentation),this)
+					<< " " << vre << " (" << vrd
+					<< " " << MMsgDC(Required) << ")";
+				if (module) log << " " << MMsgDC(Module)  << "=<" << module  << ">";
+				log << endl;
+			}
+			else {
+				log << EMsgDC(BadValueRepresentation)
+				    << " " << vre << " (" << vrd
+				    << " " << MMsgDC(Required) << ")";
+				if (element) log << " " << MMsgDC(Element) << "=<" << element << ">";
+				if (module)  log << " " << MMsgDC(Module)  << "=<" << module  << ">";
+				log << endl;
+			}
 			return false;
 		}
 		else {
@@ -410,7 +628,7 @@ Attribute::verifyVR(const char *module,const char *element,
 
 bool
 Attribute::verifyVM(const char *module,const char *element,
-	TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
 	Uint32 multiplicityMin,Uint32 multiplicityMax,const char *specifiedSource) const
 {
@@ -444,16 +662,28 @@ Attribute::verifyVM(const char *module,const char *element,
 		}
 	}
 	if (err) {
-		log << EMsgDC(BadAttributeValueMultiplicity)
-		    <<  " " << dec << vm << " (" << errmin;
-		if (errmin != errmax)
-			if (errmax == VMUNLIMITED)
+		if (newformat) {
+			log << EMsgDCF(MMsgDC(BadAttributeValueMultiplicity),this);
+			log <<  " = <" << dec << vm << ">";
+		}
+		else {
+			log << EMsgDC(BadAttributeValueMultiplicity);
+			log <<  " " << dec << vm;
+		}
+		log << " (" << errmin;
+		if (errmin != errmax) {
+			if (errmax == VMUNLIMITED) {
 				log << "-n";
-			else
+			}
+			else {
 				log << "-" << errmax;
+			}
+		}
 		log << " " << MMsgDC(RequiredBy) << " " << source << ")";
-		if (element) log << " " << MMsgDC(Element) << "=<" << element << ">";
-		if (module)  log << " " << MMsgDC(Module)  << "=<" << module  << ">";
+		if (!newformat) {
+			if (element) log << " " << MMsgDC(Element) << "=<" << element << ">";
+		}
+		if (module) log << " " << MMsgDC(Module)  << "=<" << module  << ">";
 		log << endl;
 		return false;
 	}

@@ -26,7 +26,7 @@ There are no options.
 .SH SEE ALSO
 .BR dcunbzip2(1)
 .SH AUTHOR
-Copyright (c) 1993-2016, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 Previously the first two "BZ" bytes were stripped before encoding;
 this is no longer performed and could result in incompatibility

@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)pbmtoovl.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)pbmtoovl.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <cctype>	// for isdigit()
 #else
@@ -137,6 +137,9 @@ main(int argc,char **argv)
 	// Last whitespace absorbed ... at start of raw data
 
 	long offset=bin.tellg();
+	if (verbose) {
+		cerr << "offset to start of raw data " << offset << endl;
+	}
 
 	if (!bin || cols == -1 || rows == -1) {
 		cerr << EMsgDC(UnrecognizedFormat) << endl;
@@ -196,7 +199,11 @@ main(int argc,char **argv)
 	OtherWordLargeNonPixelAttribute *overlayData=
 		new OtherWordLargeNonPixelAttribute(Tag(0x6000+overlaygroup,OverlayData_ELEMENT),bin,offset);
 	Assert(overlayData);
-	overlayData->read(bin,((cols*rows-1)/16+1)*2);		// Actually just sets VL and skips
+	long l = (((long)cols*rows-1)/16+1)*2;
+	if (verbose) {
+		cerr << "length of raw data " << l << endl;
+	}
+	overlayData->read(bin,l);		// Actually just sets VL and skips
 	list+=overlayData;
 
 	if (!usualManagedAttributeListWrite(list,dout,

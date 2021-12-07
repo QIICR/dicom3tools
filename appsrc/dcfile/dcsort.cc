@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dcsort.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dcsort.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <fstream>
 #else
@@ -573,7 +573,7 @@ checkSameSeries(int numberofinputfiles,struct sortentry *sortedfilenamestable,Di
 		ManagedAttributeList list;
 
 		if (veryverbose) log << "******** While reading ... " << filename << " ... ********" << endl; 
-		list.read(din,&log,veryveryverbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
+		list.read(din,false/*newformat*/,&log,veryveryverbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
 
 		if (!list.good()) {
 			log << list.errors()
@@ -701,7 +701,7 @@ checkSameFrameOfReferenceUID(int numberofinputfiles,struct sortentry *sortedfile
                 ManagedAttributeList list;
 
                 if (veryverbose) log << "******** While reading ... " << filename << " ... ********" << endl;
-                list.read(din,&log,veryveryverbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
+                list.read(din,false/*newformat*/,&log,veryveryverbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
 
                 if (!list.good()) {
                         log << list.errors()
@@ -768,7 +768,7 @@ sortBy(int numberofinputfiles,struct sortentry *&sortedfilenamestable,const char
 		ManagedAttributeList list;
 
 		if (veryverbose) log << "******** While reading ... " << filename << " ... ********" << endl; 
-		list.read(din,&log,veryveryverbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
+		list.read(din,false/*newformat*/,&log,veryveryverbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit);
 
 		if (!list.good()) {
 			log << list.errors()

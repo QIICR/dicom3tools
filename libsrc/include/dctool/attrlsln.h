@@ -1,4 +1,4 @@
-/* attrlsln.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attrlsln.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_attrlsln__
 #define __Header_attrlsln__
 

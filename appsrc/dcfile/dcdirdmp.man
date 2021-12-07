@@ -192,7 +192,7 @@ PATIENT 1634-94-1 1634-94
 .BR dcdump(1) ,
 .BR dcintro(1)
 .SH AUTHOR
-Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 .LP
 MRDR not yet handled properly.

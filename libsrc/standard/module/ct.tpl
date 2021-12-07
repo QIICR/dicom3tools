@@ -21,6 +21,7 @@ Module="EnhancedCTImage"
 	Verify="ImageType"													ValueSelector="1"	StringEnumValues="CommonEnhancedImageAndFrameType2"
 	Verify="ImageType"													ValueSelector="2"	StringDefinedTerms="EnhancedCTImageAndFrameType3"
 	Verify="ImageType"													ValueSelector="3"	StringDefinedTerms="EnhancedCTImageType4"
+	Name="MultienergyCTAcquisition"							Type="3"	StringEnumValues="YesNoFull"
 	InvokeMacro="CommonCTMRImageDescriptionImageLevelMacro"
 	Name="AcquisitionNumber"								Type="3"
 	Name="AcquisitionDateTime"								Type="1C"	Condition="ImageTypeValue1OriginalOrMixedAndNotLegacyConvertedCT" mbpo="true"
@@ -52,7 +53,7 @@ Module="EnhancedCTImage"
 	Name="LossyImageCompression"							Type="1C"	StringEnumValues="LossyImageCompression"	Condition="NotLegacyConvertedCT" mbpo="true"
 	Name="LossyImageCompressionRatio"						Type="1C"	Condition="LossyImageCompressionIs01"	NotZeroError=""
 	Name="LossyImageCompressionMethod"						Type="1C"	StringDefinedTerms="LossyImageCompressionMethod"	Condition="LossyImageCompressionIs01"
-	Verify="LossyImageCompressionMethod"								Condition="LossyImageCompressionMethodInconsistentWithTransferSyntax"	ThenWarningMessage="method inconsistent with transfer syntax" ShowValueWithMessage="true"
+	Verify="LossyImageCompressionMethod"								Condition="LossyImageCompressionMethodInconsistentWithTransferSyntax"	ThenWarningMessage="method inconsistent with Transfer Syntax" ShowValueWithMessage="true"
 	Name="PresentationLUTShape"								Type="1"	StringEnumValues="IdentityPresentationLUTShape"
 	Sequence="IconImageSequence"							Type="3"	VM="1"
 		InvokeMacro="IconImageSequenceMacro"
@@ -83,7 +84,8 @@ DefineMacro="CTAcquisitionTypeMacro" InformationEntity="FunctionalGroup"
 MacroEnd
 
 DefineMacro="CTAcquisitionDetailsMacro" InformationEntity="FunctionalGroup"
-	Sequence="CTAcquisitionDetailsSequence"			Type="1"	VM="1"
+	Sequence="CTAcquisitionDetailsSequence"			Type="1"	VM="1-n"
+		Name="ReferencedPathIndex"					Type="1C"	Condition="IsMultienergyCTAcquisition"
 		Name="RotationDirection"					Type="1C"	StringEnumValues="RotationDirection"		NoCondition=""		# :( cannot check since in sibling functional groups: Frame Type Value 1 of this frame is ORIGINAL and AcquisitionType not CONSTANT_ANGLE; mbpo only if DERIVED and same AcquisitionType
 		Name="RevolutionTime"						Type="1C"	NoCondition=""	NotZeroWarning=""								# :( cannot check since in sibling functional groups: Frame Type Value 1 of this frame is ORIGINAL and AcquisitionType not CONSTANT_ANGLE; mbpo only if DERIVED and same AcquisitionType
 		Name="SingleCollimationWidth"				Type="1C"	Condition="Always"	NotZeroWarning=""		# ORIGINAL mbpo
@@ -92,6 +94,7 @@ DefineMacro="CTAcquisitionDetailsMacro" InformationEntity="FunctionalGroup"
 		Name="GantryDetectorTilt"					Type="1C"	Condition="Always"							# ORIGINAL mbpo
 		Name="DataCollectionDiameter"				Type="1C"	Condition="Always"	NotZeroWarning=""		# ORIGINAL mbpo
 	SequenceEnd
+	Verify="CTAcquisitionDetailsSequence"						Condition="CTAcquisitionDetailsSequenceNotOneItemAndNotMultienergyAcquisition"	ThenErrorMessage="Only a single Item is permitted if not a multi-energy acquisition"
 MacroEnd
 
 DefineMacro="CTTableDynamicsMacro" InformationEntity="FunctionalGroup"
@@ -111,10 +114,12 @@ DefineMacro="CTPositionMacro" InformationEntity="FunctionalGroup"
 MacroEnd
 
 DefineMacro="CTGeometryMacro" InformationEntity="FunctionalGroup"
-	Sequence="CTGeometrySequence"					Type="1"	VM="1"
+	Sequence="CTGeometrySequence"					Type="1"	VM="1-n"
+		Name="ReferencedPathIndex"					Type="1C"	Condition="IsMultienergyCTAcquisition"
 		Name="DistanceSourceToDetector"				Type="1C"	Condition="Always"	NotZeroWarning=""							# ORIGINAL mbpo
 		Name="DistanceSourceToDataCollectionCenter"	Type="1C"	Condition="Always"	NotZeroWarning=""							# ORIGINAL mbpo
 	SequenceEnd
+	Verify="CTGeometrySequence"						Condition="CTGeometrySequenceNotOneItemAndNotMultienergyAcquisition"	ThenErrorMessage="Only a single Item is permitted if not a multi-energy acquisition"
 MacroEnd
 
 DefineMacro="CTReconstructionMacro" InformationEntity="FunctionalGroup"
@@ -131,21 +136,28 @@ DefineMacro="CTReconstructionMacro" InformationEntity="FunctionalGroup"
 MacroEnd
 
 DefineMacro="CTExposureMacro" InformationEntity="FunctionalGroup"
-	Sequence="CTExposureSequence"				Type="1"	VM="1"
-		Name="ExposureTimeInms"					Type="1C"	Condition="Always"	NotZeroWarning=""							# ORIGINAL mbpo
+	Sequence="CTExposureSequence"				Type="1"	VM="1-n"
+		Name="ReferencedXRaySourceIndex"		Type="1C"	Condition="IsMultienergyCTAcquisition"
+		Name="ExposureTimeInms"					Type="1C"	Condition="Always"	NotZeroWarning=""							# ORIGINAL frame (or image if multi-energy) )mbpo
 		Name="XRayTubeCurrentInmA"				Type="1C"	Condition="Always"	NotZeroWarning=""							# ORIGINAL mbpo
 		Name="ExposureInmAs"					Type="1C"	Condition="Always"	NotZeroWarning=""							# ORIGINAL mbpo
 		Name="ExposureModulationType"			Type="1C"	StringDefinedTerms ="CTExposureModulationType"	Condition="Always"	# ORIGINAL mbpo
-		Name="EstimatedDoseSaving"				Type="2C"	Condition="ExposureModulationTypeIsNotNone"	NotZeroWarning=""				# ORIGINAL mbpo
 		Name="CTDIvol"							Type="2C"	NoCondition=""	NotZeroWarning=""
+		Verify="CTDIvol"									Condition="CTDIvolIsPresentButCTDIPhantomTypeCodeSequenceIsNot"   ThenWarningMessage="CTDIvol is present but it is uninterpretable without CTDIPhantomTypeCodeSequence, which is absent"
 		Sequence="CTDIPhantomTypeCodeSequence"	Type="3"	VM="1"
 			InvokeMacro="CodeSequenceMacro"					DefinedContextID="4052"
 		SequenceEnd
+		Name="WaterEquivalentDiameter"			Type="3"	NotZeroWarning=""
+		Sequence="WaterEquivalentDiameterCalculationMethodCodeSequence"	Type="1C"	VM="1"	Condition="WaterEquivalentDiameterIsPresent"
+			InvokeMacro="CodeSequenceMacro"					DefinedContextID="10024"
+		SequenceEnd
+		Name="ImageAndFluoroscopyAreaDoseProduct"	Type="3"	NotZeroWarning=""
 	SequenceEnd
+	Verify="CTExposureSequence"						Condition="CTExposureSequenceNotOneItemAndNotMultienergyAcquisition"	ThenErrorMessage="Only a single Item is permitted if not a multi-energy acquisition"
 MacroEnd
 
 DefineMacro="CTXRayDetailsMacro" InformationEntity="FunctionalGroup"
-	Sequence="CTXRayDetailsSequence"			Type="1"	VM="1"
+	Sequence="CTXRayDetailsSequence"			Type="1"	VM="1-n"
 		Name="KVP"								Type="1C"	Condition="Always"	NotZeroWarning=""							# ORIGINAL mbpo
 		Name="FocalSpots"						Type="1C"	Condition="Always"							# ORIGINAL mbpo
 		Name="FilterType"						Type="1C"	StringDefinedTerms ="CTFilterType"	Condition="Always"	# ORIGINAL mbpo
@@ -154,6 +166,7 @@ DefineMacro="CTXRayDetailsMacro" InformationEntity="FunctionalGroup"
 		Name="CalciumScoringMassFactorDevice"	Type="3"	NotZeroWarning=""
 		Name="EnergyWeightingFactor"			Type="1C"	NotZeroWarning=""	NoCondition="" mbpo="true"	# FrameTypeValue4IsEnergyProportionalWeighting ... too hard :(
 	SequenceEnd
+	Verify="CTXRayDetailsSequence"						Condition="CTXRayDetailsSequenceNotOneItemAndNotMultienergyAcquisition"	ThenErrorMessage="Only a single Item is permitted if not a multi-energy acquisition"
 MacroEnd
 
 DefineMacro="CTPixelValueTransformationMacro" InformationEntity="FunctionalGroup"
@@ -178,12 +191,12 @@ DefineMacro="CTAdditionalXRaySourceMacro" InformationEntity="FunctionalGroup"
 MacroEnd
 
 DefineMacro="UnassignedSharedConvertedAttributesMacro" InformationEntity="FunctionalGroup"
-	Sequence="UnassignedSharedConvertedAttributesSequence"		Type="2"	VM="1"
+	Sequence="UnassignedSharedConvertedAttributesSequence"		Type="1C"	VM="1"	NoCondition=""
 	SequenceEnd
 MacroEnd
 
 DefineMacro="UnassignedPerFrameConvertedAttributesMacro" InformationEntity="FunctionalGroup"
-	Sequence="UnassignedPerFrameConvertedAttributesSequence"	Type="2"	VM="1"
+	Sequence="UnassignedPerFrameConvertedAttributesSequence"	Type="2"	VM="1"	NoCondition=""
 	SequenceEnd
 MacroEnd
 
@@ -203,7 +216,7 @@ Module="MultiFrameFunctionalGroupsForEnhancedCTImage"
 		InvokeMacro="CardiacSynchronizationMacro"		Condition="NeedCardiacSynchronizationMacroInSharedFunctionalGroupSequence"
 		InvokeMacro="FrameAnatomyMacro"			Condition="FrameAnatomySequenceNotInPerFrameFunctionalGroupSequence"
 		InvokeMacro="CTFrameVOILUTMacro"		Condition="FrameVOILUTMacroOKInSharedFunctionalGroupSequence"
-		InvokeMacro="RealWorldValueMappingMacro"	Condition="RealWorldValueMappingMacroOKInSharedFunctionalGroupSequence"
+		InvokeMacro="RealWorldValueMappingMacro"	Condition="NeedRealWorldValueMappingMacroInSharedFunctionalGroupSequenceIfMultienergy"
 		InvokeMacro="ContrastBolusUsageMacro"		Condition="NeedContrastBolusUsageMacroInSharedFunctionalGroupSequence"
 		InvokeMacro="RespiratorySynchronizationMacro"		Condition="NeedRespiratorySynchronizationMacroInSharedFunctionalGroupSequence"
 		InvokeMacro="IrradiationEventIdentificationMacro"		Condition="IrradiationEventIdentificationSequenceNotInPerFrameFunctionalGroupSequence"
@@ -218,6 +231,9 @@ Module="MultiFrameFunctionalGroupsForEnhancedCTImage"
 		InvokeMacro="CTXRayDetailsMacro"		Condition="NeedCTXRayDetailsMacroInSharedFunctionalGroupSequence"
 		InvokeMacro="CTPixelValueTransformationMacro"	Condition="PixelValueTransformationSequenceNotInPerFrameFunctionalGroupSequence"
 		InvokeMacro="CTAdditionalXRaySourceMacro"		Condition="CTAdditionalXRaySourceMacroInSharedFunctionalGroupSequence"
+		InvokeMacro="MultienergyCTProcessingMacro"		Condition="MultienergyCTProcessingMacroInSharedFunctionalGroupSequence"
+		InvokeMacro="MultienergyCTCharacteristicsMacro"		Condition="MultienergyCTCharacteristicsMacroInSharedFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"			Condition="TemporalPositionMacroOKInSharedFunctionalGroupSequence"
 	SequenceEnd
 
 	Sequence="PerFrameFunctionalGroupsSequence"	Type="1"	VM="1-n"
@@ -230,7 +246,7 @@ Module="MultiFrameFunctionalGroupsForEnhancedCTImage"
 		InvokeMacro="CardiacSynchronizationMacro"		Condition="NeedCardiacSynchronizationMacroInPerFrameFunctionalGroupSequence"
 		InvokeMacro="FrameAnatomyMacro"			Condition="FrameAnatomySequenceNotInSharedFunctionalGroupSequence"
 		InvokeMacro="CTFrameVOILUTMacro"		Condition="FrameVOILUTMacroOKInPerFrameFunctionalGroupSequence"
-		InvokeMacro="RealWorldValueMappingMacro"	Condition="RealWorldValueMappingMacroOKInPerFrameFunctionalGroupSequence"
+		InvokeMacro="RealWorldValueMappingMacro"	Condition="NeedRealWorldValueMappingMacroInPerFrameFunctionalGroupSequenceIfMultienergy"
 		InvokeMacro="ContrastBolusUsageMacro"		Condition="NeedContrastBolusUsageMacroInPerFrameFunctionalGroupSequence"
 		InvokeMacro="RespiratorySynchronizationMacro"		Condition="NeedRespiratorySynchronizationMacroInPerFrameFunctionalGroupSequence"
 		InvokeMacro="IrradiationEventIdentificationMacro"		Condition="IrradiationEventIdentificationSequenceNotInSharedFunctionalGroupSequence"
@@ -245,6 +261,9 @@ Module="MultiFrameFunctionalGroupsForEnhancedCTImage"
 		InvokeMacro="CTXRayDetailsMacro"		Condition="NeedCTXRayDetailsMacroInPerFrameFunctionalGroupSequence"
 		InvokeMacro="CTPixelValueTransformationMacro"	Condition="PixelValueTransformationSequenceNotInSharedFunctionalGroupSequence"
 		InvokeMacro="CTAdditionalXRaySourceMacro"		Condition="CTAdditionalXRaySourceMacroInPerFrameFunctionalGroupSequence"
+		InvokeMacro="MultienergyCTProcessingMacro"		Condition="MultienergyCTProcessingMacroInPerFrameFunctionalGroupSequence"
+		InvokeMacro="MultienergyCTCharacteristicsMacro"		Condition="MultienergyCTCharacteristicsMacroInPerFrameFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"			Condition="TemporalPositionMacroOKInPerFrameFunctionalGroupSequence"
 	SequenceEnd
 ModuleEnd
 
@@ -263,6 +282,7 @@ Module="MultiFrameFunctionalGroupsForLegacyConvertedEnhancedCTImage"
 		InvokeMacro="IrradiationEventIdentificationMacro"	Condition="IrradiationEventIdentificationMacroOKInSharedFunctionalGroupSequence"
 		InvokeMacro="CTImageFrameTypeMacro"					Condition="CTImageFrameTypeSequenceNotInPerFrameFunctionalGroupSequence"
 		InvokeMacro="CTPixelValueTransformationMacro"		Condition="PixelValueTransformationSequenceOKInSharedFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"					Condition="TemporalPositionMacroOKInSharedFunctionalGroupSequence"
 		InvokeMacro="UnassignedSharedConvertedAttributesMacro"
 	SequenceEnd
 
@@ -281,8 +301,9 @@ Module="MultiFrameFunctionalGroupsForLegacyConvertedEnhancedCTImage"
 		InvokeMacro="IrradiationEventIdentificationMacro"	Condition="IrradiationEventIdentificationMacroOKInPerFrameFunctionalGroupSequence"
 		InvokeMacro="CTImageFrameTypeMacro"					Condition="CTImageFrameTypeSequenceNotInSharedFunctionalGroupSequence"
 		InvokeMacro="CTPixelValueTransformationMacro"		Condition="PixelValueTransformationSequenceOKInPerFrameFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"					Condition="TemporalPositionMacroOKInPerFrameFunctionalGroupSequence"
 		InvokeMacro="UnassignedPerFrameConvertedAttributesMacro"
-		InvokeMacro="ImageFrameConversionSourceMacro"
+		InvokeMacro="ImageFrameConversionSourceMacro"		Condition="ImageFrameConversionSourceMacroPresentInPerFrameFunctionalGroupSequence"
 	SequenceEnd
 ModuleEnd
 
@@ -326,3 +347,88 @@ Module="MultiFrameFunctionalGroupsForPrivatePixelMedLegacyConvertedEnhancedCTIma
 	SequenceEnd
 ModuleEnd
 
+Module="MultienergyCTImage"
+	Sequence="MultienergyCTAcquisitionSequence"				Type="1"	VM="1"
+		Name="MultienergyAcquisitionDescription"			Type="3"
+		InvokeMacro="MultienergyCTXRaySourceMacro"
+		InvokeMacro="MultienergyCTXRayDetectorMacro"
+		InvokeMacro="MultienergyCTPathMacro"
+		InvokeMacro="CTExposureMacro"
+		InvokeMacro="CTXRayDetailsMacro"
+		InvokeMacro="CTAcquisitionDetailsMacro"
+		InvokeMacro="CTGeometryMacro"
+	SequenceEnd
+	InvokeMacro="MultienergyCTProcessingMacro"
+	InvokeMacro="MultienergyCTCharacteristicsMacro"
+ModuleEnd
+
+DefineMacro="MultienergyCTXRaySourceMacro"
+	Sequence="MultienergyCTXRaySourceSequence"				Type="1"	VM="1-n"
+		Name="XRaySourceIndex"								Type="1"
+		Name="XRaySourceID"									Type="1"
+		Name="MultienergySourceTechnique"					Type="1"	StringDefinedTerms ="MultienergySourceTechnique"
+		Name="SourceStartDateTime"							Type="1"
+		Name="SourceEndDateTime"							Type="1"
+		Name="SwitchingPhaseNumber"							Type="1C"	Condition="MultienergySourceTechniqueIsSWITCHING_SOURCE"
+		Name="SwitchingPhaseNominalDuration"				Type="3"
+		Name="SwitchingPhaseTransitionDuration"				Type="3"
+		Name="GeneratorPower"								Type="3"
+	SequenceEnd
+MacroEnd
+
+DefineMacro="MultienergyCTXRayDetectorMacro"
+	Sequence="MultienergyCTXRayDetectorSequence"			Type="1"	VM="1-n"
+		Name="XRayDetectorIndex"							Type="1"
+		Name="XRayDetectorID"								Type="1"
+		Name="MultienergyDetectorType"						Type="1"	StringDefinedTerms ="MultienergyDetectorType"
+		Name="XRayDetectorLabel"							Type="3"
+		Name="NominalMaxEnergy"								Type="1C"	Condition="MultienergyDetectorTypeIsPHOTON_COUNTING"
+		Name="NominalMinEnergy"								Type="1C"	Condition="MultienergyDetectorTypeIsPHOTON_COUNTING"
+		Name="EffectiveBinEnergy"							Type="3"
+	SequenceEnd
+MacroEnd
+
+DefineMacro="MultienergyCTPathMacro"
+	Sequence="MultienergyCTPathSequence"					Type="1"	VM="2-n"
+		Name="MultienergyCTPathIndex"						Type="1"
+		Name="ReferencedXRaySourceIndex"					Type="1"
+		Name="ReferencedXRayDetectorIndex"					Type="1"
+	SequenceEnd
+MacroEnd
+
+DefineMacro="MultienergyCTCharacteristicsMacro"
+	Sequence="MultienergyCTCharacteristicsSequence"				Type="1C"	VM="1"	Condition="ImageTypeValue4IsVMI"	mbpo="true"
+		Name="MonoenergeticEnergyEquivalent"					Type="1C"			Condition="ImageTypeValue4IsVMI"	mbpo="true"
+		Sequence="DerivationAlgorithmSequence"					Type="3"	VM="1-n"
+			InvokeMacro="AlgorithmIdentificationMacro"
+		SequenceEnd
+		Sequence="PerformedProcessingParametersSequence"		Type="3"	VM="1-n"
+			InvokeMacro="ContentItemWithModifiersMacro"
+		SequenceEnd
+	SequenceEnd
+MacroEnd
+
+DefineMacro="MultienergyCTProcessingMacro"
+	Sequence="MultienergyCTProcessingSequence"					Type="3"	VM="1"
+		Name="DecompositionMethod"								Type="1"	StringDefinedTerms="DecompositionMethod"
+		Name="DecompositionDescription"							Type="3"
+		Sequence="DecompositionAlgorithmIdentificationSequence"	Type="3"	VM="1-n"
+			InvokeMacro="AlgorithmIdentificationMacro"
+		SequenceEnd
+		Sequence="DecompositionMaterialSequence"				Type="3"	VM="1"
+			Sequence="MaterialCodeSequence"						Type="1"	VM="1"
+				InvokeMacro="CodeSequenceMacro"
+			SequenceEnd
+			Sequence="MaterialAttenuationSequence"				Type="3"	VM="2-n"
+				Name="PhotonEnergy"								Type="1"
+				Name="XRayMassAttenuationCoefficient"			Type="1"
+			SequenceEnd
+		SequenceEnd
+	SequenceEnd
+MacroEnd
+
+Module="EnhancedMultienergyCTAcquisition"
+	InvokeMacro="MultienergyCTXRaySourceMacro"
+	InvokeMacro="MultienergyCTXRayDetectorMacro"
+	InvokeMacro="MultienergyCTPathMacro"
+ModuleEnd

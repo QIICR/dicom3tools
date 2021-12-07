@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dcsub.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dcsub.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attrmxls.h"
 #include "attrtype.h"
 #include "attrothr.h"
@@ -221,7 +221,7 @@ main(int argc, char *argv[])
 	bool success=true;
 	TextOutputStream  log(cerr);
 	if (verbose) log << "******** While reading file 1 ... ********" << endl; 
-	list1.read(din1,&log,verbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags);
+	list1.read(din1,false/*newformat*/,&log,verbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags);
 
 	if (!list1.good()) {
 		if (!ignorereaderrors) {
@@ -231,7 +231,7 @@ main(int argc, char *argv[])
 		log << EMsgDC(DatasetReadFailed) << endl;
 	}
 	if (verbose) log << "******** While reading file 2 ... ********" << endl; 
-	list2.read(din2,&log,verbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags);
+	list2.read(din2,false/*newformat*/,&log,verbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags);
 
 	if (!list2.good()) {
 		if (!ignorereaderrors) {

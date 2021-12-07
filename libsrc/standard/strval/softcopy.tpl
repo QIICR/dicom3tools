@@ -236,4 +236,67 @@ StringValues="ColorSpace"	{
 	ROMMRGB
 }
 
+StringValues="CompoundGraphicUnits"	{
+	PIXEL,
+	DISPLAY
+}
+
+StringValues="CompoundGraphicType"	{
+	MULTILINE,
+	INFINITELINE,
+	CUTLINE,
+	RANGELINE,
+	RULER,
+	AXIS,
+	CROSSHAIR,
+	ARROW,
+	RECTANGLE,
+	ELLIPSE
+}
+
+StringValues="TickAlignment" {
+	BOTTOM,
+	CENTER,
+	TOP
+}
+
+StringValues="TickLabelAlignment" {
+	BOTTOM,
+	TOP
+}
+
+StringValues="FontNameType" {
+	BOTTOM,
+	TOP
+}
+
+StringValues="HorizontalAlignment" {
+	LEFT,
+	CENTER,
+	RIGHT
+}
+
+StringValues="VerticalAlignment" {
+	TOP,
+	CENTER,
+	BOTTOM
+}
+
+StringValues="ShadowStyle" {
+	NORMAL,
+	OUTLINED,
+	OFF
+}
+
+StringValues="LineDashingStyle" {
+	SOLID,
+	DASHED
+}
+
+StringValues="FillMode" {
+	SOLID,
+	STIPPELED
+}
+
+
 

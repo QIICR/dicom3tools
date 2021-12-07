@@ -76,6 +76,9 @@ DefineMacro="IdentifiedPersonOrDeviceMacro"
 		InvokeMacro="CodeSequenceMacro"
 	SequenceEnd
 	Name="InstitutionalDepartmentName"						Type="3"
+	Sequence="InstitutionalDepartmentTypeCodeSequence"		Type="3"	VM="1"
+		InvokeMacro="CodeSequenceMacro"									BaselineContextID="7030"
+	SequenceEnd
 MacroEnd
 
 DefineMacro="NumericMeasurementMacro"
@@ -109,10 +112,10 @@ DefineMacro="ImageReferenceMacro"
 	Sequence="ReferencedSOPSequence"								Type="1"	VM="1"
 		InvokeMacro="SOPInstanceReferenceMacro"
 		Name="ReferencedFrameNumber"								Type="1C"	NoCondition=""	NotZeroError=""	# cannot just check SOP Class and mbpo false, since may be absent for multi-frame if applies to all frames (including multi-frame SOP Class with only 1 frame) :(
-		Verify="ReferencedFrameNumber"											Condition="ReferencedFrameNumberPresentAndReferencedSOPClassUIDIsNotMultiFrame"	ThenErrorMessage="May not be present for Referenced SOP Class that is not multi-frame"
+		Verify="ReferencedFrameNumber"											Condition="ReferencedFrameNumberPresentAndReferencedSOPClassUIDIsNotMultiFrame"	ThenErrorMessage="Shall not be present for Referenced SOP Class that is not multi-frame"
 		Name="ReferencedSegmentNumber"								Type="1C"	NoCondition=""	NotZeroError=""	# cannot just check SOP Class and mbpo false, since may be absent for segmentation if applies to all segments :(
-		Verify="ReferencedSegmentNumber"										Condition="ReferencedSegmentNumberPresentAndReferencedSOPClassUIDIsNotSegmentationOrSurfaceSegmentation"	ThenErrorMessage="May not be present for Referenced SOP Class that is not segmentation"
-		Verify="ReferencedSegmentNumber"										Condition="ReferencedFrameNumberAndReferencedSegmentNumberPresent"	ThenErrorMessage="May not be present when ReferencedFrameNumber is present"
+		Verify="ReferencedSegmentNumber"										Condition="ReferencedSegmentNumberPresentAndReferencedSOPClassUIDIsNotSegmentationOrSurfaceSegmentation"	ThenErrorMessage="Shall not be present for Referenced SOP Class that is not segmentation"
+		Verify="ReferencedSegmentNumber"										Condition="ReferencedFrameNumberAndReferencedSegmentNumberPresent"	ThenErrorMessage="Shall not be present when ReferencedFrameNumber is present"
 		Sequence="ReferencedSOPSequence"							Type="3"	VM="1"	# presentation states
 			InvokeMacro="SOPInstanceReferenceMacro"
 		SequenceEnd
@@ -253,6 +256,9 @@ Module="SRDocumentGeneral"
 		Name="InstitutionName"										Type="2"
 		Sequence="InstitutionCodeSequence"							Type="2"	VM="0-1"
 			InvokeMacro="CodeSequenceMacro"
+		SequenceEnd
+		Sequence="ResponsibleGroupCodeSequence"						Type="3"	VM="1"
+			InvokeMacro="CodeSequenceMacro"										BaselineContextID="7030"
 		SequenceEnd
 	SequenceEnd
 	Sequence="PredecessorDocumentsSequence"							Type="1C"	VM="1-n"	NoCondition=""	# real world

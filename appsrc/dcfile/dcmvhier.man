@@ -38,7 +38,7 @@ and characters).
 .LP
 \ 
 .SH AUTHOR
-Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 No effort is made to check that other patient/study/series level attributes (such
 as UIDs) are the same values within all images of the created patient/study/series

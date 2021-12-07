@@ -1,4 +1,4 @@
-/* txstream.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* txstream.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_txstream__
 #define __Header_txstream__
 
@@ -27,8 +27,9 @@ public:
 		}
 };
 
-ostream& writeZeroPaddedNumber(ostream& o,Uint32 value,ios::fmtflags basetouse,int size);
+ostream& writeZeroPaddedNumber(ostream& o,Uint32 value,ios::fmtflags basetouse,int size,bool actuallyshowbase=true);
 ostream& writeZeroPaddedHexNumber(ostream& o,Uint32 value,int size);
+ostream& writeZeroPaddedHexNumberWithoutShowBase(ostream& o,Uint32 value,int size);
 
 #endif /* __Header_txstream__ */
 

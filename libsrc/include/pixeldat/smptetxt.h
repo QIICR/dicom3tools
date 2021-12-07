@@ -1,4 +1,4 @@
-/* smptetxt.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* smptetxt.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 static const unsigned short smpte_string_0percent_width = 14;
 static const unsigned short smpte_string_0percent_height = 9;
 static const unsigned char smpte_string_0percent_bits[] = {

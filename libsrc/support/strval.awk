@@ -1,4 +1,4 @@
-#  strval.awk Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  strval.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 # create C++ headers from string values template 
 
 # can set these values on the command line:

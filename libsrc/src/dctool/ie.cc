@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)ie.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)ie.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "basetype.h"
 #include "ie.h"
 
@@ -26,7 +26,15 @@ getInformationEntityFromDescription(const char *d) {
 		else if (strcmp(d,"StructureSet") == 0)				ie = StructureSetIE;
 		else if (strcmp(d,"Study") == 0)					ie = StudyIE;
 		else if (strcmp(d,"TreatmentRecord") == 0)			ie = TreatmentRecordIE;
-		else if (strcmp(d,"Waveform") == 0)					ie = WaveformIE;
+		else if (strcmp(d,"Overlay") == 0)					ie = OverlayIE;
+		else if (strcmp(d,"Curve") == 0)					ie = CurveIE;
+		else if (strcmp(d,"ModalityLUT") == 0)				ie = ModalityLUTIE;
+		else if (strcmp(d,"VOILUT") == 0)					ie = VOILUTIE;
+		else if (strcmp(d,"ColorPalette") == 0)				ie = ColorPaletteIE;
+		else if (strcmp(d,"Surface") == 0)					ie = SurfaceIE;
+		else if (strcmp(d,"TractographyResults") == 0)		ie = TractographyResultsIE;
+		else if (strcmp(d,"Annotation") == 0)				ie = AnnotationIE;
+
 	}
 	return ie;
 }
@@ -54,8 +62,50 @@ describeInformationEntity(InformationEntity ie) {
 	else if (ie == StructureSetIE)			d = "StructureSet";
 	else if (ie == StudyIE)					d = "Study";
 	else if (ie == TreatmentRecordIE)		d = "TreatmentRecord";
-	else if (ie == WaveformIE)				d = "Waveform";
+	else if (ie == OverlayIE)				d = "Overlay";
+	else if (ie == CurveIE)					d = "Curve";
+	else if (ie == ModalityLUTIE)			d = "ModalityLUT";
+	else if (ie == VOILUTIE)				d = "VOILUT";
+	else if (ie == ColorPaletteIE)			d = "ColorPalette";
+	else if (ie == SurfaceIE)				d = "Surface";
+	else if (ie == TractographyResultsIE)	d = "TractographyResults";
+	else if (ie == AnnotationIE)			d = "Annotation";
+
 	return d;
+}
+
+int getDepthOfInformationEntity(InformationEntity ie) {
+	int depth = 999;
+	if      (ie == DirectoryIE)				depth = 1;
+	else if (ie == DocumentIE)				depth = 7;
+	else if (ie == EncapsulatedDocumentIE)	depth = 7;
+	else if (ie == EquipmentIE)				depth = 5;
+	else if (ie == FileIE)					depth = 1;
+	else if (ie == FrameOfReferenceIE)		depth = 6;
+	else if (ie == HangingProtocolIE)		depth = 7;
+	else if (ie == ImageIE)					depth = 7;
+	else if (ie == MRSpectroscopyIE)		depth = 7;
+	else if (ie == PatientIE)				depth = 2;
+	else if (ie == PlanIE)					depth = 7;
+	else if (ie == PresentationIE)			depth = 7;
+	else if (ie == RawDataIE)				depth = 7;
+	else if (ie == RealWorldValueMappingIE)	depth = 7;
+	else if (ie == SeriesIE)				depth = 4;
+	else if (ie == SpatialFiducialsIE)		depth = 7;
+	else if (ie == SpatialRegistrationIE)	depth = 7;
+	else if (ie == StructureSetIE)			depth = 7;
+	else if (ie == StudyIE)					depth = 3;
+	else if (ie == TreatmentRecordIE)		depth = 7;
+	else if (ie == OverlayIE)				depth = 7;
+	else if (ie == CurveIE)					depth = 7;
+	else if (ie == ModalityLUTIE)			depth = 7;
+	else if (ie == VOILUTIE)				depth = 7;
+	else if (ie == ColorPaletteIE)			depth = 7;
+	else if (ie == SurfaceIE)				depth = 7;
+	else if (ie == TractographyResultsIE)	depth = 7;
+	else if (ie == AnnotationIE)			depth = 7;
+
+	return depth;
 }
 
 

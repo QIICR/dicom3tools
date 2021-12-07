@@ -1,4 +1,4 @@
-#  elmtojava_DicomDictionary_CreateIEByTag.awk Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  elmtojava_DicomDictionary_CreateIEByTag.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 NR==1	{
 	if (role != "java" && role != "csv") {
 		print "Error - role " role " invalid" >"/dev/tty"

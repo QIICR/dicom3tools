@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dciodvfy.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dciodvfy.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attrmxls.h"
 #include "mesgtext.h"
 #include "dcopt.h"
@@ -12,7 +12,8 @@ static const char *CopyrightIdentifier(void) { return "@(#)dciodvfy.cc Copyright
 // Similar to TextOutputStream& Tag::write(TextOutputStream& stream,ElementDictionary *dict) in libsrc/src/dctool/attrtag.cc
 // but without the VR
 
-static void writeTagNumberAndNameToLog(Tag tag,ElementDictionary *dict,TextOutputStream &log) {
+static void
+writeTagNumberAndNameToLog(Tag tag,ElementDictionary *dict,TextOutputStream &log) {
 	log << "(";
 	writeZeroPaddedHexNumber(log,tag.getGroup(),4);
 	log << ",";
@@ -27,15 +28,41 @@ static void writeTagNumberAndNameToLog(Tag tag,ElementDictionary *dict,TextOutpu
 	}
 }
 
-static void writeTagNumberAndNameToLog(Attribute *a,ElementDictionary *dict,TextOutputStream &log) {
+static void
+writeTagNumberAndNameToLog(Attribute *a,ElementDictionary *dict,TextOutputStream &log) {
 	writeTagNumberAndNameToLog(a->getTag(),dict,log);
+}
+
+static void
+writeFullPathInInstanceToCurrentAttributeToLog(Attribute *a,ElementDictionary *dict,TextOutputStream &log) {
+	log << a->buildFullPathInInstanceToCurrentAttribute(dict);
+}
+
+const char*
+EMsgDCF(const char *index,const Attribute *a) {
+	return Attribute::EMsgDCF(index,a);
+}
+
+const char*
+EMsgDCF(const char *index,const Attribute *a,int valuenumber) {
+	return Attribute::EMsgDCF(index,a,valuenumber);
+}
+
+const char*
+WMsgDCF(const char *index,const Attribute *a) {
+	return Attribute::WMsgDCF(index,a);
+}
+
+const char*
+WMsgDCF(const char *index,const Attribute *a,int valuenumber) {
+	return Attribute::WMsgDCF(index,a,valuenumber);
 }
 
 // loopOverListsInSequencesWithLog is copied from libsrc/src/dctool/attrmxls.cc
 
 static bool
-loopOverListsInSequencesWithLog(Attribute *a,TextOutputStream &log,
-		bool (*func)(AttributeList &,TextOutputStream &))
+loopOverListsInSequencesWithLog(Attribute *a,bool verbose,bool newformat,TextOutputStream &log,
+		bool (*func)(AttributeList &,bool,bool,TextOutputStream &))
 {
 	bool succeeded=true;
 	if (strcmp(a->getVR(),"SQ") == 0) {
@@ -44,7 +71,7 @@ loopOverListsInSequencesWithLog(Attribute *a,TextOutputStream &log,
 		if ((n=a->getLists(&al)) > 0) {
 			int i;
 			for (i=0; i<n; ++i) {
-				if (!(*func)(*al[i],log)) succeeded=false;
+				if (!(*func)(*al[i],verbose,newformat,log)) succeeded=false;
 			}
 			delete [] al;
 		}
@@ -53,8 +80,8 @@ loopOverListsInSequencesWithLog(Attribute *a,TextOutputStream &log,
 }
 
 static bool
-loopOverListsInSequencesWithRootListAndLog(AttributeList &rootlist,Attribute *a,TextOutputStream &log,
-		bool (*func)(AttributeList &,AttributeList &,TextOutputStream &))
+loopOverListsInSequencesWithRootListAndLog(AttributeList &rootlist,Attribute *a,bool verbose,bool newformat,TextOutputStream &log,
+		bool (*func)(AttributeList &,AttributeList &,bool,bool,TextOutputStream &))
 {
 	bool succeeded=true;
 	if (strcmp(a->getVR(),"SQ") == 0) {
@@ -63,7 +90,7 @@ loopOverListsInSequencesWithRootListAndLog(AttributeList &rootlist,Attribute *a,
 		if ((n=a->getLists(&al)) > 0) {
 			int i;
 			for (i=0; i<n; ++i) {
-				if (!(*func)(rootlist,*al[i],log)) succeeded=false;
+				if (!(*func)(rootlist,*al[i],verbose,newformat,log)) succeeded=false;
 			}
 			delete [] al;
 		}
@@ -71,7 +98,7 @@ loopOverListsInSequencesWithRootListAndLog(AttributeList &rootlist,Attribute *a,
 	return succeeded;
 }
 
-static bool checkScaledNumericValues(Tag coarseTag,const char *coarseName,Tag fineTag,const char *fineName,double scaleFactor,AttributeList &list,TextOutputStream &log) {
+static bool checkScaledNumericValues(Tag coarseTag,const char *coarseName,Tag fineTag,const char *fineName,double scaleFactor,AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 	bool success=true;
 	Attribute *aCoarse=list[coarseTag];
 	Attribute *aFine=list[fineTag];
@@ -80,7 +107,12 @@ static bool checkScaledNumericValues(Tag coarseTag,const char *coarseName,Tag fi
 		Float64 fineValue = 0;		// Uint16 would be OK if was always IS, but sometimes fine values are DS and not IS, and Uint16 may be too small
 		if (aCoarse->getValue(0,coarseValue) && aFine->getValue(0,fineValue)) {
 			if (coarseValue != Uint16(round(fineValue/scaleFactor)) && coarseValue != Uint16(fineValue/scaleFactor)) {		// NB. standard does not specify whether or not to round or truncate, so allow both
-				log << EMsgDC(ScaledNumericValuesForSameConceptAreInconsistent) << " - " << coarseName << " = " << coarseValue << " and " << fineName << " = " << fineValue << endl;
+				if (newformat) {
+					log << EMsgDCF(MMsgDC(ScaledNumericValuesForSameConceptAreInconsistent),aCoarse) << " - " << coarseName << " = " << coarseValue << " and " << fineName << " = " << fineValue << endl;
+				}
+				else {
+					log << EMsgDC(ScaledNumericValuesForSameConceptAreInconsistent) << " - " << coarseName << " = " << coarseValue << " and " << fineName << " = " << fineValue << endl;
+				}
 				success=false;
 			}
 		}
@@ -89,17 +121,17 @@ static bool checkScaledNumericValues(Tag coarseTag,const char *coarseName,Tag fi
 }
 
 static bool
-checkScaledNumericValues(AttributeList &list,TextOutputStream &log) {
+checkScaledNumericValues(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 	bool success=true;
-	if (!checkScaledNumericValues(TagFromName(Exposure),"Exposure",TagFromName(ExposureInuAs),"ExposureInuAs",1000.0,list,log)) success = false;
-	if (!checkScaledNumericValues(TagFromName(ExposureTime),"ExposureTime",TagFromName(ExposureTimeInuS),"ExposureTimeInuS",1000.0,list,log)) success = false;
-	if (!checkScaledNumericValues(TagFromName(XRayTubeCurrent),"XRayTubeCurrent",TagFromName(XRayTubeCurrentInuA),"XRayTubeCurrentInuA",1000.0,list,log)) success = false;
+	if (!checkScaledNumericValues(TagFromName(Exposure),"Exposure",TagFromName(ExposureInuAs),"ExposureInuAs",1000.0,list,verbose,newformat,log)) success = false;
+	if (!checkScaledNumericValues(TagFromName(ExposureTime),"ExposureTime",TagFromName(ExposureTimeInuS),"ExposureTimeInuS",1000.0,list,verbose,newformat,log)) success = false;
+	if (!checkScaledNumericValues(TagFromName(XRayTubeCurrent),"XRayTubeCurrent",TagFromName(XRayTubeCurrentInuA),"XRayTubeCurrentInuA",1000.0,list,verbose,newformat,log)) success = false;
 
 	AttributeListIterator listi(list);
 	while (!listi) {
 		Attribute *a=listi();
 		Assert(a);
-		if (!::loopOverListsInSequencesWithLog(a,log,&::checkScaledNumericValues)) {
+		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkScaledNumericValues)) {
 			success=false;
 		}
 		++listi;
@@ -108,7 +140,7 @@ checkScaledNumericValues(AttributeList &list,TextOutputStream &log) {
 }
 
 static bool
-checkPatientOrientationValuesForBiped(AttributeList &list,TextOutputStream &log) {
+checkPatientOrientationValuesForBiped(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 //log << "checkPatientOrientationValuesForBiped" << endl;
 	bool success=true;
 	Attribute *aPatientOrientation=list[TagFromName(PatientOrientation)];
@@ -136,28 +168,53 @@ checkPatientOrientationValuesForBiped(AttributeList &list,TextOutputStream &log)
 							case 'L':	haveL = true; break;
 							case 'R':	haveR = true; break;
 							default:
-										log << EMsgDC(IllegalCharacterInPatientOrientation) << " - '" << c << "' - only L, R, A, P, H or F permitted" << endl;
+										if (newformat) {
+											log << EMsgDCF(MMsgDC(IllegalCharacterInPatientOrientation),aPatientOrientation) << " = '" << c << "' - only L, R, A, P, H or F permitted" << endl;
+										}
+										else {
+											log << EMsgDC(IllegalCharacterInPatientOrientation) << " - '" << c << "' - only L, R, A, P, H or F permitted" << endl;
+										}
 										success = false;
 										break;
 						}
 					}
 					if (haveA && haveP) {
-						log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - A, P " << endl;
+						if (newformat) {
+							log << EMsgDCF(MMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue),aPatientOrientation) << " - A, P " << endl;
+						}
+						else {
+							log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - A, P " << endl;
+						}
 						success = false;
 					}
 					if (haveH && haveF) {
-						log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - H, F " << endl;
+						if (newformat) {
+							log << EMsgDCF(MMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue),aPatientOrientation) << " - H, F " << endl;
+						}
+						else {
+							log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - H, F " << endl;
+						}
 						success = false;
 					}
 					if (haveL && haveR) {
-						log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - L, R " << endl;
+						if (newformat) {
+							log << EMsgDCF(MMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue),aPatientOrientation) << " - L, R " << endl;
+						}
+						else {
+							log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - L, R " << endl;
+						}
 						success = false;
 					}
 					if (i == 0) {
 						firstValue=value;
 					}
 					else if (firstValue && value && strlen(firstValue) > 0 && strcmp(firstValue,value) == 0) {
-						log << EMsgDC(PatientOrientationRowAndColumnDirectionsCannotBeIdentical) << " - \"" << firstValue << "\" and \"" << value << "\"" << endl;
+						if (newformat) {
+							log << EMsgDCF(MMsgDC(PatientOrientationRowAndColumnDirectionsCannotBeIdentical),aPatientOrientation) << " - <" << firstValue << "> and <" << value << ">" << endl;
+						}
+						else {
+							log << EMsgDC(PatientOrientationRowAndColumnDirectionsCannotBeIdentical) << " - \"" << firstValue << "\" and \"" << value << "\"" << endl;
+						}
 						success = false;
 					}
 				}
@@ -168,7 +225,7 @@ checkPatientOrientationValuesForBiped(AttributeList &list,TextOutputStream &log)
 	while (!listi) {
 		Attribute *a=listi();
 		Assert(a);
-		if (!::loopOverListsInSequencesWithLog(a,log,&::checkPatientOrientationValuesForBiped)) {
+		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkPatientOrientationValuesForBiped)) {
 			success=false;
 		}
 		++listi;
@@ -177,7 +234,7 @@ checkPatientOrientationValuesForBiped(AttributeList &list,TextOutputStream &log)
 }
 
 static bool
-checkPatientOrientationValuesForQuadruped(AttributeList &list,TextOutputStream &log) {
+checkPatientOrientationValuesForQuadruped(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 //log << "checkPatientOrientationValuesForQuadruped" << endl;
 	bool success=true;
 	Attribute *aPatientOrientation=list[TagFromName(PatientOrientation)];
@@ -265,39 +322,79 @@ checkPatientOrientationValuesForQuadruped(AttributeList &list,TextOutputStream &
 						}
 					}
 					if (badValue) {
-						log << EMsgDC(IllegalCharacterInPatientOrientation) << " - '" << c << "' - only CD, CR, D, DI, L, LE, M, PA, PL, PR, R, RT or V permitted for quadruped" << endl;
+						if (newformat) {
+							log << EMsgDCF(MMsgDC(IllegalCharacterInPatientOrientation),aPatientOrientation) << " = '" << c << "' - only CD, CR, D, DI, L, LE, M, PA, PL, PR, R, RT or V permitted for quadruped" << endl;
+						}
+						else {
+							log << EMsgDC(IllegalCharacterInPatientOrientation) << " - '" << c << "' - only CD, CR, D, DI, L, LE, M, PA, PL, PR, R, RT or V permitted for quadruped" << endl;
+						}
 						success = false;
 					}
 					else {
 						if (haveLE && haveRT) {
-							log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - LE, RT " << endl;
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue),aPatientOrientation) << " - LE, RT " << endl;
+							}
+							else {
+								log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - LE, RT " << endl;
+							}
 							success = false;
 						}
 						if (haveD && haveV) {
-							log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - D, V " << endl;
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue),aPatientOrientation) << " - D, V " << endl;
+							}
+							else {
+								log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - D, V " << endl;
+							}
 							success = false;
 						}
-						if (haveCR && haveCD || haveR && haveCD || haveR && haveCR) {
-							log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - CR, CD, R " << endl;
+						if ((haveCR && haveCD) || (haveR && haveCD) || (haveR && haveCR)) {
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue),aPatientOrientation) << " - CR, CD, R " << endl;
+							}
+							else {
+								log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - CR, CD, R " << endl;
+							}
 							success = false;
 						}
 						if (haveM && haveL) {
-							log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - M, L " << endl;
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue),aPatientOrientation) << " - M, L " << endl;
+							}
+							else {
+								log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - M, L " << endl;
+							}
 							success = false;
 						}
 						if (havePR && haveDI) {
-							log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - PR, DI " << endl;
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue),aPatientOrientation) << " - PR, DI " << endl;
+							}
+							else {
+								log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - PR, DI " << endl;
+							}
 							success = false;
 						}
 						if (havePA && havePL) {
-							log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - PA, PL " << endl;
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue),aPatientOrientation) << " - PA, PL " << endl;
+							}
+							else {
+								log << EMsgDC(ConflictingDirectionsInPatientOrientationCannotBePresentInSameValue) << " - PA, PL " << endl;
+							}
 							success = false;
 						}
 						if (i == 0) {
 							firstValue=value;
 						}
 						else if (firstValue && value && strlen(firstValue) > 0 && strcmp(firstValue,value) == 0) {
-							log << EMsgDC(PatientOrientationRowAndColumnDirectionsCannotBeIdentical) << " - \"" << firstValue << "\" and \"" << value << "\"" << endl;
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(PatientOrientationRowAndColumnDirectionsCannotBeIdentical),aPatientOrientation) << " = \"" << firstValue << "\" and \"" << value << "\"" << endl;
+							}
+							else {
+								log << EMsgDC(PatientOrientationRowAndColumnDirectionsCannotBeIdentical) << " - \"" << firstValue << "\" and \"" << value << "\"" << endl;
+							}
 						success = false;
 						}
 					}
@@ -309,7 +406,7 @@ checkPatientOrientationValuesForQuadruped(AttributeList &list,TextOutputStream &
 	while (!listi) {
 		Attribute *a=listi();
 		Assert(a);
-		if (!::loopOverListsInSequencesWithLog(a,log,&::checkPatientOrientationValuesForQuadruped)) {
+		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkPatientOrientationValuesForQuadruped)) {
 			success=false;
 		}
 		++listi;
@@ -318,7 +415,7 @@ checkPatientOrientationValuesForQuadruped(AttributeList &list,TextOutputStream &
 }
 
 static bool
-checkPatientOrientationValuesForBipedOrQuadruped(AttributeList &list,TextOutputStream &log) {
+checkPatientOrientationValuesForBipedOrQuadruped(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 	bool quadruped = false;
 	Attribute *aAnatomicalOrientationType=list[TagFromName(AnatomicalOrientationType)];
 	if (aAnatomicalOrientationType) {
@@ -328,11 +425,11 @@ checkPatientOrientationValuesForBipedOrQuadruped(AttributeList &list,TextOutputS
 			quadruped = true;
 		}
 	}
-	return quadruped ? checkPatientOrientationValuesForQuadruped(list,log) : checkPatientOrientationValuesForBiped(list,log);
+	return quadruped ? checkPatientOrientationValuesForQuadruped(list,verbose,newformat,log) : checkPatientOrientationValuesForBiped(list,verbose,newformat,log);
 }
 
 static bool
-checkUIDs(AttributeList &list,TextOutputStream &log) {
+checkUIDs(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 	bool success=true;
 	AttributeListIterator listi(list);
 	while (!listi) {
@@ -346,16 +443,32 @@ checkUIDs(AttributeList &list,TextOutputStream &log) {
 				if (a->getValue(i,value)) {
 					if (value && strlen(value) >= 2) {
 						if (strncmp(value,"1.",2) != 0 && strncmp(value,"2.",2) != 0) {
-							log << EMsgDC(IllegalRootForUID) << " - \"" << value << "\" in ";
-							writeTagNumberAndNameToLog(a,list.getDictionary(),log);
-							log << endl;
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(IllegalRootForUID),a) << " = <" << value << ">" << endl;
+							}
+							else {
+								log << EMsgDC(IllegalRootForUID) << " - \"" << value << "\" in ";
+								writeTagNumberAndNameToLog(a,list.getDictionary(),log);
+								log << endl;
+							}
+							success = false;
+						}
+						else if (strlen(value) >= 5 && strncmp(value,"2.999",5) == 0) {
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(ExampleRootForUID),a) << " = <" << value << ">" << endl;
+							}
+							else {
+								log << EMsgDC(ExampleRootForUID) << " - \"" << value << "\" in ";
+								writeTagNumberAndNameToLog(a,list.getDictionary(),log);
+								log << endl;
+							}
 							success = false;
 						}
 					}
 				}
 			}
 		}
-		if (!::loopOverListsInSequencesWithLog(a,log,&::checkUIDs)) {
+		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkUIDs)) {
 			success=false;
 		}
 		++listi;
@@ -364,18 +477,23 @@ checkUIDs(AttributeList &list,TextOutputStream &log) {
 }
 
 static bool
-checkNoEmptyReferencedFileIDComponents(AttributeList &list,TextOutputStream &log) {
+checkNoEmptyReferencedFileIDComponents(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 	bool success=true;
 	Attribute *aReferencedFileID=list[TagFromName(ReferencedFileID)];
 	if (aReferencedFileID && aReferencedFileID->isEmptyOrHasAnyEmptyValue()) {
-		log << EMsgDC(ReferencedFileIDHasEmptyComponents) << endl;
+		if (newformat) {
+			log << EMsgDCF(MMsgDC(ReferencedFileIDHasEmptyComponents),aReferencedFileID) << endl;
+		}
+		else {
+			log << EMsgDC(ReferencedFileIDHasEmptyComponents) << endl;
+		}
 		success=false;
 	}
 	AttributeListIterator listi(list);
 	while (!listi) {
 		Attribute *a=listi();
 		Assert(a);
-		if (!::loopOverListsInSequencesWithLog(a,log,&::checkNoEmptyReferencedFileIDComponents)) {
+		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkNoEmptyReferencedFileIDComponents)) {
 			success=false;
 		}
 		++listi;
@@ -384,23 +502,29 @@ checkNoEmptyReferencedFileIDComponents(AttributeList &list,TextOutputStream &log
 }
 
 static bool
-checkNoIllegalOddNumberedGroups(AttributeList &list,TextOutputStream &log) {
+checkNoIllegalOddNumberedGroups(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 	bool success=true;
 	AttributeListIterator listi(list);
 	while (!listi) {
 		Attribute *a=listi();
 		Assert(a);
-		if (!::loopOverListsInSequencesWithLog(a,log,&::checkNoIllegalOddNumberedGroups)) {
+		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkNoIllegalOddNumberedGroups)) {
 			success=false;
 		}
 		Tag tag=a->getTag();
 		Uint16 group = tag.getGroup();
 		if (group == 0x0001 || group == 0x0003 || group == 0x0005 || group == 0x0007) {
-			log << EMsgDC(BadGroup) << " - (";
-			writeZeroPaddedHexNumber(log,group,4);
-			log << ",";
-			writeZeroPaddedHexNumber(log,tag.getElement(),4);
-			log << ") " << endl;
+			if (newformat) {
+				log << EMsgDCF(MMsgDC(BadGroup),a) << endl;
+			}
+			else {
+				log << EMsgDC(BadGroup);
+				log << " - (";
+				writeZeroPaddedHexNumber(log,group,4);
+				log << ",";
+				writeZeroPaddedHexNumber(log,tag.getElement(),4);
+				log << ") " << endl;
+			}
 			success=false;
 		}
 		++listi;
@@ -409,13 +533,18 @@ checkNoIllegalOddNumberedGroups(AttributeList &list,TextOutputStream &log) {
 }
 
 static bool
-checkHasStringValueElseWarning(AttributeList &list,Tag tag,const char *label,TextOutputStream &log)
+checkHasStringValueElseWarning(AttributeList &list,Tag tag,const char *label,bool verbose,bool newformat,TextOutputStream &log)
 {
 	Attribute *a=list[tag];
 	if (!a || a->getVM() == 0) {
-		log << WMsgDC(MissingAttributeValueNeededForDirectory)
-		    << " - " << label
-		    << endl;
+		if (newformat) {
+			log << WMsgDCA(MissingAttributeValueNeededForDirectory,StrDup(label));
+		}
+		else {
+			log << WMsgDC(MissingAttributeValueNeededForDirectory)
+		   	 	<< " - " << label;
+		}
+		log << endl;
 		return false;
 	}
 	else {
@@ -424,7 +553,7 @@ checkHasStringValueElseWarning(AttributeList &list,Tag tag,const char *label,Tex
 }
 
 static bool
-checkPresentationStateDisplayedAreaSelectionValuesAreValid(AttributeList &list,TextOutputStream &log)
+checkPresentationStateDisplayedAreaSelectionValuesAreValid(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 
@@ -522,16 +651,26 @@ checkPresentationStateDisplayedAreaSelectionValuesAreValid(AttributeList &list,T
 								Int32 brhcYExpected = imageHorizontalFlip ? y[3] : y[2];
 //log << "checkPresentationStateDisplayedAreaSelectionValuesAreValid(): expected rotated flipped TLHC = (" << tlhcXExpected << "," << tlhcYExpected << ") and BRHC = (" << brhcXExpected << "," << brhcYExpected << ") " << endl;
 								if (tlhcX != tlhcXExpected || tlhcY != tlhcYExpected) {
-									log << EMsgDC(DisplayedAreaSelectionSequenceInternallyInconsistent)
-										<< " - DisplayedAreaTopLeftHandCorner = (" << tlhcX << "," << tlhcY << ") "
+									if (newformat) {
+										log << EMsgDCF(MMsgDC(DisplayedAreaSelectionSequenceInternallyInconsistent),sDisplayedAreaSelectionSequence);
+									}
+									else {
+										log << EMsgDC(DisplayedAreaSelectionSequenceInternallyInconsistent);
+									}
+									log << " - DisplayedAreaTopLeftHandCorner = (" << tlhcX << "," << tlhcY << ") "
 										<< " does not match expected value after rotation of " << imageRotation << " degrees and " << (imageHorizontalFlip ? "" : "no ") << "horizontal flip "
 										<< " (" << tlhcXExpected << "," << tlhcYExpected << ") "
 										<< endl;
 									success=false;
 								}
 								if (brhcX != brhcXExpected || brhcY != brhcYExpected) {
-									log << EMsgDC(DisplayedAreaSelectionSequenceInternallyInconsistent)
-										<< " - DisplayedAreaBottomRightHandCorner = (" << brhcX << "," << brhcY << ") "
+									if (newformat) {
+										log << EMsgDCF(MMsgDC(DisplayedAreaSelectionSequenceInternallyInconsistent),sDisplayedAreaSelectionSequence);
+									}
+									else {
+										log << EMsgDC(DisplayedAreaSelectionSequenceInternallyInconsistent);
+									}
+									log << " - DisplayedAreaBottomRightHandCorner = (" << brhcX << "," << brhcY << ") "
 										<< " does not match expected value after rotation of " << imageRotation << " degrees and " << (imageHorizontalFlip ? "" : "no ") << "horizontal flip "
 										<< " (" << brhcXExpected << "," << brhcYExpected << ") "
 										<< endl;
@@ -539,8 +678,13 @@ checkPresentationStateDisplayedAreaSelectionValuesAreValid(AttributeList &list,T
 								}
 							}
 							else if (tlhcX >= brhcX || tlhcY >= brhcY) {
-								log << EMsgDC(DisplayedAreaSelectionSequenceInternallyInconsistent)
-									<< " - DisplayedAreaTopLeftHandCorner = (" << tlhcX << "," << tlhcY << ") "
+								if (newformat) {
+									log << EMsgDCF(MMsgDC(DisplayedAreaSelectionSequenceInternallyInconsistent),sDisplayedAreaSelectionSequence);
+								}
+								else {
+									log << EMsgDC(DisplayedAreaSelectionSequenceInternallyInconsistent);
+								}
+								log << " - DisplayedAreaTopLeftHandCorner = (" << tlhcX << "," << tlhcY << ") "
 									<< " is not above and to the left of"
 									<< " DisplayedAreaBottomRightHandCorner = (" << brhcX << "," << brhcY << ") "
 									<< endl;
@@ -556,7 +700,7 @@ checkPresentationStateDisplayedAreaSelectionValuesAreValid(AttributeList &list,T
 }
 
 static bool
-checkValuesNeededToBuildDicomDirectoryArePresentAndNotEmpty(AttributeList &list,TextOutputStream &log)
+checkValuesNeededToBuildDicomDirectoryArePresentAndNotEmpty(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 
@@ -564,14 +708,14 @@ checkValuesNeededToBuildDicomDirectoryArePresentAndNotEmpty(AttributeList &list,
 	const char *vSOPClassUID=AttributeValue(aSOPClassUID);
 	Attribute *aDirectoryRecordSequence=list[TagFromName(DirectoryRecordSequence)];
 	if (!aDirectoryRecordSequence && (vSOPClassUID == NULL || (strcmp(vSOPClassUID,HangingProtocolStorageSOPClassUID) != 0 && strcmp(vSOPClassUID,ColorPaletteStorageSOPClassUID) != 0))) {
-		success = checkHasStringValueElseWarning(list,TagFromName(PatientID),"Patient ID",log) && success;
-		success = checkHasStringValueElseWarning(list,TagFromName(StudyDate),"Study Date",log) && success;
-		success = checkHasStringValueElseWarning(list,TagFromName(StudyTime),"Study Time",log) && success;
-		success = checkHasStringValueElseWarning(list,TagFromName(StudyID),"Study ID",log) && success;
-		success = checkHasStringValueElseWarning(list,TagFromName(Modality),"Modality",log) && success;
-		success = checkHasStringValueElseWarning(list,TagFromName(SeriesNumber),"Series Number",log) && success;
+		success = checkHasStringValueElseWarning(list,TagFromName(PatientID),         (newformat ? "/PatientID(0010,0020)" : "Patient ID"),           verbose,newformat,log) && success;
+		success = checkHasStringValueElseWarning(list,TagFromName(StudyDate),         (newformat ? "/StudyDate(0008,0020)" : "Study Date"),           verbose,newformat,log) && success;
+		success = checkHasStringValueElseWarning(list,TagFromName(StudyTime),         (newformat ? "/StudyTime(0008,0030)" : "Study Time"),           verbose,newformat,log) && success;
+		success = checkHasStringValueElseWarning(list,TagFromName(StudyID),           (newformat ? "/StudyID(0020,0010)" : "Study ID"),               verbose,newformat,log) && success;
+		success = checkHasStringValueElseWarning(list,TagFromName(Modality),          (newformat ? "/Modality(0008,0060)" : "Modality"),              verbose,newformat,log) && success;
+		success = checkHasStringValueElseWarning(list,TagFromName(SeriesNumber),      (newformat ? "/SeriesNumber(0020,0011)" : "Series Number"),     verbose,newformat,log) && success;
 		if (list[TagFromName(PixelData)]) {
-			success = checkHasStringValueElseWarning(list,TagFromName(InstanceNumber),"Instance Number",log) && success;
+			success = checkHasStringValueElseWarning(list,TagFromName(InstanceNumber),(newformat ? "/InstanceNumber(0020,0013) " : "Instance Number"),verbose,newformat,log) && success;
 		}
 		// should do RT, PS, Waveform, SR, Spectroscopy, etc. stuff here as well :(
 	}
@@ -579,7 +723,7 @@ checkValuesNeededToBuildDicomDirectoryArePresentAndNotEmpty(AttributeList &list,
 }
 
 static bool
-checkWaveformSequenceIsInternallyConsistent(AttributeList &list,TextOutputStream &log) {
+checkWaveformSequenceIsInternallyConsistent(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 	bool success=true;
 	Attribute *aWaveformSequence=list[TagFromName(WaveformSequence)];
 	if (aWaveformSequence) {
@@ -599,8 +743,13 @@ checkWaveformSequenceIsInternallyConsistent(AttributeList &list,TextOutputStream
 						AttributeList **channelDefinitionSequenceLists;
 						int numberOfChannelDefinitionSequenceItems = sChannelDefinitionSequence->getLists(&channelDefinitionSequenceLists);
 						if (numberOfWaveformChannels != numberOfChannelDefinitionSequenceItems) {
-							log << EMsgDC(WaveformSequenceInternallyInconsistent)
-							    << " - NumberOfWaveformChannels = " << numberOfWaveformChannels
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(WaveformSequenceInternallyInconsistent),aWaveformSequence);
+							}
+							else {
+								log << EMsgDC(WaveformSequenceInternallyInconsistent);
+							}
+							log << " - NumberOfWaveformChannels = " << numberOfWaveformChannels
 							    << " but number of ChannelDefinitionSequence Items = " << numberOfChannelDefinitionSequenceItems
 							    << endl;
 							success=false;
@@ -614,7 +763,7 @@ checkWaveformSequenceIsInternallyConsistent(AttributeList &list,TextOutputStream
 }
 
 static bool
-checkPixelDataIsTheCorrectLength(AttributeList &list,TextOutputStream &log)
+checkPixelDataIsTheCorrectLength(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 	Attribute *aPixelData=list[TagFromName(PixelData)];
@@ -657,14 +806,22 @@ checkPixelDataIsTheCorrectLength(AttributeList &list,TextOutputStream &log)
 				++expectedLength;	// odd lengths are always padded by one byte to even ([bugs.dicom3tools] (000113))
 			}
 			if (vl != expectedLength) {
-				log << EMsgDC(PixelDataIncorrectVL)
-					<< " - " << MMsgDC(Expected) << " " << dec << expectedLength << " dec"
-					<< " - " << MMsgDC(Got) << " " << dec << vl << " dec"
-				    << endl;
+				if (newformat) {
+					log << EMsgDCF(MMsgDC(PixelDataIncorrectVL),aPixelData)
+						<< " = <" << dec << vl << ">"
+						<< " - " << MMsgDC(Expected) << " " << dec << expectedLength << " dec"
+				    	<< endl;
+				}
+				else {
+					log << EMsgDC(PixelDataIncorrectVL)
+						<< " - " << MMsgDC(Expected) << " " << dec << expectedLength << " dec"
+						<< " - " << MMsgDC(Got) << " " << dec << vl << " dec"
+				    	<< endl;
+				}
 				success=false;
 			}
 		}
-		// else do not check if encapsulated
+		// if encapsulated, a check that fragments are even length is performed during reading in attrmxrd.cc (000514)
 	}
 	
 	return success;
@@ -672,7 +829,7 @@ checkPixelDataIsTheCorrectLength(AttributeList &list,TextOutputStream &log)
 
 
 static bool
-checkPixelAspectRatioValidIfPresent(AttributeList &list,TextOutputStream &log)
+checkPixelAspectRatioValidIfPresent(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 	Attribute *aPixelAspectRatio=list[TagFromName(PixelAspectRatio)];
@@ -681,7 +838,12 @@ checkPixelAspectRatioValidIfPresent(AttributeList &list,TextOutputStream &log)
 		Uint32 value1,value2;
 		if (aPixelAspectRatio->getValue(0,value1) && aPixelAspectRatio->getValue(1,value2)) {
 			if (value1 == value2) {
-				log << EMsgDC(PixelAspectRatioNotPermittedWhenOneToOne) << " - values are " << value1 << "\\" << value2 << endl;
+				if (newformat) {
+					log << EMsgDCF(MMsgDC(PixelAspectRatioNotPermittedWhenOneToOne),aPixelAspectRatio) << " = <" << dec << value1 << "\\" << value2 << ">" << endl;
+				}
+				else {
+					log << EMsgDC(PixelAspectRatioNotPermittedWhenOneToOne) << " - values are " << dec << value1 << "\\" << value2 << endl;
+				}
 			}
 		}
 	}
@@ -690,7 +852,7 @@ checkPixelAspectRatioValidIfPresent(AttributeList &list,TextOutputStream &log)
 }
 
 static bool
-checkEstimatedRadiographicMagnificationFactorIfPresent(AttributeList &list,TextOutputStream &log)
+checkEstimatedRadiographicMagnificationFactorIfPresent(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 	Attribute *aEstimatedRadiographicMagnificationFactor=list[TagFromName(EstimatedRadiographicMagnificationFactor)];
@@ -705,8 +867,14 @@ checkEstimatedRadiographicMagnificationFactorIfPresent(AttributeList &list,TextO
 		 && aDistanceSourceToPatient->getValue(0,vDistanceSourceToPatient)) {
 			if (vDistanceSourceToPatient > 0
 			 && fabs(vDistanceSourceToDetector/vDistanceSourceToPatient - vEstimatedRadiographicMagnificationFactor) > 0.0001) {
-				log << WMsgDC(EstimatedRadiographicMagnificationFactorDoesNotMatchRatioOfDistanceSourceToDetectorAndDistanceSourceToPatient)
-					<< " - values are " << vEstimatedRadiographicMagnificationFactor << ", " << vDistanceSourceToDetector << ", " << vDistanceSourceToPatient << endl;
+			 	if (newformat) {
+					log << WMsgDCF(MMsgDC(EstimatedRadiographicMagnificationFactorDoesNotMatchRatioOfDistanceSourceToDetectorAndDistanceSourceToPatient),aEstimatedRadiographicMagnificationFactor)
+						<< " = <" << vEstimatedRadiographicMagnificationFactor << "> != <" << vDistanceSourceToDetector << "> / <" << vDistanceSourceToPatient << ">" << endl;
+				}
+				else {
+					log << WMsgDC(EstimatedRadiographicMagnificationFactorDoesNotMatchRatioOfDistanceSourceToDetectorAndDistanceSourceToPatient)
+						<< " - values are " << vEstimatedRadiographicMagnificationFactor << ", " << vDistanceSourceToDetector << ", " << vDistanceSourceToPatient << endl;
+				}
 			}
 		}
 	}
@@ -714,7 +882,7 @@ checkEstimatedRadiographicMagnificationFactorIfPresent(AttributeList &list,TextO
 	return success;
 }
 
-static bool checkUnitVector(Attribute *a,int length,int valueOffset,const char *whichVector,const char *tagName,TextOutputStream &log) {
+static bool checkUnitVector(Attribute *a,int length,int valueOffset,const char *whichVector,const char *tagName,bool verbose,bool newformat,TextOutputStream &log) {
 //cerr << "checkUnitVector(): checking " << whichVector << " of " << tagName << endl;
 	bool success=true;
 	Float32 x,y,z;
@@ -726,7 +894,17 @@ static bool checkUnitVector(Attribute *a,int length,int valueOffset,const char *
 //cerr << "checkUnitVector(): sumOfSquares = " << sumOfSquares << endl;
 		if (fabs(sumOfSquares - 1) > 0.0001) {
 			success=false;
-			log << EMsgDC(OrientationVectorIsNotUnitVector) << " for " << whichVector << " vector of " << tagName << " - values are " << x << "\\" << y << "\\" << z << endl;
+			if (newformat) {
+				log << EMsgDCF(MMsgDC(OrientationVectorIsNotUnitVector),a);
+				if (whichVector && strlen(whichVector)) {
+					log << " for " << whichVector << " vector";
+				}
+				log << " = <" << x << "\\" << y << "\\" << z << ">"
+					<< endl;
+			}
+			else {
+				log << EMsgDC(OrientationVectorIsNotUnitVector) << " for " << whichVector << " vector of " << tagName << " - values are " << x << "\\" << y << "\\" << z << endl;
+			}
 		}
 	}
 	return success;
@@ -735,7 +913,7 @@ static bool checkUnitVector(Attribute *a,int length,int valueOffset,const char *
 static bool checkOrthogonal(
 		Attribute *a1,int length1,int valueOffset1,const char *whichVector1,const char *tagName1,
 		Attribute *a2,int length2,int valueOffset2,const char *whichVector2,const char *tagName2,
-		TextOutputStream &log) {
+		bool verbose,bool newformat,TextOutputStream &log) {
 //cerr << "checkOrthogonal(): checking " << whichVector1 << " of " << tagName1 << " and " << whichVector2 << " of " << tagName2 << endl;
 	bool success=true;
 	Float32 x1,y1,z1;
@@ -752,31 +930,46 @@ static bool checkOrthogonal(
 //cerr << "checkUnitVector(): dotProduct = " << dotProduct << endl;
 		if (fabs(dotProduct) > 0.0001) {
 			success=false;
-			log << EMsgDC(OrientationVectorsAreNotOrthogonal)
-				<< " for " << whichVector1 << " vector of " << tagName1 << " (" << x1 << "\\" << y1 << "\\" << z1 << ")"
-				<< " and " << whichVector2 << " vector of " << tagName2 << " (" << x2 << "\\" << y2 << "\\" << z2 << ")"
-				<< endl;
+			if (newformat) {
+				log << EMsgDCF(MMsgDC(OrientationVectorsAreNotOrthogonal),a1);	// would be nice to list different paths to two attributes :(
+				if (whichVector1 && strlen(whichVector1)) {
+					log << " for " << whichVector1 << " vector of";
+				}
+				log << " " << tagName1 << " (" << x1 << "\\" << y1 << "\\" << z1 << ")"
+					<< " and";
+				if (whichVector2 && strlen(whichVector2)) {
+					log << " " << whichVector2 << " vector of";
+				}
+				log << " " << tagName2 << " (" << x2 << "\\" << y2 << "\\" << z2 << ")"
+					<< endl;
+			}
+			else {
+				log << EMsgDC(OrientationVectorsAreNotOrthogonal)
+					<< " for " << whichVector1 << " vector of " << tagName1 << " (" << x1 << "\\" << y1 << "\\" << z1 << ")"
+					<< " and " << whichVector2 << " vector of " << tagName2 << " (" << x2 << "\\" << y2 << "\\" << z2 << ")"
+					<< endl;
+			}
 		}
 	}
 	return success;
 }
 
 static bool
-checkOrientationsAreOrthogonal(AttributeList &list,TextOutputStream &log)
+checkOrientationsAreOrthogonal(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 	{
 		Attribute *aImageOrientationPatient=list[TagFromName(ImageOrientationPatient)];
 		if (aImageOrientationPatient) {
 			int length = aImageOrientationPatient->getVL();
-			if (!checkOrthogonal(aImageOrientationPatient,length,0,"row","ImageOrientationPatient",aImageOrientationPatient,length,3,"column","ImageOrientationPatient",log)) success = false;
+			if (!checkOrthogonal(aImageOrientationPatient,length,0,"row","ImageOrientationPatient",aImageOrientationPatient,length,3,"column","ImageOrientationPatient",verbose,newformat,log)) success = false;
 		}
 	}
 	{
 		Attribute *aImageOrientation=list[TagFromName(ImageOrientation)];
 		if (aImageOrientation) {
 			int length = aImageOrientation->getVL();
-			if (!checkOrthogonal(aImageOrientation,length,0,"row","ImageOrientation",aImageOrientation,length,3,"column","ImageOrientation",log)) success = false;
+			if (!checkOrthogonal(aImageOrientation,length,0,"row","ImageOrientation",aImageOrientation,length,3,"column","ImageOrientation",verbose,newformat,log)) success = false;
 		}
 	}
 	
@@ -784,7 +977,7 @@ checkOrientationsAreOrthogonal(AttributeList &list,TextOutputStream &log)
 	while (!listi) {
 		Attribute *a=listi();
 		Assert(a);
-		if (!::loopOverListsInSequencesWithLog(a,log,&::checkOrientationsAreOrthogonal)) {
+		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkOrientationsAreOrthogonal)) {
 			success=false;
 		}
 		++listi;
@@ -793,7 +986,7 @@ checkOrientationsAreOrthogonal(AttributeList &list,TextOutputStream &log)
 }
 
 static bool
-checkOrientationsAreUnitVectors(AttributeList &list,TextOutputStream &log)
+checkOrientationsAreUnitVectors(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	// call for ImageOrientationPatient and ImageOrientation
 	bool success=true;
@@ -801,45 +994,45 @@ checkOrientationsAreUnitVectors(AttributeList &list,TextOutputStream &log)
 		Attribute *aImageOrientationPatient=list[TagFromName(ImageOrientationPatient)];
 		if (aImageOrientationPatient) {
 			int length = aImageOrientationPatient->getVL();
-			if (!checkUnitVector(aImageOrientationPatient,length,0,"row","ImageOrientationPatient",log)) success = false;
-			if (!checkUnitVector(aImageOrientationPatient,length,3,"column","ImageOrientationPatient",log)) success = false;
+			if (!checkUnitVector(aImageOrientationPatient,length,0,"row","ImageOrientationPatient",verbose,newformat,log)) success = false;
+			if (!checkUnitVector(aImageOrientationPatient,length,3,"column","ImageOrientationPatient",verbose,newformat,log)) success = false;
 		}
 	}
 	{
 		Attribute *aImageOrientation=list[TagFromName(ImageOrientation)];
 		if (aImageOrientation) {
 			int length = aImageOrientation->getVL();
-			if (!checkUnitVector(aImageOrientation,length,0,"row","ImageOrientation",log)) success = false;
-			if (!checkUnitVector(aImageOrientation,length,3,"column","ImageOrientation",log)) success = false;
+			if (!checkUnitVector(aImageOrientation,length,0,"row","ImageOrientation",verbose,newformat,log)) success = false;
+			if (!checkUnitVector(aImageOrientation,length,3,"column","ImageOrientation",verbose,newformat,log)) success = false;
 		}
 	}
 	{
 		Attribute *aImageOrientationSlide=list[TagFromName(ImageOrientationSlide)];
 		if (aImageOrientationSlide) {
 			int length = aImageOrientationSlide->getVL();
-			if (!checkUnitVector(aImageOrientationSlide,length,0,"row","ImageOrientationSlide",log)) success = false;
-			if (!checkUnitVector(aImageOrientationSlide,length,3,"column","ImageOrientationSlide",log)) success = false;
+			if (!checkUnitVector(aImageOrientationSlide,length,0,"row","ImageOrientationSlide",verbose,newformat,log)) success = false;
+			if (!checkUnitVector(aImageOrientationSlide,length,3,"column","ImageOrientationSlide",verbose,newformat,log)) success = false;
 		}
 	}
 	{
 		Attribute *aControlPointOrientation=list[TagFromName(ControlPointOrientation)];
 		if (aControlPointOrientation) {
 			int length = aControlPointOrientation->getVL();
-			if (!checkUnitVector(aControlPointOrientation,length,0,"","ControlPointOrientation",log)) success = false;
+			if (!checkUnitVector(aControlPointOrientation,length,0,"","ControlPointOrientation",verbose,newformat,log)) success = false;
 		}
 	}
 	{
 		Attribute *aSlabOrientation=list[TagFromName(SlabOrientation)];
 		if (aSlabOrientation) {
 			int length = aSlabOrientation->getVL();
-			if (!checkUnitVector(aSlabOrientation,length,0,"","SlabOrientation",log)) success = false;
+			if (!checkUnitVector(aSlabOrientation,length,0,"","SlabOrientation",verbose,newformat,log)) success = false;
 		}
 	}
 	{
 		Attribute *aVelocityEncodingDirection=list[TagFromName(VelocityEncodingDirection)];
 		if (aVelocityEncodingDirection) {
 			int length = aVelocityEncodingDirection->getVL();
-			if (!checkUnitVector(aVelocityEncodingDirection,length,0,"","VelocityEncodingDirection",log)) success = false;
+			if (!checkUnitVector(aVelocityEncodingDirection,length,0,"","VelocityEncodingDirection",verbose,newformat,log)) success = false;
 		}
 	}
 	
@@ -847,7 +1040,7 @@ checkOrientationsAreUnitVectors(AttributeList &list,TextOutputStream &log)
 	while (!listi) {
 		Attribute *a=listi();
 		Assert(a);
-		if (!::loopOverListsInSequencesWithLog(a,log,&::checkOrientationsAreUnitVectors)) {
+		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkOrientationsAreUnitVectors)) {
 			success=false;
 		}
 		++listi;
@@ -856,7 +1049,7 @@ checkOrientationsAreUnitVectors(AttributeList &list,TextOutputStream &log)
 }
 
 static bool
-checkPixelSpacingCalibration(AttributeList &list,TextOutputStream &log)
+checkPixelSpacingCalibration(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 	Attribute *aPixelSpacing=list[TagFromName(PixelSpacing)];
@@ -873,9 +1066,16 @@ checkPixelSpacingCalibration(AttributeList &list,TextOutputStream &log)
 				Float32 vImagerPixelSpacingCol = 0;
 				if (aImagerPixelSpacing->getValue(0,vImagerPixelSpacingRow) && aImagerPixelSpacing->getValue(1,vImagerPixelSpacingCol)
 				&& (vPixelSpacingRow != vImagerPixelSpacingRow || vPixelSpacingCol != vImagerPixelSpacingCol)) {
-					log << WMsgDC(PixelSpacingDoesNotMatchImagerPixelSpacingButPixelSpacingCalibrationTypeNotPresent)
-					    << " - PixelSpacing = " << vPixelSpacingRow << "\\" << vPixelSpacingCol << " versus ImagerPixelSpacing = "
-						<< vImagerPixelSpacingRow << "\\" << vImagerPixelSpacingCol << endl;
+					if (newformat) {
+						log << WMsgDCF(MMsgDC(PixelSpacingDoesNotMatchImagerPixelSpacingButPixelSpacingCalibrationTypeNotPresent),aPixelSpacing)
+						    << " - PixelSpacing <" << vPixelSpacingRow << "\\" << vPixelSpacingCol << "> - ImagerPixelSpacing <"
+							<< vImagerPixelSpacingRow << "\\" << vImagerPixelSpacingCol << ">" << endl;
+					}
+					else {
+						log << WMsgDC(PixelSpacingDoesNotMatchImagerPixelSpacingButPixelSpacingCalibrationTypeNotPresent)
+						    << " - PixelSpacing = " << vPixelSpacingRow << "\\" << vPixelSpacingCol << " versus ImagerPixelSpacing = "
+							<< vImagerPixelSpacingRow << "\\" << vImagerPixelSpacingCol << endl;
+					}
 				}
 			}
 			if (aNominalScannedPixelSpacing) {
@@ -883,9 +1083,16 @@ checkPixelSpacingCalibration(AttributeList &list,TextOutputStream &log)
 				Float32 vNominalScannedPixelSpacingCol = 0;
 				if (aNominalScannedPixelSpacing->getValue(0,vNominalScannedPixelSpacingRow) && aNominalScannedPixelSpacing->getValue(1,vNominalScannedPixelSpacingCol)
 				&& (vPixelSpacingRow != vNominalScannedPixelSpacingRow || vPixelSpacingCol != vNominalScannedPixelSpacingCol)) {
-					log << WMsgDC(PixelSpacingDoesNotMatchNominalScannedPixelSpacingButPixelSpacingCalibrationTypeNotPresent)
-					    << " - PixelSpacing = " << vPixelSpacingRow << "\\" << vPixelSpacingCol << " versus NominalScannedPixelSpacing = "
-						<< vNominalScannedPixelSpacingRow << "\\" << vNominalScannedPixelSpacingCol << endl;
+					if (newformat) {
+						log << WMsgDCF(MMsgDC(PixelSpacingDoesNotMatchNominalScannedPixelSpacingButPixelSpacingCalibrationTypeNotPresent),aPixelSpacing)
+						    << " - PixelSpacing <" << vPixelSpacingRow << "\\" << vPixelSpacingCol << "> - NominalScannedPixelSpacing <"
+							<< vNominalScannedPixelSpacingRow << "\\" << vNominalScannedPixelSpacingCol << ">" << endl;
+					}
+					else {
+						log << WMsgDC(PixelSpacingDoesNotMatchNominalScannedPixelSpacingButPixelSpacingCalibrationTypeNotPresent)
+						    << " - PixelSpacing = " << vPixelSpacingRow << "\\" << vPixelSpacingCol << " versus NominalScannedPixelSpacing = "
+							<< vNominalScannedPixelSpacingRow << "\\" << vNominalScannedPixelSpacingCol << endl;
+					}
 				}
 			}
 		}
@@ -895,7 +1102,7 @@ checkPixelSpacingCalibration(AttributeList &list,TextOutputStream &log)
 }
 
 static bool
-checkSpacingBetweenSlicesIsNotNegative(AttributeList &list,TextOutputStream &log)
+checkSpacingBetweenSlicesIsNotNegative(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 	Attribute *aSpacingBetweenSlices=list[TagFromName(SpacingBetweenSlices)];
@@ -907,7 +1114,12 @@ checkSpacingBetweenSlicesIsNotNegative(AttributeList &list,TextOutputStream &log
 				Attribute *aSOPClassUID=list[TagFromName(SOPClassUID)];
 				char *vSOPClassUID;
 				if (!aSOPClassUID || !aSOPClassUID->getValue(0,vSOPClassUID) || strcmp(vSOPClassUID,NuclearMedicineImageStorageSOPClassUID) != 0) {
-					log << EMsgDC(IllegalNegativeValue) << " - SpacingBetweenSlices = " << vSpacingBetweenSlices << endl;
+					if (newformat) {
+						log << EMsgDCF(MMsgDC(IllegalNegativeValue),aSpacingBetweenSlices) << " = <" << vSpacingBetweenSlices << ">" << endl;
+					}
+					else {
+						log << EMsgDC(IllegalNegativeValue) << " - SpacingBetweenSlices = " << vSpacingBetweenSlices << endl;
+					}
 					success = false;
 				}
 			}
@@ -917,7 +1129,7 @@ checkSpacingBetweenSlicesIsNotNegative(AttributeList &list,TextOutputStream &log
 }
 
 static bool
-checkFrameIncrementPointerValuesValid(AttributeList &list,TextOutputStream &log)
+checkFrameIncrementPointerValuesValid(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 	Attribute *aFrameIncrementPointer=list[TagFromName(FrameIncrementPointer)];
@@ -929,10 +1141,18 @@ checkFrameIncrementPointerValuesValid(AttributeList &list,TextOutputStream &log)
 				Tag *tag = new Tag(value);
 				Attribute *a = list[*tag];
 				if (!a) {
-					log << EMsgDC(FrameIncrementPointerValueNotPresentInDataset)
-					    << " for value " << i << ", which is ";
-					writeTagNumberAndNameToLog(*tag,list.getDictionary(),log);
-					log << endl;
+					if (newformat) {
+						log << EMsgDCF(MMsgDC(FrameIncrementPointerValueNotPresentInDataset),aFrameIncrementPointer,i)
+						    << " = <";
+						writeFullPathInInstanceToCurrentAttributeToLog(a,list.getDictionary(),log);
+						log << ">" << endl;
+					}
+					else {
+						log << EMsgDC(FrameIncrementPointerValueNotPresentInDataset)
+						    << " for value " << i << ", which is ";
+						writeTagNumberAndNameToLog(*tag,list.getDictionary(),log);
+						log << endl;
+					}
 				}
 				delete tag;
 			}
@@ -943,7 +1163,7 @@ checkFrameIncrementPointerValuesValid(AttributeList &list,TextOutputStream &log)
 }
 
 static bool
-checkFrameVectorCountsValid(AttributeList &list,TextOutputStream &log)
+checkFrameVectorCountsValid(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 	Attribute *aNumberOfFrames=list[TagFromName(NumberOfFrames)];
@@ -979,12 +1199,19 @@ checkFrameVectorCountsValid(AttributeList &list,TextOutputStream &log)
 		if (aVector) {
 			int nValues = aVector->getVM();
 			if (nValues != vNumberOfFrames) {
-				log << EMsgDC(NumberOfValuesInVectorDoesNotMatchNumberOfFrames)
-					<< " for Attribute ";
-				writeTagNumberAndNameToLog(aVector,list.getDictionary(),log);
-				log << ", which has " << dec << nValues << " values"
-					<< " though Number of Frames is " << vNumberOfFrames
-					<< endl;
+				if (newformat) {
+					log << EMsgDCF(MMsgDC(NumberOfValuesInVectorDoesNotMatchNumberOfFrames),aVector)
+						<< " - Number of values in vector <" << dec << nValues << ">"
+						<< " - Number of Frames <" << vNumberOfFrames << ">";
+				}
+				else {
+					log << EMsgDC(NumberOfValuesInVectorDoesNotMatchNumberOfFrames)
+						<< " for Attribute ";
+					writeTagNumberAndNameToLog(aVector,list.getDictionary(),log);
+					log << ", which has " << dec << nValues << " values"
+						<< " though Number of Frames is " << vNumberOfFrames;
+				}
+				log << endl;
 				success = false;
 			}
 			Attribute *aNumber=list[numberTags[i]];
@@ -1004,22 +1231,37 @@ checkFrameVectorCountsValid(AttributeList &list,TextOutputStream &log)
 					}
 				}
 				if (highestValueFound != vNumber) {
-					log << EMsgDC(SpecifiedNumberOfVectorValuesDoesNotMatchActualValuesInVector)
-						<< " for Attribute ";
-					writeTagNumberAndNameToLog(aNumber,list.getDictionary(),log);
-					log << ", which has value " << dec << vNumber
-						<< ", whereas the highest value found in ";
-					writeTagNumberAndNameToLog(aVector,list.getDictionary(),log);
-					log << " is " << dec << highestValueFound
-						<< endl;
+					if (newformat) {
+						log << EMsgDCF(MMsgDC(SpecifiedNumberOfVectorValuesDoesNotMatchActualValuesInVector),aNumber)
+							<< " = <" << dec << vNumber << ">"
+							<< " - highest value found in - <";
+						writeFullPathInInstanceToCurrentAttributeToLog(aVector,list.getDictionary(),log);
+						log << "> - <" << dec << highestValueFound << ">";
+					}
+					else {
+						log << EMsgDC(SpecifiedNumberOfVectorValuesDoesNotMatchActualValuesInVector)
+							<< " for Attribute ";
+						writeTagNumberAndNameToLog(aNumber,list.getDictionary(),log);
+						log << ", which has value " << dec << vNumber
+							<< ", whereas the highest value found in ";
+						writeTagNumberAndNameToLog(aVector,list.getDictionary(),log);
+						log << " is " << dec << highestValueFound;
+					}
+					log << endl;
 					success = false;
 				}
 				if (lowestValueFound != 1) {
-					log << EMsgDC(LowestValueInVectorIsNotOne)
-						<< " for Attribute ";
-					writeTagNumberAndNameToLog(aVector,list.getDictionary(),log);
-					log << ", but rather is " << dec << lowestValueFound
-						<< endl;
+					if (newformat) {
+						log << EMsgDCF(MMsgDC(LowestValueInVectorIsNotOne),aVector)
+							<< " = <" << dec << lowestValueFound << ">";
+					}
+					else {
+						log << EMsgDC(LowestValueInVectorIsNotOne)
+							<< " for Attribute ";
+						writeTagNumberAndNameToLog(aVector,list.getDictionary(),log);
+						log << ", but rather is " << dec << lowestValueFound;
+					}
+					log << endl;
 					success = false;
 				}
 			}
@@ -1028,9 +1270,8 @@ checkFrameVectorCountsValid(AttributeList &list,TextOutputStream &log)
 	return success;
 }
 
-
 static bool
-checkMetaInformationMatchesSOPInstance(AttributeList &list,TextOutputStream &log)
+checkMetaInformationMatchesSOPInstance(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 	Attribute *aMediaStorageSOPInstanceUID=list[TagFromName(MediaStorageSOPInstanceUID)];
@@ -1045,14 +1286,22 @@ checkMetaInformationMatchesSOPInstance(AttributeList &list,TextOutputStream &log
 			const char *vSOPInstanceUID=AttributeValue(aSOPInstanceUID);
 			if (!vMediaStorageSOPInstanceUID || !vSOPInstanceUID || strcmp(vMediaStorageSOPInstanceUID,vSOPInstanceUID) != 0) {
 				success=false;
-				log << EMsgDC(MediaStorageSOPInstanceUIDDifferentFromSOPInstanceUID)
-				    << endl;
+				if (newformat) {
+					log << EMsgDCF(MMsgDC(MediaStorageSOPInstanceUIDDifferentFromSOPInstanceUID),aMediaStorageSOPInstanceUID) << endl;
+				}
+				else {
+					log << EMsgDC(MediaStorageSOPInstanceUIDDifferentFromSOPInstanceUID) << endl;
+				}
 			}
 		}
 		else if (!aDirectoryRecordSequence) {
 			success=false;
-			log << EMsgDC(MediaStorageSOPInstanceUIDButMissingSOPInstanceUIDAndNotADirectory)
-			    << endl;
+			if (newformat) {
+				log << EMsgDCF(MMsgDC(MediaStorageSOPInstanceUIDButMissingSOPInstanceUIDAndNotADirectory),aMediaStorageSOPInstanceUID) << endl;
+			}
+			else {
+				log << EMsgDC(MediaStorageSOPInstanceUIDButMissingSOPInstanceUIDAndNotADirectory) << endl;
+			}
 		}
 	}
 
@@ -1062,21 +1311,33 @@ checkMetaInformationMatchesSOPInstance(AttributeList &list,TextOutputStream &log
 			const char *vSOPClassUID=AttributeValue(aSOPClassUID);
 			if (!vMediaStorageSOPClassUID || !vSOPClassUID || strcmp(vMediaStorageSOPClassUID,vSOPClassUID) != 0) {
 				success=false;
-				log << EMsgDC(MediaStorageSOPClassUIDDifferentFromSOPClassUID)
-				    << endl;
+				if (newformat) {
+					log << EMsgDCF(MMsgDC(MediaStorageSOPClassUIDDifferentFromSOPClassUID),aMediaStorageSOPClassUID) << endl;
+				}
+				else {
+					log << EMsgDC(MediaStorageSOPClassUIDDifferentFromSOPClassUID) << endl;
+				}
 			}
 		}
 		else if (aDirectoryRecordSequence) {
 			if (!vMediaStorageSOPClassUID || strcmp(vMediaStorageSOPClassUID,MediaStorageDirectoryStorageSOPClassUID) != 0) {
 				success=false;
-				log << EMsgDC(MediaStorageSOPClassUIDNotMediaStorageDirectoryStorageSOPClassUID)
-				    << endl;
+				if (newformat) {
+					log << EMsgDCF(MMsgDC(MediaStorageSOPClassUIDNotMediaStorageDirectoryStorageSOPClassUID),aMediaStorageSOPClassUID) << endl;
+				}
+				else {
+					log << EMsgDC(MediaStorageSOPClassUIDNotMediaStorageDirectoryStorageSOPClassUID) << endl;
+				}
 			}
 		}
 		else {
 			success=false;
-			log << EMsgDC(MediaStorageSOPClassUIDButMissingSOPClassUIDAndNotADirectory)
-			    << endl;
+			if (newformat) {
+				log << EMsgDCF(MMsgDC(MediaStorageSOPClassUIDButMissingSOPClassUIDAndNotADirectory),aMediaStorageSOPClassUID) << endl;
+			}
+			else {
+				log << EMsgDC(MediaStorageSOPClassUIDButMissingSOPClassUIDAndNotADirectory) << endl;
+			}
 		}
 	}
 
@@ -1084,7 +1345,7 @@ checkMetaInformationMatchesSOPInstance(AttributeList &list,TextOutputStream &log
 }
 
 static bool
-checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,Tag descriptorTag,Tag dataTag,const char *message,TextOutputStream &log)
+checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,Tag descriptorTag,Tag dataTag,const char *message,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 	{
@@ -1129,15 +1390,25 @@ checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,Tag descriptorTag,Tag 
 						}
 						else {
 							// what have we missed ?
-							log << WMsgDC(NotCheckingLUTDataMaximum)
-							    << " - " << message
-							    << " - 16 bit LUT for VR " << aLUTData->getVR()
-							    << endl;
+							if (newformat) {
+								log << WMsgDCF(MMsgDC(NotCheckingLUTDataMaximum),aLUTData);
+							}
+							else {
+								log << WMsgDC(NotCheckingLUTDataMaximum);
+							}
+							log << " - " << message
+								<< " - 16 bit LUT for VR " << aLUTData->getVR()
+								<< endl;
 						}
 						if (foundValuesToCheck) {
 							if (nLUTData != actualNumberOfEntries) {
-								log << EMsgDC(LUTDataWrongLength)
-								    << " - " << message
+								if (newformat) {
+									log << EMsgDCF(MMsgDC(LUTDataWrongLength),aLUTData);
+								}
+								else {
+									log << EMsgDC(LUTDataWrongLength);
+								}
+								log << " - " << message
 								    << " - LUT Descriptor number of entries = " << actualNumberOfEntries
 								    << " but number of 16 bit values = " << nLUTData
 								    << endl;
@@ -1176,15 +1447,25 @@ checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,Tag descriptorTag,Tag 
 						}
 						else {
 							// what have we missed ?
-							log << WMsgDC(NotCheckingLUTDataMaximum)
-							    << " - " << message
+							if (newformat) {
+								log << WMsgDCF(MMsgDC(NotCheckingLUTDataMaximum),aLUTData);
+							}
+							else {
+								log << WMsgDC(NotCheckingLUTDataMaximum);
+							}
+							log << " - " << message
 							    << " - 8 bit LUT for VR " << aLUTData->getVR()
 							    << endl;
 						}
 						if (foundValuesToCheck) {
 							if (nLUTData*2 != actualNumberOfEntries) {
-								log << EMsgDC(LUTDataWrongLength)
-								    << " - " << message
+								if (newformat) {
+									log << EMsgDCF(MMsgDC(LUTDataWrongLength),aLUTData);
+								}
+								else {
+									log << EMsgDC(LUTDataWrongLength);
+								}
+								log << " - " << message
 								    << " - LUT Descriptor number of entries = " << actualNumberOfEntries
 								    << " but number of 8 bit values = " << nLUTData*2
 								    << " packed into " << nLUTData << " 16 bit words"
@@ -1196,8 +1477,13 @@ checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,Tag descriptorTag,Tag 
 					if (foundValuesToCheck) {
 //cerr << "checkLUTDataValuesMatchSpecifiedRange(): maxValue = 0x" << hex << maxValue << dec << endl;
 						if (maxValue < wantMaxValueMin || maxValue > wantMaxValueMax) {
-							log << EMsgDC(LUTDataBad)
-							    << " - " << message
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(LUTDataBad),aLUTData);
+							}
+							else {
+								log << EMsgDC(LUTDataBad);
+							}
+							log << " - " << message
 							    << " - LUT Descriptor number of bits = " << numberOfBits
 							    << " but maximum LUT Data value is " << hex << maxValue << dec
 							    << endl;
@@ -1212,7 +1498,7 @@ checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,Tag descriptorTag,Tag 
 }
 
 static bool
-checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,Tag sequenceTag,Tag descriptorTag,Tag dataTag,const char *message,TextOutputStream &log)
+checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,Tag sequenceTag,Tag descriptorTag,Tag dataTag,const char *message,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 	Attribute* a = list[sequenceTag];
@@ -1224,7 +1510,7 @@ checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,Tag sequenceTag,Tag de
 		for (int i=0; i<nItems; ++i) {
 			AttributeList *itemList = itemLists[i];
 			if (itemList) {
-				if (!checkLUTDataValuesMatchSpecifiedRange(*itemList,descriptorTag,dataTag,message,log)) success = false;
+				if (!checkLUTDataValuesMatchSpecifiedRange(*itemList,descriptorTag,dataTag,message,verbose,newformat,log)) success = false;
 			}
 		}
 	}
@@ -1232,7 +1518,7 @@ checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,Tag sequenceTag,Tag de
 }
 
 static bool
-checkLUTDataValuesInIconImageSequenceMatchSpecifiedRange(AttributeList &list,TextOutputStream &log)
+checkLUTDataValuesInIconImageSequenceMatchSpecifiedRange(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success=true;
 	Attribute* aIconImageSequence = list[TagFromName(IconImageSequence)];
@@ -1245,11 +1531,11 @@ checkLUTDataValuesInIconImageSequenceMatchSpecifiedRange(AttributeList &list,Tex
 			AttributeList *itemList = itemLists[i];
 			if (itemList) {
 				if (!checkLUTDataValuesMatchSpecifiedRange(*itemList,TagFromName(RedPaletteColorLookupTableDescriptor),TagFromName(RedPaletteColorLookupTableData),
-					"Icon Image Sequence - Red Palette Color LUT",log)) success = false;
+					"Icon Image Sequence - Red Palette Color LUT",verbose,newformat,log)) success = false;
 				if (!checkLUTDataValuesMatchSpecifiedRange(*itemList,TagFromName(GreenPaletteColorLookupTableDescriptor),TagFromName(GreenPaletteColorLookupTableData),
-					"Icon Image Sequence - Green Palette Color LUT",log)) success = false;
+					"Icon Image Sequence - Green Palette Color LUT",verbose,newformat,log)) success = false;
 				if (!checkLUTDataValuesMatchSpecifiedRange(*itemList,TagFromName(BluePaletteColorLookupTableDescriptor),TagFromName(BluePaletteColorLookupTableData),
-					"Icon Image Sequence - Blue Palette Color LUT",log)) success = false;
+					"Icon Image Sequence - Blue Palette Color LUT",verbose,newformat,log)) success = false;
 			}
 		}
 	}
@@ -1257,12 +1543,12 @@ checkLUTDataValuesInIconImageSequenceMatchSpecifiedRange(AttributeList &list,Tex
 }
 
 static bool
-checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,TextOutputStream &log)
+checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log)
 {
 	bool success = true;
-	if (!checkLUTDataValuesMatchSpecifiedRange(list,TagFromName(ModalityLUTSequence),TagFromName(LUTDescriptor),TagFromName(LUTData),"Modality LUT",log)) success = false;
-	if (!checkLUTDataValuesMatchSpecifiedRange(list,TagFromName(VOILUTSequence),TagFromName(LUTDescriptor),TagFromName(LUTData),"VOI LUT",log)) success = false;
-	if (!checkLUTDataValuesMatchSpecifiedRange(list,TagFromName(PresentationLUTSequence),TagFromName(LUTDescriptor),TagFromName(LUTData),"Presentation LUT",log)) success = false;
+	if (!checkLUTDataValuesMatchSpecifiedRange(list,TagFromName(ModalityLUTSequence),TagFromName(LUTDescriptor),TagFromName(LUTData),"Modality LUT",verbose,newformat,log)) success = false;
+	if (!checkLUTDataValuesMatchSpecifiedRange(list,TagFromName(VOILUTSequence),TagFromName(LUTDescriptor),TagFromName(LUTData),"VOI LUT",verbose,newformat,log)) success = false;
+	if (!checkLUTDataValuesMatchSpecifiedRange(list,TagFromName(PresentationLUTSequence),TagFromName(LUTDescriptor),TagFromName(LUTData),"Presentation LUT",verbose,newformat,log)) success = false;
 	
 	Attribute* aSoftcopyVOILUTSequence = list[TagFromName(SoftcopyVOILUTSequence)];
 	if (aSoftcopyVOILUTSequence && aSoftcopyVOILUTSequence->isSequence()) {
@@ -1274,16 +1560,16 @@ checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,TextOutputStream &log)
 			AttributeList *itemList = itemLists[i];
 			if (itemList) {
 				if (!checkLUTDataValuesMatchSpecifiedRange(*itemList,TagFromName(VOILUTSequence),TagFromName(LUTDescriptor),TagFromName(LUTData),
-					"Softcopy VOI LUT",log)) success = false;
+					"Softcopy VOI LUT",verbose,newformat,log)) success = false;
 			}
 		}
 	}
 
-	if (!checkLUTDataValuesMatchSpecifiedRange(list,TagFromName(RedPaletteColorLookupTableDescriptor),TagFromName(RedPaletteColorLookupTableData),"Red Palette Color LUT",log)) success = false;
-	if (!checkLUTDataValuesMatchSpecifiedRange(list,TagFromName(GreenPaletteColorLookupTableDescriptor),TagFromName(GreenPaletteColorLookupTableData),"Green Palette Color LUT",log)) success = false;
-	if (!checkLUTDataValuesMatchSpecifiedRange(list,TagFromName(BluePaletteColorLookupTableDescriptor),TagFromName(BluePaletteColorLookupTableData),"Blue Palette Color LUT",log)) success = false;
+	if (!checkLUTDataValuesMatchSpecifiedRange(list,TagFromName(RedPaletteColorLookupTableDescriptor),TagFromName(RedPaletteColorLookupTableData),"Red Palette Color LUT",verbose,newformat,log)) success = false;
+	if (!checkLUTDataValuesMatchSpecifiedRange(list,TagFromName(GreenPaletteColorLookupTableDescriptor),TagFromName(GreenPaletteColorLookupTableData),"Green Palette Color LUT",verbose,newformat,log)) success = false;
+	if (!checkLUTDataValuesMatchSpecifiedRange(list,TagFromName(BluePaletteColorLookupTableDescriptor),TagFromName(BluePaletteColorLookupTableData),"Blue Palette Color LUT",verbose,newformat,log)) success = false;
 
-	if (!checkLUTDataValuesInIconImageSequenceMatchSpecifiedRange(list,log)) success = false;
+	if (!checkLUTDataValuesInIconImageSequenceMatchSpecifiedRange(list,verbose,newformat,log)) success = false;
 
 	Attribute* aDirectoryRecordSequence = list[TagFromName(DirectoryRecordSequence)];
 	if (aDirectoryRecordSequence && aDirectoryRecordSequence->isSequence()) {
@@ -1294,7 +1580,7 @@ checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,TextOutputStream &log)
 		for (int i=0; i<nItems; ++i) {
 			AttributeList *itemList = itemLists[i];
 			if (itemList) {
-				if (!checkLUTDataValuesInIconImageSequenceMatchSpecifiedRange(*itemList,log)) success = false;
+				if (!checkLUTDataValuesInIconImageSequenceMatchSpecifiedRange(*itemList,verbose,newformat,log)) success = false;
 			}
 		}
 	}
@@ -1303,7 +1589,7 @@ checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,TextOutputStream &log)
 }
 
 static bool
-checkCodeValuesDoNotContainInappropriateCharacters(AttributeList &list,TextOutputStream &log) {
+checkCodeValuesDoNotContainInappropriateCharacters(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 	//cerr << "checkCodeValuesDoNotContainInappropriateCharacters():" << endl;
 	bool success=true;
 	AttributeListIterator listi(list);
@@ -1342,7 +1628,7 @@ checkCodeValuesDoNotContainInappropriateCharacters(AttributeList &list,TextOutpu
 											Uint32 length=0;
 											const char *ptr=value;
 											char c;
-											while (c=*ptr++) {
+											while ((c=*ptr++)) {
 												bool bad = false;
 												if (isSNOMED) {
 													if (!isupper(c) && !isdigit(c) && c != '-') {
@@ -1355,7 +1641,16 @@ checkCodeValuesDoNotContainInappropriateCharacters(AttributeList &list,TextOutpu
 													}
 												}
 												if (bad) {
-													log << WMsgDC(CodeValueContainsInvalidCharactersForCodingScheme) << " - value is <" << value << "> - bad character is '" << c << "' - coding scheme is <" << vCodingSchemeDesignator << ">" << endl;
+													if (newformat) {
+														log << WMsgDCF(MMsgDC(CodeValueContainsInvalidCharactersForCodingScheme),aCodeValue);
+													}
+													else {
+														log << WMsgDC(CodeValueContainsInvalidCharactersForCodingScheme);
+													}
+													log << " - value is <" << value
+														<< "> - bad character is '" << c
+														<< "' - coding scheme is <" << vCodingSchemeDesignator
+														<< ">" << endl;
 													//success=false;
 												}
 											}
@@ -1370,7 +1665,7 @@ checkCodeValuesDoNotContainInappropriateCharacters(AttributeList &list,TextOutpu
 			}
 		}
 		{
-			if (!::loopOverListsInSequencesWithLog(a,log,&::checkCodeValuesDoNotContainInappropriateCharacters)) {
+			if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkCodeValuesDoNotContainInappropriateCharacters)) {
 				success=false;
 			}
 		}
@@ -1381,7 +1676,7 @@ checkCodeValuesDoNotContainInappropriateCharacters(AttributeList &list,TextOutpu
 
 
 static bool
-checkLongCodeValuesAreLongEnough(AttributeList &list,TextOutputStream &log) {
+checkLongCodeValuesAreLongEnough(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 	//cerr << "checkLongCodeValuesAreLongEnough():" << endl;
 	bool success=true;
 	AttributeListIterator listi(list);
@@ -1411,7 +1706,18 @@ checkLongCodeValuesAreLongEnough(AttributeList &list,TextOutputStream &log) {
 											//cerr << "checkLongCodeValuesAreLongEnough(): have LongCodeValue value [" <<j << "] " << value << endl;
 											Uint32 length = strlen(value);
 											if (length <= 16) {
-												log << EMsgDC(LongCodeValueTooShort) << " - value is <" << value << "> - length is " << length << endl;
+												if (newformat) {
+													log << EMsgDCF(MMsgDC(LongCodeValueTooShort),aLongCodeValue)
+														<< " - value is <" << value
+														<< "> - length is <" << length << ">"
+														<< endl;
+												}
+												else {
+													log << EMsgDC(LongCodeValueTooShort)
+														<< " - value is <" << value
+														<< "> - length is " << length
+														<< endl;
+												}
 												success=false;
 											}
 										}
@@ -1425,7 +1731,7 @@ checkLongCodeValuesAreLongEnough(AttributeList &list,TextOutputStream &log) {
 			}
 		}
 		{
-			if (!::loopOverListsInSequencesWithLog(a,log,&::checkLongCodeValuesAreLongEnough)) {
+			if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkLongCodeValuesAreLongEnough)) {
 				success=false;
 			}
 		}
@@ -1436,7 +1742,7 @@ checkLongCodeValuesAreLongEnough(AttributeList &list,TextOutputStream &log) {
 
 
 static bool
-checkCodeMeaningsForMeasurementUnitsDoNotContainInappropriateQuotes(AttributeList &list,TextOutputStream &log) {
+checkCodeMeaningsForMeasurementUnitsDoNotContainInappropriateQuotes(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 //cerr << "checkCodeMeaningsForMeasurementUnitsDoNotContainInappropriateQuotes():" << endl;
 	bool success=true;
 	AttributeListIterator listi(list);
@@ -1469,7 +1775,13 @@ checkCodeMeaningsForMeasurementUnitsDoNotContainInappropriateQuotes(AttributeLis
 										while (*ptr++) ++length;
 										if (value[0] == '\'' || value[length-1] == '\''
 										 || value[0] == '\"' || value[length-1] == '\"') {
-											log << WMsgDC(CodeMeaningForMeasurementUnitsBeginsOrEndsWithQuotationCharacters) << " - meaning is <" << value << ">" << endl;
+										 	if (newformat) {
+												log << WMsgDCF(MMsgDC(CodeMeaningForMeasurementUnitsBeginsOrEndsWithQuotationCharacters),aCodeMeaning);
+											}
+											else {
+												log << WMsgDC(CodeMeaningForMeasurementUnitsBeginsOrEndsWithQuotationCharacters);
+											}
+											log << " - meaning is <" << value << ">" << endl;
 											//success=false;
 										}
 									}
@@ -1482,7 +1794,7 @@ checkCodeMeaningsForMeasurementUnitsDoNotContainInappropriateQuotes(AttributeLis
 			}
 		}
 		else {
-			if (!::loopOverListsInSequencesWithLog(a,log,&::checkCodeMeaningsForMeasurementUnitsDoNotContainInappropriateQuotes)) {
+			if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkCodeMeaningsForMeasurementUnitsDoNotContainInappropriateQuotes)) {
 				success=false;
 			}
 		}
@@ -1492,7 +1804,7 @@ checkCodeMeaningsForMeasurementUnitsDoNotContainInappropriateQuotes(AttributeLis
 }
 
 static bool
-checkCodingSchemeDesignatorForMeasurementUnits(AttributeList &list,TextOutputStream &log) {
+checkCodingSchemeDesignatorForMeasurementUnits(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 //cerr << "checkCodingSchemeDesignatorForMeasurementUnits():" << endl;
 	bool success=true;
 	AttributeListIterator listi(list);
@@ -1529,14 +1841,24 @@ checkCodingSchemeDesignatorForMeasurementUnits(AttributeList &list,TextOutputStr
 //cerr << "checkCodingSchemeDesignatorForMeasurementUnits(): have CodingSchemeDesignator value [" <<j << "] " << value << endl;
 										bool isUCUM = strcmp("UCUM",value) == 0;
 										if (isUCUM && !isInsideUnitsCodeSequence && sequenceTag != TagFromName(CodingSchemeIdentificationSequence)) {	// CodingSchemeIdentificationSequence is not a units code sequence, but is a legitimate place for it to be (000462)
-											log << WMsgDC(UCUMCodingSchemeDesignatorIsUsedInSequenceOtherThanUnitsCodeSequence) << " - ";
-											writeTagNumberAndNameToLog(sequenceTag,list.getDictionary(),log);
+											if (newformat) {
+												log << WMsgDCF(MMsgDC(UCUMCodingSchemeDesignatorIsUsedInSequenceOtherThanUnitsCodeSequence),aCodingSchemeDesignator);
+											}
+											else {
+												log << WMsgDC(UCUMCodingSchemeDesignatorIsUsedInSequenceOtherThanUnitsCodeSequence) << " - ";
+												writeTagNumberAndNameToLog(sequenceTag,list.getDictionary(),log);
+											}
 											log << endl;
 											//success=false;
 										}
 										else if (!isUCUM && isInsideUnitsCodeSequence) {
-											log << WMsgDC(CodingSchemeDesignatorInUnitsCodeSequenceIsNotUCUM) << " - is " << value << " instead - ";
-											writeTagNumberAndNameToLog(sequenceTag,list.getDictionary(),log);
+											if (newformat) {
+												log << WMsgDCF(MMsgDC(CodingSchemeDesignatorInUnitsCodeSequenceIsNotUCUM),aCodingSchemeDesignator) << " = <" << value << ">";
+											}
+											else {
+												log << WMsgDC(CodingSchemeDesignatorInUnitsCodeSequenceIsNotUCUM) << " - is " << value << " instead - ";
+												writeTagNumberAndNameToLog(sequenceTag,list.getDictionary(),log);
+											}
 											log << endl;
 											//success=false;
 										}
@@ -1548,7 +1870,7 @@ checkCodingSchemeDesignatorForMeasurementUnits(AttributeList &list,TextOutputStr
 					delete [] al;
 				}
 			}
-			if (!::loopOverListsInSequencesWithLog(a,log,&::checkCodingSchemeDesignatorForMeasurementUnits)) {
+			if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkCodingSchemeDesignatorForMeasurementUnits)) {
 				success=false;
 			}
 		}
@@ -1558,7 +1880,7 @@ checkCodingSchemeDesignatorForMeasurementUnits(AttributeList &list,TextOutputStr
 }
 
 static bool
-checkPerFrameFunctionalGroupsSequencesAreNotAlreadyPresentInSharedFunctionalGroup(AttributeList &list,TextOutputStream &log) {
+checkPerFrameFunctionalGroupsSequencesAreNotAlreadyPresentInSharedFunctionalGroup(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 //cerr << "checkPerFrameFunctionalGroupsSequencesAreNotAlreadyPresentInSharedFunctionalGroup():" << endl;
 	bool success=true;
 	Attribute *aSharedFunctionalGroupsSequence = list[TagFromName(SharedFunctionalGroupsSequence)];
@@ -1584,8 +1906,13 @@ checkPerFrameFunctionalGroupsSequencesAreNotAlreadyPresentInSharedFunctionalGrou
 						if (a && a->isSequence()) {
 							Tag t = a->getTag();
 							if ((*sharedList)[t]) {
-								log << EMsgDC(FunctionalGroupSequenceAlreadyUsedInSharedFunctionalGroupsSequence) << " - ";
-								writeTagNumberAndNameToLog(t,list.getDictionary(),log);
+								if (newformat) {
+									log << EMsgDCF(MMsgDC(FunctionalGroupSequenceAlreadyUsedInSharedFunctionalGroupsSequence),a);
+								}
+								else {
+									log << EMsgDC(FunctionalGroupSequenceAlreadyUsedInSharedFunctionalGroupsSequence) << " - ";
+									writeTagNumberAndNameToLog(t,list.getDictionary(),log);
+								}
 								log << " - in Per-frame Functional Groups Sequence Item #" << (i+1) << endl;
 								success=false;
 							}
@@ -1600,7 +1927,7 @@ checkPerFrameFunctionalGroupsSequencesAreNotAlreadyPresentInSharedFunctionalGrou
 }
 
 static bool
-checkCountOfDimensionIndexValuesMatchesDimensionIndexSequence(AttributeList &list,TextOutputStream &log) {
+checkCountOfDimensionIndexValuesMatchesDimensionIndexSequence(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 //cerr << "checkCountOfDimensionIndexValuesMatchesDimensionIndexSequence():" << endl;
 	bool success=true;
 	
@@ -1628,8 +1955,14 @@ checkCountOfDimensionIndexValuesMatchesDimensionIndexSequence(AttributeList &lis
 						Attribute *aDimensionIndexValues = (*frameContentSequenceList)[TagFromName(DimensionIndexValues)];
 						int nDimensionIndexValues = aDimensionIndexValues ? aDimensionIndexValues->getVM() : 0;
 						if (nDimensionIndexSequenceSequenceItems != nDimensionIndexValues) {
-							log << EMsgDC(NumberOfDimensionIndexValuesDoesNotMatchNumberOfDimensions) << " for frame " << (f+1)
-								<< " got " << nDimensionIndexValues << " - expected " << nDimensionIndexSequenceSequenceItems << endl;
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(NumberOfDimensionIndexValuesDoesNotMatchNumberOfDimensions),aDimensionIndexValues)
+									<< " = <" << nDimensionIndexValues << "> - expected " << nDimensionIndexSequenceSequenceItems << endl;
+							}
+							else {
+								log << EMsgDC(NumberOfDimensionIndexValuesDoesNotMatchNumberOfDimensions) << " for frame " << (f+1)
+									<< " got " << nDimensionIndexValues << " - expected " << nDimensionIndexSequenceSequenceItems << endl;
+							}
 							success = false;
 						}
 					}
@@ -1642,7 +1975,7 @@ checkCountOfDimensionIndexValuesMatchesDimensionIndexSequence(AttributeList &lis
 }
 
 static bool
-checkDimensionIndexValuesMatchInStackPositionNumberAndTemporalPositionIndex(AttributeList &list,TextOutputStream &log) {
+checkDimensionIndexValuesMatchInStackPositionNumberAndTemporalPositionIndex(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 //cerr << "checkDimensionIndexValuesMatchInStackPositionNumberAndTemporalPositionIndex():" << endl;
 	bool success=true;
 	
@@ -1692,7 +2025,7 @@ checkDimensionIndexValuesMatchInStackPositionNumberAndTemporalPositionIndex(Attr
 						Attribute *aInStackPositionNumber = (*frameContentSequenceList)[TagFromName(InStackPositionNumber)];
 						if (indexValueThatIsInStackPositionNumber != -1) {
 							if (aInStackPositionNumber == NULL || aInStackPositionNumber->getVM() == 0) {
-								log << EMsgDC(MissingInStackPositionNumberUsedAsDimensionIndex) << " for frame " << (f+1) << endl;
+								log << EMsgDCF(MMsgDC(MissingInStackPositionNumberUsedAsDimensionIndex),aDimensionIndexValues) << " for frame " << (f+1) << endl;
 								success = false;
 							}
 							else {
@@ -1705,13 +2038,24 @@ checkDimensionIndexValuesMatchInStackPositionNumberAndTemporalPositionIndex(Attr
 									(void)aDimensionIndexValues->getValue(indexValueThatIsInStackPositionNumber,vDimensionIndexValue);
 //cerr << "checkDimensionIndexValuesMatchInStackPositionNumberAndTemporalPositionIndex(): have corresponding DimensionIndexValue " << dec << vDimensionIndexValue << endl;
 									if (vDimensionIndexValue != vInStackPositionNumber) {
-										log << EMsgDC(DimensionIndexValueForInStackPositionNumberDoesNotEqualValueOfInStackPositionNumber) << " for frame " << (f+1)
-											<< " - got DimensionIndexValue " << vDimensionIndexValue << " - expected same value as InStackPositionNumber " << vInStackPositionNumber << endl;
+										if (newformat) {
+											log << EMsgDCF(MMsgDC(DimensionIndexValueForInStackPositionNumberDoesNotEqualValueOfInStackPositionNumber),aDimensionIndexValues)
+												<< " = <" << vDimensionIndexValue << "> - expected same value as InStackPositionNumber " << vInStackPositionNumber << endl;
+										}
+										else {
+											log << EMsgDC(DimensionIndexValueForInStackPositionNumberDoesNotEqualValueOfInStackPositionNumber) << " for frame " << (f+1)
+												<< " - got DimensionIndexValue " << vDimensionIndexValue << " - expected same value as InStackPositionNumber " << vInStackPositionNumber << endl;
+										}
 										success = false;
 									}
 								}
 								else {
-									log << EMsgDC(MissingDimensionIndexValueForInStackPositionNumber) << " for frame " << (f+1) << endl;
+									if (newformat) {
+										log << EMsgDCF(MMsgDC(MissingDimensionIndexValueForInStackPositionNumber),aDimensionIndexValues) << endl;
+									}
+									else {
+										log << EMsgDC(MissingDimensionIndexValueForInStackPositionNumber) << " for frame " << (f+1) << endl;
+									}
 									success = false;
 								}
 							}
@@ -1720,7 +2064,12 @@ checkDimensionIndexValuesMatchInStackPositionNumberAndTemporalPositionIndex(Attr
 						Attribute *aTemporalPositionIndex = (*frameContentSequenceList)[TagFromName(TemporalPositionIndex)];
 						if (indexValueThatIsTemporalPositionIndex != -1) {
 							if (aTemporalPositionIndex == NULL || aTemporalPositionIndex->getVM() == 0) {
-								log << EMsgDC(MissingTemporalPositionIndexUsedAsDimensionIndex) << " for frame " << (f+1) << endl;
+								if (newformat) {
+									log << EMsgDCF(MMsgDC(MissingTemporalPositionIndexUsedAsDimensionIndex),aDimensionIndexValues) << endl;
+								}
+								else {
+									log << EMsgDC(MissingTemporalPositionIndexUsedAsDimensionIndex) << " for frame " << (f+1) << endl;
+								}
 								success = false;
 							}
 							else {
@@ -1733,13 +2082,24 @@ checkDimensionIndexValuesMatchInStackPositionNumberAndTemporalPositionIndex(Attr
 									(void)aDimensionIndexValues->getValue(indexValueThatIsTemporalPositionIndex,vDimensionIndexValue);
 //cerr << "checkDimensionIndexValuesMatchInStackPositionNumberAndTemporalPositionIndex(): have corresponding DimensionIndexValue " << dec << vDimensionIndexValue << endl;
 									if (vDimensionIndexValue != vTemporalPositionIndex) {
-										log << EMsgDC(DimensionIndexValueForTemporalPositionIndexDoesNotEqualValueOfTemporalPositionIndex) << " for frame " << (f+1)
-											<< " - got DimensionIndexValue " << vDimensionIndexValue << " - expected same value as TemporalPositionIndex " << vTemporalPositionIndex << endl;
+										if (newformat) {
+											log << EMsgDCF(MMsgDC(DimensionIndexValueForTemporalPositionIndexDoesNotEqualValueOfTemporalPositionIndex),aDimensionIndexValues)
+												<< " = <" << vDimensionIndexValue << "> - expected same value as TemporalPositionIndex " << vTemporalPositionIndex << endl;
+										}
+										else {
+											log << EMsgDC(DimensionIndexValueForTemporalPositionIndexDoesNotEqualValueOfTemporalPositionIndex) << " for frame " << (f+1)
+												<< " - got DimensionIndexValue " << vDimensionIndexValue << " - expected same value as TemporalPositionIndex " << vTemporalPositionIndex << endl;
+										}
 										success = false;
 									}
 								}
 								else {
-									log << EMsgDC(MissingDimensionIndexValueForTemporalPositionIndex) << " for frame " << (f+1) << endl;
+									if (newformat) {
+										log << EMsgDCF(MMsgDC(MissingDimensionIndexValueForTemporalPositionIndex),aDimensionIndexValues) << endl;
+									}
+									else {
+										log << EMsgDC(MissingDimensionIndexValueForTemporalPositionIndex) << " for frame " << (f+1) << endl;
+									}
 									success = false;
 								}
 							}
@@ -1754,7 +2114,7 @@ checkDimensionIndexValuesMatchInStackPositionNumberAndTemporalPositionIndex(Attr
 }
 
 static bool
-checkCountPerFrameFunctionalGroupsMatchesNumberOfFrames(AttributeList &list,TextOutputStream &log) {
+checkCountPerFrameFunctionalGroupsMatchesNumberOfFrames(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 //cerr << "checkCountPerFrameFunctionalGroupsMatchesNumberOfFrames():" << endl;
 	bool success=true;
 	
@@ -1769,8 +2129,13 @@ checkCountPerFrameFunctionalGroupsMatchesNumberOfFrames(AttributeList &list,Text
 				(void)aNumberOfFrames->getValue(0,vNumberOfFrames);
 			}
 			if (nPerFrameFunctionalGroupsSequenceItems != vNumberOfFrames) {
-				log << EMsgDC(NumberOfPerFrameFunctionalGroupsSequenceItemsDoesNotMatchNumberOfFrames)
-					<< " - have " << nPerFrameFunctionalGroupsSequenceItems << " items - but " << vNumberOfFrames << " frames" << endl;
+				if (newformat) {
+					log << EMsgDCF(MMsgDC(NumberOfPerFrameFunctionalGroupsSequenceItemsDoesNotMatchNumberOfFrames),aPerFrameFunctionalGroupsSequence);
+				}
+				else {
+					log << EMsgDC(NumberOfPerFrameFunctionalGroupsSequenceItemsDoesNotMatchNumberOfFrames);
+				}
+				log << " - have " << nPerFrameFunctionalGroupsSequenceItems << " items - but " << vNumberOfFrames << " frames" << endl;
 				success = false;
 			}
 		}
@@ -1780,7 +2145,116 @@ checkCountPerFrameFunctionalGroupsMatchesNumberOfFrames(AttributeList &list,Text
 }
 
 static bool
-checkCoordinateContentItemsHaveAppropriateChildren(AttributeList &list,TextOutputStream &log) {
+checkSegmentNumbersMonotonicallyIncreasingFromOneByOne(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
+//cerr << "checkSegmentNumbersMonotonicallyIncreasingFromOneByOne():" << endl;
+	bool success=true;
+	
+	Attribute *aSegmentSequence = list[TagFromName(SegmentSequence)];
+	if (aSegmentSequence && aSegmentSequence->isSequence()) {
+		AttributeList **aSegmentSequenceLists;
+		int nSegmentSequenceItems;
+		if ((nSegmentSequenceItems=aSegmentSequence->getLists(&aSegmentSequenceLists)) > 0) {
+			int s;
+			for (s=0; s<nSegmentSequenceItems; ++s) {
+				AttributeList *segmentList = aSegmentSequenceLists[s];
+				Attribute *aSegmentNumber = (*segmentList)[TagFromName(SegmentNumber)];
+				Uint16 vSegmentNumber = 0;
+				if (aSegmentNumber) {
+					(void)aSegmentNumber->getValue(0,vSegmentNumber);
+					if (vSegmentNumber != s + 1) {
+						if (newformat) {
+							log << EMsgDCF(MMsgDC(SegmentNumberNotMonotonicallyIncreasingFromOneByOne),aSegmentNumber);
+						}
+						else {
+							log << EMsgDC(SegmentNumberNotMonotonicallyIncreasingFromOneByOne);
+						}
+						log << " - have SegmentSequence item number " << (s+1) << " (from one) with SegmentNumber of " << vSegmentNumber << endl;
+						success = false;
+						break;	// only report first one
+					}
+				}
+			}
+		}
+	}
+	
+	return success;
+}
+
+static bool
+checkReferencedSegmentNumbersHaveTarget(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
+//cerr << "checkReferencedSegmentNumbersHaveTarget():" << endl;
+	bool success=true;
+	
+	Attribute *aSegmentSequence = list[TagFromName(SegmentSequence)];
+	if (aSegmentSequence && aSegmentSequence->isSequence()) {
+		AttributeList **aSegmentSequenceLists;
+		int nSegmentSequenceItems;
+		if ((nSegmentSequenceItems=aSegmentSequence->getLists(&aSegmentSequenceLists)) > 0) {
+			Uint16 segmentNumberTargets[nSegmentSequenceItems];		// set of target SegmentNumbers, even if not numbered sequentially (don't care; checked elsewhere)
+			int s;
+			for (s=0; s<nSegmentSequenceItems; ++s) {
+				AttributeList *segmentList = aSegmentSequenceLists[s];
+				Attribute *aSegmentNumber = (*segmentList)[TagFromName(SegmentNumber)];
+				segmentNumberTargets[s] = 0;
+				if (aSegmentNumber) {
+					(void)aSegmentNumber->getValue(0,segmentNumberTargets[s]);
+				}
+			}
+			
+			// if we were able to build a set of target SegmentNumbers, now check every reference
+	
+			Attribute *aPerFrameFunctionalGroupsSequence = list[TagFromName(PerFrameFunctionalGroupsSequence)];
+			if (aPerFrameFunctionalGroupsSequence && aPerFrameFunctionalGroupsSequence->isSequence() && !aPerFrameFunctionalGroupsSequence->isEmpty()) {
+				AttributeList **aPerFrameFunctionalGroupsSequenceLists;
+				int nPerFrameFunctionalGroupsSequenceItems;
+				if ((nPerFrameFunctionalGroupsSequenceItems=aPerFrameFunctionalGroupsSequence->getLists(&aPerFrameFunctionalGroupsSequenceLists)) > 0) {
+					int f;
+					for (f=0; f<nPerFrameFunctionalGroupsSequenceItems; ++f) {
+						AttributeList *perFrameList = aPerFrameFunctionalGroupsSequenceLists[f];
+						Attribute *aSegmentIdentificationSequence = (*perFrameList)[TagFromName(SegmentIdentificationSequence)];
+						if (aSegmentIdentificationSequence && aSegmentIdentificationSequence->isSequence() && !aSegmentIdentificationSequence->isEmpty()) {
+							AttributeList **aSegmentIdentificationSequenceLists;
+							int nSegmentIdentificationSequenceItems;
+							if ((nSegmentIdentificationSequenceItems=aSegmentIdentificationSequence->getLists(&aSegmentIdentificationSequenceLists)) > 0) {
+								AttributeList *segmentIdentificationSequenceList = aSegmentIdentificationSequenceLists[0];	// should only be one so only check one
+								Attribute *aReferencedSegmentNumber = (*segmentIdentificationSequenceList)[TagFromName(ReferencedSegmentNumber)];
+								Uint16 vReferencedSegmentNumber = 0;
+								if (aReferencedSegmentNumber) {
+									(void)aReferencedSegmentNumber->getValue(0,vReferencedSegmentNumber);
+//cerr << "checkReferencedSegmentNumbersHaveTarget(): checking frame " << (f+1) << endl;
+									bool found = false;
+									for (int i=0; i<nSegmentSequenceItems; ++i) {
+										if (vReferencedSegmentNumber == segmentNumberTargets[i]) {
+//cerr << "checkReferencedSegmentNumbersHaveTarget(): for frame " << (f+1) << " have SegmentNumber for ReferencedSegmentNumber " << vReferencedSegmentNumber << endl;
+											found = true;
+											break;
+										}
+									}
+									if (!found) {
+										if (newformat) {
+											log << EMsgDCF(MMsgDC(ReferencedSegmentNumberNotPresentInSegmentSequence),aReferencedSegmentNumber)
+												<< " = <" << vReferencedSegmentNumber << ">" << endl;
+										}
+										else {
+											log << EMsgDC(ReferencedSegmentNumberNotPresentInSegmentSequence)
+												<< " - have ReferencedSegmentNumber " << vReferencedSegmentNumber << " in SegmentIdentificationSequence for frame " << (f+1) << endl;
+										}
+										success = false;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return success;
+}
+
+static bool
+checkCoordinateContentItemsHaveAppropriateChildren(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 //cerr << "checkCoordinateContentItemsHaveAppropriateChildren():" << endl;
 	bool success=true;
 	{
@@ -1805,8 +2279,8 @@ checkCoordinateContentItemsHaveAppropriateChildren(AttributeList &list,TextOutpu
 							if (aChildValueType) {
 								vChildValueType=AttributeValue(aChildValueType);
 								if (vChildValueType &&
-										(strcmp(vValueType,"SCOORD") == 0 && strcmp(vChildValueType,"IMAGE") == 0)
-									 || (strcmp(vValueType,"TCOORD") == 0 && (strcmp(vChildValueType,"SCOORD") == 0 || strcmp(vChildValueType,"IMAGE") == 0 || strcmp(vChildValueType,"WAVEFORM") == 0))
+									   ((strcmp(vValueType,"SCOORD") == 0 && strcmp(vChildValueType,"IMAGE") == 0)
+									 || (strcmp(vValueType,"TCOORD") == 0 && (strcmp(vChildValueType,"SCOORD") == 0 || strcmp(vChildValueType,"IMAGE") == 0 || strcmp(vChildValueType,"WAVEFORM") == 0)))
 									) {
 //cerr << "checkCoordinateContentItemsHaveAppropriateChildren(): foundAppropriateChild " << vChildValueType << endl;
 									foundAppropriateChildOrIsByReferenceRelationship = true;
@@ -1836,8 +2310,14 @@ checkCoordinateContentItemsHaveAppropriateChildren(AttributeList &list,TextOutpu
 								}
 							}
 							if (!foundAppropriateRelationship) {
-								log << EMsgDC(CoordinatesContentItemHasIncorrectRelationshipChildContentItem) << " for " << vValueType
-									<< " got " << (vRelationshipType ? vRelationshipType : "no relationship") << " - expected SELECTED FROM" << endl;
+								if (newformat) {
+									log << EMsgDCF(MMsgDC(CoordinatesContentItemHasIncorrectRelationshipChildContentItem),aRelationshipType) << " for " << vValueType
+										<< " = <" << (vRelationshipType ? vRelationshipType : "no relationship") << "> - expected SELECTED FROM" << endl;
+								}
+								else {
+									log << EMsgDC(CoordinatesContentItemHasIncorrectRelationshipChildContentItem) << " for " << vValueType
+										<< " got " << (vRelationshipType ? vRelationshipType : "no relationship") << " - expected SELECTED FROM" << endl;
+								}
 								success=false;
 							}
 						}
@@ -1845,10 +2325,18 @@ checkCoordinateContentItemsHaveAppropriateChildren(AttributeList &list,TextOutpu
 					}
 				}
 				if (!foundAppropriateChildOrIsByReferenceRelationship) {
-					log << EMsgDC(CoordinatesContentItemMissingOrIncorrectRequiredChildContentItem) << " for " << vValueType
-						<< " got " << (vChildValueType ? vChildValueType : "no child")
-						<< " expected " << (strcmp(vValueType,"SCOORD") == 0 ? "IMAGE" : "SCOORD, IMAGE or WAVEFORM")
-						<< endl;
+					if (newformat) {
+						log << EMsgDCF(MMsgDC(CoordinatesContentItemMissingOrIncorrectRequiredChildContentItem),aContentSequence) << " for " << vValueType
+							<< " = <" << (vChildValueType ? vChildValueType : "no child")
+							<< "> - expected " << (strcmp(vValueType,"SCOORD") == 0 ? "IMAGE" : "SCOORD, IMAGE or WAVEFORM")
+							<< endl;
+					}
+					else {
+						log << EMsgDC(CoordinatesContentItemMissingOrIncorrectRequiredChildContentItem) << " for " << vValueType
+							<< " got " << (vChildValueType ? vChildValueType : "no child")
+							<< " expected " << (strcmp(vValueType,"SCOORD") == 0 ? "IMAGE" : "SCOORD, IMAGE or WAVEFORM")
+							<< endl;
+					}
 					success=false;
 				}
 			}
@@ -1859,7 +2347,7 @@ checkCoordinateContentItemsHaveAppropriateChildren(AttributeList &list,TextOutpu
 	while (!listi) {
 		Attribute *a=listi();
 		Assert(a);
-		if (!::loopOverListsInSequencesWithLog(a,log,&::checkCoordinateContentItemsHaveAppropriateChildren)) {
+		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkCoordinateContentItemsHaveAppropriateChildren)) {
 			success=false;
 		}
 		++listi;
@@ -1918,7 +2406,7 @@ findInstanceInHierarchicalEvidenceSequence(Attribute *aEvidenceSequence,const ch
 }
 
 static bool
-findInstanceInHierarchicalEvidenceSequences(AttributeList &list,const char *vSOPInstanceUID,const char *vSOPClassUID,const char *vValueType,const char *subType,TextOutputStream &log) {
+findInstanceInHierarchicalEvidenceSequences(AttributeList &list,Attribute *aSOPInstanceUID,const char *vSOPInstanceUID,Attribute *aSOPClassUID,const char *vSOPClassUID,const char *vValueType,const char *subType,bool verbose,bool newformat,TextOutputStream &log) {
 //cerr << "findInstanceInHierarchicalEvidenceSequences():" << endl;
 	bool success = false;
 	AttributeList *foundList = NULL;
@@ -1942,23 +2430,60 @@ findInstanceInHierarchicalEvidenceSequences(AttributeList &list,const char *vSOP
 //cerr << "findInstanceInHierarchicalEvidenceSequences(): found match ReferencedSOPClassUID " << vSOPClassUID << endl;
 			}
 			else {
-				log << EMsgDC(SOPClassInCurrentRequestedProcedureOrPertinentOtherEvidenceSequenceDoesNotMatchReference)
-					<< " for " << vValueType << " " << (subType ? " " : "") << (subType ? subType : "") << " ReferencedSOPInstanceUID " << (vSOPInstanceUID ? vSOPInstanceUID : "missing or empty SOPInstanceUID")
-					<< " " << vValueType << " ReferencedSOPClassUID is " << vSOPClassUID << " but evidence ReferencedSOPClassUID is " << vReferencedSOPClassUID
-					<< endl;
+				if (newformat) {
+					log << EMsgDCF(MMsgDC(SOPClassInCurrentRequestedProcedureOrPertinentOtherEvidenceSequenceDoesNotMatchReference),aSOPClassUID)
+						<< " for " << vValueType;
+					if (subType) {
+						log << " " << subType;
+					}
+					log << " = <" << vSOPClassUID
+						<< "> but expected <" << vReferencedSOPClassUID << ">"
+						<< " (ReferencedSOPInstanceUID ";
+					if (vSOPInstanceUID) {
+						log << "= <" << vSOPInstanceUID << ">";
+					}
+					else {
+						log << "missing or empty SOPInstanceUID";
+					}
+					log << ")";
+				}
+				else {
+					log << EMsgDC(SOPClassInCurrentRequestedProcedureOrPertinentOtherEvidenceSequenceDoesNotMatchReference)
+						<< " for " << vValueType << " " << (subType ? " " : "") << (subType ? subType : "")
+						<< " ReferencedSOPInstanceUID " << (vSOPInstanceUID ? vSOPInstanceUID : "missing or empty SOPInstanceUID")
+						<< " " << vValueType
+						<< " ReferencedSOPClassUID is " << vSOPClassUID
+						<< " but evidence ReferencedSOPClassUID is " << vReferencedSOPClassUID;
+				}
+				log << endl;
 				success	= false;
 			}
 		}
 	}
 	else {
-		log << EMsgDC(NotListedInCurrentRequestedProcedureOrPertinentOtherEvidenceSequence)
-			<< " but have " << vValueType << (subType ? " " : "") << (subType ? subType : "") << " ReferencedSOPInstanceUID " << (vSOPInstanceUID ? vSOPInstanceUID : "missing or empty SOPInstanceUID") << endl;
+		if (newformat) {
+			log << EMsgDCF(MMsgDC(NotListedInCurrentRequestedProcedureOrPertinentOtherEvidenceSequence),aSOPInstanceUID)
+				<< " but have " << vValueType << (subType ? " " : "") << (subType ? subType : "")
+				<< " ReferencedSOPInstanceUID ";
+			if (vSOPInstanceUID) {
+				log << " = <" << vSOPInstanceUID << ">";
+			}
+			else {
+				log << "missing or empty SOPInstanceUID";
+			}
+		}
+		else {
+			log << EMsgDC(NotListedInCurrentRequestedProcedureOrPertinentOtherEvidenceSequence)
+				<< " but have " << vValueType << (subType ? " " : "") << (subType ? subType : "")
+				<< " ReferencedSOPInstanceUID " << (vSOPInstanceUID ? vSOPInstanceUID : "missing or empty SOPInstanceUID");
+		}
+		log << endl;
 	}
 	return success;
 }
 
 static bool
-checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences(AttributeList &rootlist,AttributeList &list,TextOutputStream &log) {
+checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences(AttributeList &rootlist,AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 //cerr << "checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences():" << endl;
 	bool success=true;
 
@@ -1967,6 +2492,12 @@ checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences(AttributeList 
 		if (aValueType) {
 			const char *vValueType=AttributeValue(aValueType);
 			if (vValueType && (strcmp(vValueType,"IMAGE") == 0 || strcmp(vValueType,"COMPOSITE") == 0 || strcmp(vValueType,"WAVEFORM") == 0)) {
+				Attribute *aReferencedSOPInstanceUID = NULL;
+				Attribute *aReferencedSOPClassUID = NULL;
+				Attribute *aPresentationStateReferencedSOPInstanceUID = NULL;
+				Attribute *aPresentationStateReferencedSOPClassUID = NULL;
+				Attribute *aRealWorldValueReferencedSOPInstanceUID = NULL;
+				Attribute *aRealWorldValueReferencedSOPClassUID = NULL;
 				const char *vReferencedSOPInstanceUID = NULL;
 				const char *vReferencedSOPClassUID = NULL;
 				const char *vPresentationStateReferencedSOPInstanceUID = NULL;
@@ -1982,12 +2513,12 @@ checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences(AttributeList 
 						int iinstance;
 						for (iinstance=0; iinstance<ninstance; ++iinstance) {
 							AttributeList *itemListInstance = alinstance[iinstance];
-							Attribute *aReferencedSOPInstanceUID=(*itemListInstance)[TagFromName(ReferencedSOPInstanceUID)];
+							aReferencedSOPInstanceUID=(*itemListInstance)[TagFromName(ReferencedSOPInstanceUID)];
 							if (aReferencedSOPInstanceUID) {
 								vReferencedSOPInstanceUID=AttributeValue(aReferencedSOPInstanceUID);
 //cerr << "checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences():  in " << vValueType  << " have ReferencedSOPInstanceUID " << vReferencedSOPInstanceUID << endl;
 							}
-							Attribute *aReferencedSOPClassUID=(*itemListInstance)[TagFromName(ReferencedSOPClassUID)];
+							aReferencedSOPClassUID=(*itemListInstance)[TagFromName(ReferencedSOPClassUID)];
 							if (aReferencedSOPClassUID) {
 								vReferencedSOPClassUID=AttributeValue(aReferencedSOPClassUID);
 //cerr << "checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences():  in " << vValueType  << " have ReferencedSOPClassUID " << vReferencedSOPClassUID << endl;
@@ -2002,12 +2533,12 @@ checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences(AttributeList 
 									int ipresentationstate;
 									for (ipresentationstate=0; ipresentationstate<npresentationstate; ++ipresentationstate) {
 										AttributeList *itemListPresentationStateInstance = alpresentationstate[ipresentationstate];
-										Attribute *aPresentationStateReferencedSOPInstanceUID=(*itemListPresentationStateInstance)[TagFromName(ReferencedSOPInstanceUID)];
+										aPresentationStateReferencedSOPInstanceUID=(*itemListPresentationStateInstance)[TagFromName(ReferencedSOPInstanceUID)];
 										if (aPresentationStateReferencedSOPInstanceUID) {
 											vPresentationStateReferencedSOPInstanceUID=AttributeValue(aPresentationStateReferencedSOPInstanceUID);
 //cerr << "checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences():  in " << vValueType  << " have Presentation State ReferencedSOPInstanceUID " << vPresentationStateReferencedSOPInstanceUID << endl;
 										}
-										Attribute *aPresentationStateReferencedSOPClassUID=(*itemListPresentationStateInstance)[TagFromName(ReferencedSOPClassUID)];
+										aPresentationStateReferencedSOPClassUID=(*itemListPresentationStateInstance)[TagFromName(ReferencedSOPClassUID)];
 										if (aPresentationStateReferencedSOPClassUID) {
 											vPresentationStateReferencedSOPClassUID=AttributeValue(aPresentationStateReferencedSOPClassUID);
 //cerr << "checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences():  in " <<vValueType  << " have Presentation State ReferencedSOPClassUID " << vPresentationStateReferencedSOPClassUID << endl;
@@ -2025,12 +2556,12 @@ checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences(AttributeList 
 									int iRealWorldValue;
 									for (iRealWorldValue=0; iRealWorldValue<nRealWorldValue; ++iRealWorldValue) {
 										AttributeList *itemListRealWorldValue = alRealWorldValue[iRealWorldValue];
-										Attribute *aRealWorldValueReferencedSOPInstanceUID=(*itemListRealWorldValue)[TagFromName(ReferencedSOPInstanceUID)];
+										aRealWorldValueReferencedSOPInstanceUID=(*itemListRealWorldValue)[TagFromName(ReferencedSOPInstanceUID)];
 										if (aRealWorldValueReferencedSOPInstanceUID) {
 											vRealWorldValueReferencedSOPInstanceUID=AttributeValue(aRealWorldValueReferencedSOPInstanceUID);
 //cerr << "checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences():  in " << vValueType  << " have Real World Value Mapping ReferencedSOPInstanceUID " << vRealWorldValueReferencedSOPInstanceUID << endl;
 										}
-										Attribute *aRealWorldValueReferencedSOPClassUID=(*itemListRealWorldValue)[TagFromName(ReferencedSOPClassUID)];
+										aRealWorldValueReferencedSOPClassUID=(*itemListRealWorldValue)[TagFromName(ReferencedSOPClassUID)];
 										if (aRealWorldValueReferencedSOPClassUID) {
 											vRealWorldValueReferencedSOPClassUID=AttributeValue(aRealWorldValueReferencedSOPClassUID);
 //cerr << "checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences():  in " <<vValueType  << " have Real World Value Mapping ReferencedSOPClassUID " << vRealWorldValueReferencedSOPClassUID << endl;
@@ -2043,15 +2574,15 @@ checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences(AttributeList 
 					}
 				}
 				
-				if (!findInstanceInHierarchicalEvidenceSequences(rootlist,vReferencedSOPInstanceUID,vReferencedSOPClassUID,vValueType,NULL,log)) {
+				if (!findInstanceInHierarchicalEvidenceSequences(rootlist,aReferencedSOPInstanceUID,vReferencedSOPInstanceUID,aReferencedSOPClassUID,vReferencedSOPClassUID,vValueType,NULL,verbose,newformat,log)) {
 					success=false;
 				}
 				// presentation state is optional, so do not check if no referenced
-				if (vPresentationStateReferencedSOPInstanceUID && !findInstanceInHierarchicalEvidenceSequences(rootlist,vPresentationStateReferencedSOPInstanceUID,vPresentationStateReferencedSOPClassUID,vValueType,"PresentationState",log)) {
+				if (vPresentationStateReferencedSOPInstanceUID && !findInstanceInHierarchicalEvidenceSequences(rootlist,aPresentationStateReferencedSOPInstanceUID,vPresentationStateReferencedSOPInstanceUID,aPresentationStateReferencedSOPClassUID,vPresentationStateReferencedSOPClassUID,vValueType,"PresentationState",verbose,newformat,log)) {
 					success=false;
 				}
 				// real world value mapping is optional, so do not check if no referenced
-				if (vRealWorldValueReferencedSOPInstanceUID && !findInstanceInHierarchicalEvidenceSequences(rootlist,vRealWorldValueReferencedSOPInstanceUID,vRealWorldValueReferencedSOPClassUID,vValueType,"RealWorldValueMapping",log)) {
+				if (vRealWorldValueReferencedSOPInstanceUID && !findInstanceInHierarchicalEvidenceSequences(rootlist,aRealWorldValueReferencedSOPInstanceUID,vRealWorldValueReferencedSOPInstanceUID,aRealWorldValueReferencedSOPClassUID,vRealWorldValueReferencedSOPClassUID,vValueType,"RealWorldValueMapping",verbose,newformat,log)) {
 					success=false;
 				}
 			}
@@ -2062,11 +2593,151 @@ checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences(AttributeList 
 	while (!listi) {
 		Attribute *a=listi();
 		Assert(a);
-		if (!::loopOverListsInSequencesWithRootListAndLog(rootlist,a,log,&::checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences)) {
+		if (!::loopOverListsInSequencesWithRootListAndLog(rootlist,a,verbose,newformat,log,&::checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences)) {
 			success=false;
 		}
 		++listi;
 	}
+	return success;
+}
+
+static bool
+checkConsistencyOfTiledImageGeometry(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
+//cerr << "checkConsistencyOfTiledImageGeometry():" << endl;
+	bool success=true;
+
+	Attribute *aNumberOfFrames=list[TagFromName(NumberOfFrames)];
+
+	char *vSOPClassUID;
+	Attribute *aSOPClassUID=list[TagFromName(SOPClassUID)];
+	if (aSOPClassUID && aSOPClassUID->getValue(0,vSOPClassUID) && strcmp(vSOPClassUID,VLWholeSlideMicroscopyImageStorageSOPClassUID) == 0) {
+//cerr << "checkConsistencyOfTiledImageGeometry(): is WSI so perform check" << endl;
+		Uint32 vNumberOfFrames = 1;
+		{
+			if (aNumberOfFrames) {
+				(void)aNumberOfFrames->getValue(0,vNumberOfFrames);
+			}
+		}
+		
+		int nPerFrameFunctionalGroupsSequenceItems = 0;
+		{
+			Attribute *aPerFrameFunctionalGroupsSequence = list[TagFromName(PerFrameFunctionalGroupsSequence)];
+			if (aPerFrameFunctionalGroupsSequence && aPerFrameFunctionalGroupsSequence->isSequence()) {
+				AttributeList **aPerFrameFunctionalGroupsSequenceLists;
+				nPerFrameFunctionalGroupsSequenceItems=aPerFrameFunctionalGroupsSequence->getLists(&aPerFrameFunctionalGroupsSequenceLists);
+			}
+		}
+		
+		// do not need to check vNumberOfFrames == nPerFrameFunctionalGroupsSequenceItems if latter not 0, already done by checkCountPerFrameFunctionalGroupsMatchesNumberOfFrames()
+		
+		bool isTiledFull = false;
+		{
+			Attribute *aDimensionOrganizationType=list[TagFromName(DimensionOrganizationType)];
+			char *vDimensionOrganizationType = NULL;
+			if (aDimensionOrganizationType && aDimensionOrganizationType->getValue(0,vDimensionOrganizationType) && strcmp(vDimensionOrganizationType,"TILED_FULL") == 0) {
+				isTiledFull = true;
+			}
+		}
+		
+		Uint32 vNumberOfOpticalPaths = 1;
+		{
+			Attribute *aNumberOfOpticalPaths=list[TagFromName(NumberOfOpticalPaths)];
+			if (aNumberOfOpticalPaths) {
+				(void)aNumberOfOpticalPaths->getValue(0,vNumberOfOpticalPaths);
+			}
+		}
+		
+		Uint32 vColumns = 0;
+		{
+			Attribute *aColumns=list[TagFromName(Columns)];
+			if (aColumns) {
+				(void)aColumns->getValue(0,vColumns);
+			}
+		}
+		
+		Uint32 vTotalPixelMatrixColumns = 0;
+		{
+			Attribute *aTotalPixelMatrixColumns=list[TagFromName(TotalPixelMatrixColumns)];
+			if (aTotalPixelMatrixColumns) {
+				(void)aTotalPixelMatrixColumns->getValue(0,vTotalPixelMatrixColumns);
+			}
+		}
+		
+		Uint32 numberOfColumnsOfTiles = vTotalPixelMatrixColumns / vColumns;
+		
+		if (vTotalPixelMatrixColumns % vColumns != 0) {
+			// do not emit a warning - occurs commonly and is not illegal or bad practice ...
+			//log << WMsgDCF(MMsgDC(TotalPixelMatrixColumnsNotAnExactMultipleOfColumns),aTotalPixelMatrixColumns)
+			//	<< " TotalPixelMatrixColumns = " << vTotalPixelMatrixColumns
+			//	<< " Columns =  " << vColumns
+			//	<< endl;
+			++numberOfColumnsOfTiles;
+		}
+		
+		Uint32 vRows = 0;
+		{
+			Attribute *aRows=list[TagFromName(Rows)];
+			if (aRows) {
+				(void)aRows->getValue(0,vRows);
+			}
+		}
+		
+		Uint32 vTotalPixelMatrixRows = 0;
+		{
+			Attribute *aTotalPixelMatrixRows=list[TagFromName(TotalPixelMatrixRows)];
+			if (aTotalPixelMatrixRows) {
+				(void)aTotalPixelMatrixRows->getValue(0,vTotalPixelMatrixRows);
+			}
+		}
+		
+		Uint32 numberOfRowsOfTiles = vTotalPixelMatrixRows / vRows;
+		
+		if (vTotalPixelMatrixRows % vRows != 0) {
+			// do not emit a warning - occurs commonly and is not illegal or bad practice ...
+			//log << WMsgDCF(MMsgDC(TotalPixelMatrixRowsNotAnExactMultipleOfRows),aTotalPixelMatrixRows)
+			//	<< " TotalPixelMatrixRows = " << vTotalPixelMatrixRows
+			//	<< " Rows =  " << vRows
+			//	<< endl;
+			++numberOfRowsOfTiles;
+		}
+		
+		Uint32 vTotalPixelMatrixFocalPlanes = 1;
+		{
+			Attribute *aTotalPixelMatrixFocalPlanes=list[TagFromName(TotalPixelMatrixFocalPlanes)];
+			if (aTotalPixelMatrixFocalPlanes) {
+				(void)aTotalPixelMatrixFocalPlanes->getValue(0,vTotalPixelMatrixFocalPlanes);
+			}
+		}
+		
+		Uint32 expectedNumberOfFrames = vNumberOfOpticalPaths * vTotalPixelMatrixFocalPlanes * numberOfRowsOfTiles * numberOfColumnsOfTiles;
+		
+		if (isTiledFull || nPerFrameFunctionalGroupsSequenceItems == vNumberOfFrames) {
+			if (expectedNumberOfFrames != vNumberOfFrames) {
+				if (newformat) {
+					log << EMsgDCF(MMsgDC(NumberOfFramesDoesNotMatchExpectedValueForTiledTotalPixelMatrix),aNumberOfFrames)
+						<< " = <" << vNumberOfFrames
+						<< " > - expected " << expectedNumberOfFrames
+						<< " for " << vNumberOfOpticalPaths << " optical paths"
+						<< ", " << vTotalPixelMatrixFocalPlanes << " focal planes"
+						<< ", " << numberOfRowsOfTiles << " rows of tiles"
+						<< ", " << numberOfColumnsOfTiles << " columns of tiles"
+						<< endl;
+				}
+				else {
+					log << EMsgDC(NumberOfFramesDoesNotMatchExpectedValueForTiledTotalPixelMatrix)
+						<< " got " << vNumberOfFrames
+						<< " expected " << expectedNumberOfFrames
+						<< " for " << vNumberOfOpticalPaths << " optical paths"
+						<< ", " << vTotalPixelMatrixFocalPlanes << " focal planes"
+						<< ", " << numberOfRowsOfTiles << " rows of tiles"
+						<< ", " << numberOfColumnsOfTiles << " columns of tiles"
+						<< endl;
+				}
+				success=false;
+			}
+		}
+	}
+
 	return success;
 }
 
@@ -2078,6 +2749,7 @@ main(int argc, char *argv[])
 
 	bool verbose=options.get("verbose") || options.get("v");
 	bool describe=options.get("describe");
+	bool newformat=options.get("newformat") || options.get("new");
 	bool dump=options.get("dump");
 	bool showfilename=options.get("filename");
 	
@@ -2129,7 +2801,7 @@ main(int argc, char *argv[])
 	}
 	
 	if (verbose) log << "******** While reading ... ********" << endl; 
-	list.read(din,&log,verbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit,
+	list.read(din,newformat,&log,verbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags,dicom_input_options.useUSVRForLUTDataIfNotExplicit,
 		false/*useStopAtTag*/,Tag(0,0)/*stopAtTag*/,false/*fixBitsDuringRead*/);
 
 	const char *errors=list.errors();
@@ -2141,78 +2813,88 @@ main(int argc, char *argv[])
 	
 	// do not && each of these with success, else no function gets called after first failure !
 	
-	if (!checkMetaInformationMatchesSOPInstance(list,log)) success = false;
+	if (!checkMetaInformationMatchesSOPInstance(list,verbose,newformat,log)) success = false;
 	
-	if (!checkPixelDataIsTheCorrectLength(list,log)) success = false;
+	if (!checkPixelDataIsTheCorrectLength(list,verbose,newformat,log)) success = false;
 	
-	if (!checkWaveformSequenceIsInternallyConsistent(list,log)) success = false;
+	if (!checkWaveformSequenceIsInternallyConsistent(list,verbose,newformat,log)) success = false;
 	
-	if (!checkNoIllegalOddNumberedGroups(list,log)) success = false;
+	if (!checkNoIllegalOddNumberedGroups(list,verbose,newformat,log)) success = false;
 	
-	if (!checkLUTDataValuesMatchSpecifiedRange(list,log)) success = false;
+	if (!checkLUTDataValuesMatchSpecifiedRange(list,verbose,newformat,log)) success = false;
 	
-	if (!checkNoEmptyReferencedFileIDComponents(list,log)) success = false;
+	if (!checkNoEmptyReferencedFileIDComponents(list,verbose,newformat,log)) success = false;
 	
-	if (!checkFrameIncrementPointerValuesValid(list,log)) success = false;
+	if (!checkFrameIncrementPointerValuesValid(list,verbose,newformat,log)) success = false;
 	
-	if (!checkFrameVectorCountsValid(list,log)) success = false;
+	if (!checkFrameVectorCountsValid(list,verbose,newformat,log)) success = false;
 	
-	if (!checkPixelAspectRatioValidIfPresent(list,log)) success = false;
+	if (!checkPixelAspectRatioValidIfPresent(list,verbose,newformat,log)) success = false;
 	
-	if (!checkEstimatedRadiographicMagnificationFactorIfPresent(list,log)) success = false;
+	if (!checkEstimatedRadiographicMagnificationFactorIfPresent(list,verbose,newformat,log)) success = false;
 	
-	if (!checkPixelSpacingCalibration(list,log)) success = false;
+	if (!checkPixelSpacingCalibration(list,verbose,newformat,log)) success = false;
 	
-	if (!checkOrientationsAreUnitVectors(list,log)) success = false;
+	if (!checkOrientationsAreUnitVectors(list,verbose,newformat,log)) success = false;
 	
-	if (!checkOrientationsAreOrthogonal(list,log)) success = false;
+	if (!checkOrientationsAreOrthogonal(list,verbose,newformat,log)) success = false;
 	
-	if (!checkPatientOrientationValuesForBipedOrQuadruped(list,log)) success = false;
+	if (!checkPatientOrientationValuesForBipedOrQuadruped(list,verbose,newformat,log)) success = false;
 	
-	if (!checkScaledNumericValues(list,log)) success = false;
+	if (!checkScaledNumericValues(list,verbose,newformat,log)) success = false;
 	
-	if (!checkSpacingBetweenSlicesIsNotNegative(list,log)) success = false;
+	if (!checkSpacingBetweenSlicesIsNotNegative(list,verbose,newformat,log)) success = false;
 	
-	if (!checkUIDs(list,log)) success = false;
+	if (!checkUIDs(list,verbose,newformat,log)) success = false;
 
-	if (!checkPresentationStateDisplayedAreaSelectionValuesAreValid(list,log)) success = false;
+	if (!checkPresentationStateDisplayedAreaSelectionValuesAreValid(list,verbose,newformat,log)) success = false;
 	
-	if (!checkCodeValuesDoNotContainInappropriateCharacters(list,log)) success = false;
+	if (!checkCodeValuesDoNotContainInappropriateCharacters(list,verbose,newformat,log)) success = false;
 	
-	if (!checkLongCodeValuesAreLongEnough(list,log)) success = false;
+	if (!checkLongCodeValuesAreLongEnough(list,verbose,newformat,log)) success = false;
 	
-	if (!checkCodeMeaningsForMeasurementUnitsDoNotContainInappropriateQuotes(list,log)) success = false;
+	if (!checkCodeMeaningsForMeasurementUnitsDoNotContainInappropriateQuotes(list,verbose,newformat,log)) success = false;
 	
-	if (!checkCodingSchemeDesignatorForMeasurementUnits(list,log)) success = false;
+	if (!checkCodingSchemeDesignatorForMeasurementUnits(list,verbose,newformat,log)) success = false;
 	
-	if (!checkCoordinateContentItemsHaveAppropriateChildren(list,log)) success = false;
+	if (!checkCoordinateContentItemsHaveAppropriateChildren(list,verbose,newformat,log)) success = false;
 	
-	if (!checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences(list,list,log)) success = false;
+	if (!checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences(list,list,verbose,newformat,log)) success = false;
 	
-	if (!checkPerFrameFunctionalGroupsSequencesAreNotAlreadyPresentInSharedFunctionalGroup(list,log)) success = false;
+	if (!checkPerFrameFunctionalGroupsSequencesAreNotAlreadyPresentInSharedFunctionalGroup(list,verbose,newformat,log)) success = false;
 	
-	if (!checkCountOfDimensionIndexValuesMatchesDimensionIndexSequence(list,log)) success = false;
+	if (!checkCountOfDimensionIndexValuesMatchesDimensionIndexSequence(list,verbose,newformat,log)) success = false;
 	
-	if (!checkDimensionIndexValuesMatchInStackPositionNumberAndTemporalPositionIndex(list,log)) success = false;
+	if (!checkDimensionIndexValuesMatchInStackPositionNumberAndTemporalPositionIndex(list,verbose,newformat,log)) success = false;
 	
-	if (!checkCountPerFrameFunctionalGroupsMatchesNumberOfFrames(list,log)) success = false;
+	if (!checkCountPerFrameFunctionalGroupsMatchesNumberOfFrames(list,verbose,newformat,log)) success = false;
 	
-	if (!list.validatePrivate(log)) success = false;
+	if (!checkSegmentNumbersMonotonicallyIncreasingFromOneByOne(list,verbose,newformat,log)) success = false;
 	
-	checkValuesNeededToBuildDicomDirectoryArePresentAndNotEmpty(list,log);	// always only warnings ... do not affect success
+	if (!checkReferencedSegmentNumbersHaveTarget(list,verbose,newformat,log)) success = false;
+	
+	if (!checkConsistencyOfTiledImageGeometry(list,verbose,newformat,log)) success = false;
+
+	if (!list.validatePrivate(verbose,newformat,log)) success = false;
+	
+	checkValuesNeededToBuildDicomDirectoryArePresentAndNotEmpty(list,verbose,newformat,log);	// always only warnings ... do not affect success
 	
 	if (verbose) log << "success after manual checks " << (success ? "success" : "failure") << endl;
 
-	if (!list.validateVR(log)) {
-		log << EMsgDC(DataSetContainsInvalidValuesForVR)
-		    << endl;
+	if (!list.validateVR(verbose,newformat,log)) {
+		if (!newformat) {
+			log << EMsgDC(DataSetContainsInvalidValuesForVR)
+				<< endl;
+		}
 		success=false;
 	}
 	if (verbose) log << "success after validateVR " << (success ? "success" : "failure") << endl;
 
-	if (!list.validateRetired(log)) {
-		log << WMsgDC(DataSetContainsRetiredAttributes)
-		    << endl;
+	if (!list.validateRetired(verbose,newformat,log)) {
+		if (!newformat) {
+			log << WMsgDC(DataSetContainsRetiredAttributes)
+				<< endl;
+		}
 	}
 
 	CompositeIOD *iod = selectCompositeIOD(&list,profile);
@@ -2224,7 +2906,7 @@ main(int argc, char *argv[])
 		    << MMsgDC(Retired)
 		    << endl;
 		}
-		if (!iod->verify(&list,verbose,log,list.getDictionary())) success=false;
+		if (!iod->verify(&list,verbose,newformat,log,list.getDictionary())) success=false;
 		if (describe || verbose) iod->write(log,&list,list.getDictionary());
 	}
 	else {
@@ -2236,9 +2918,11 @@ main(int argc, char *argv[])
 	}
 	if (verbose) log << "success after iod verify " << (success ? "success" : "failure") << endl;
 
-	if (iod && !list.validateUsed(log)) {
-		log << WMsgDC(DataSetContainsAttributesNotUsedInIOD)
-		    << endl;
+	if (iod && !list.validateUsed(verbose,newformat,log)) {
+		if (!newformat) {
+			log << WMsgDC(DataSetContainsAttributesNotUsedInIOD)
+				<< endl;
+		}
 	}
 	
 	if (dump) {

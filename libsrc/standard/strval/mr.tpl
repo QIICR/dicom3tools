@@ -667,3 +667,9 @@ StringValues="ASLContext" {
 	M_ZERO_SCAN
 }
 
+StringValues="WaterReferenceAcquisition" {
+	WATER_REFERENCE,
+	USED_DISCARDED,
+	REFERENCED.
+	NONE
+}

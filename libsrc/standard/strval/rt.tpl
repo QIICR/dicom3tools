@@ -51,6 +51,9 @@ StringValues="ApplicatorType"	{
 	ELECTRON_CIRC = circular electron applicator,
 	ELECTRON_SHORT = short electron applicator,
 	ELECTRON_OPEN = open (dummy) electron applicator,
+	PHOTON_SQUARE = square photon applicator,
+	PHOTON_RECT = rectangular photon applicator,
+	PHOTON_CIRC = circular photon applicator,
 	INTRAOPERATIVE = intraoperative (custom) applicator,
 	STEREOTACTIC = stereotactic applicator
 }
@@ -106,7 +109,8 @@ StringValues="DoseSummationType"	{
 	FRACTION_SESSION = dose calculated for a single session (“fraction”) of a single Fraction Group within RT Plan,
 	BEAM_SESSION = dose calculated for a single session (“fraction”) of one or more Beams within RT Plan,
 	BRACHY_SESSION = dose calculated for a single session (“fraction”) of one or more Brachy Application Setups within RT Plan,
-	CONTROL_POINT = dose calculated for one or more Control Points within a Beam for a single fraction
+	CONTROL_POINT = dose calculated for one or more Control Points within a Beam for a single fraction,
+	RECORD = dose calculated for RT Beams Treatment Record
 }
 
 StringValues="DVHROIContributionType"	{
@@ -167,6 +171,7 @@ StringValues="RTROIInterpretedType"	{
 	GTV = Gross Tumor Volume (as defined in ICRU50),
 	TREATED_VOLUME = Treated Volume (as defined in ICRU50),
 	IRRAD_VOLUME = Irradiated Volume (as defined in ICRU50),
+	OAR = Organ at Risk (as defined in ICRU50),
 	BOLUS = patient bolus to be used for external beam therapy,
 	AVOIDANCE = region in which dose is to be minimized,
 	ORGAN = patient organ,
@@ -182,7 +187,8 @@ StringValues="RTROIInterpretedType"	{
 	SUPPORT = external patient support device,
 	FIXATION = external patient fixation or immobilisation device,
 	DOSE_REGION = ROI to be used as a dose reference,
-	CONTROL = ROI to be used in control of dose optimization and calculation
+	CONTROL = ROI to be used in control of dose optimization and calculation,
+	DOSE_MEASUREMENT = ROI representing a dose measurement device
 }
 
 StringValues="ROIPhysicalProperty"	{
@@ -573,4 +579,36 @@ StringValues="BeamDoseType" {
 	EFFECTIVE
 }
 
+StringValues="DeviceMotionExecutionMode" {
+	CONTINUOUS,
+	TRIGGERED,
+	AUTOMATIC
+}
+
+StringValues="DeviceMotionObservationMode" {
+	INROOM,
+	REMOTE
+}
+
+StringValues="ApplicatorApertureShape" {
+	SYM_SQUARE,
+	SYM_RECTANGLE,
+	SYM_CIRCULAR
+}
+
+StringValues="FixationEye" {
+	L,
+	R
+}
+
+StringValues="ReferenceDoseDefinition" {
+	HIGHEST,
+	MAXIMUM,
+	CENTER
+}
+
+StringValues="ScanSpotReorderingAllowed" {
+	ALLOWED,
+	NOT ALLOWED
+}
 

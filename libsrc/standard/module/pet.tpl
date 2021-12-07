@@ -41,6 +41,7 @@ Module="PETSeries"
 		Name="EnergyWindowUpperLimit"					Type="3"
 	SequenceEnd
 	Name="SecondaryCountsType"							Type="3"	StringDefinedTerms="SecondaryCountsType"
+	Name="ScanProgressionDirection"						Type="3"	StringEnumValues="ScanProgressionDirection"
 ModuleEnd
 
 Module="PETIsotope"
@@ -143,6 +144,7 @@ Module="MultiFrameFunctionalGroupsForEnhancedPETImage"
 		InvokeMacro="PETFrameCorrectionFactorsMacro"	Condition="NeedPETFrameCorrectionFactorsMacroInSharedFunctionalGroupSequence"
 		InvokeMacro="PETReconstructionMacro"	Condition="NeedPETReconstructionMacroInSharedFunctionalGroupSequence"
 		InvokeMacro="PETTableDynamicsMacro"	Condition="NeedPETTableDynamicsMacroInSharedFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"					Condition="TemporalPositionMacroOKInSharedFunctionalGroupSequence"
 	SequenceEnd
 	Sequence="PerFrameFunctionalGroupsSequence"	Type="1"	VM="1-n"
 		InvokeMacro="PixelMeasuresMacro"		Condition="PixelMeasuresSequenceNotInSharedFunctionalGroupSequence"
@@ -166,6 +168,7 @@ Module="MultiFrameFunctionalGroupsForEnhancedPETImage"
 		InvokeMacro="PETFrameCorrectionFactorsMacro"	Condition="NeedPETFrameCorrectionFactorsMacroInPerFrameFunctionalGroupSequence"
 		InvokeMacro="PETReconstructionMacro"	Condition="NeedPETReconstructionMacroInPerFrameFunctionalGroupSequence"
 		InvokeMacro="PETTableDynamicsMacro"	Condition="NeedPETTableDynamicsMacroInPerFrameFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"			Condition="TemporalPositionMacroOKInPerFrameFunctionalGroupSequence"
 	SequenceEnd
 ModuleEnd
 
@@ -184,8 +187,8 @@ Module="MultiFrameFunctionalGroupsForLegacyConvertedEnhancedPETImage"
 		InvokeMacro="RespiratorySynchronizationMacro"		Condition="RespiratorySynchronizationMacroOKInSharedFunctionalGroupSequence"
 		InvokeMacro="IrradiationEventIdentificationMacro"	Condition="IrradiationEventIdentificationMacroOKInSharedFunctionalGroupSequence"
 		InvokeMacro="PETFrameTypeMacro"						Condition="PETFrameTypeSequenceNotInPerFrameFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"					Condition="TemporalPositionMacroOKInSharedFunctionalGroupSequence"
 		InvokeMacro="UnassignedSharedConvertedAttributesMacro"
-		InvokeMacro="ImageFrameConversionSourceMacro"		Condition="ConversionSourceAttributesSequenceNotInPerFrameFunctionalGroupSequence"
 	SequenceEnd
 
 	Sequence="PerFrameFunctionalGroupsSequence"				Type="1"	VM="1-n"
@@ -203,8 +206,9 @@ Module="MultiFrameFunctionalGroupsForLegacyConvertedEnhancedPETImage"
 		InvokeMacro="RespiratorySynchronizationMacro"		Condition="RespiratorySynchronizationMacroOKInPerFrameFunctionalGroupSequence"
 		InvokeMacro="IrradiationEventIdentificationMacro"	Condition="IrradiationEventIdentificationMacroOKInPerFrameFunctionalGroupSequence"
 		InvokeMacro="PETFrameTypeMacro"						Condition="PETFrameTypeSequenceNotInSharedFunctionalGroupSequence"
+		InvokeMacro="TemporalPositionMacro"					Condition="TemporalPositionMacroOKInPerFrameFunctionalGroupSequence"
 		InvokeMacro="UnassignedPerFrameConvertedAttributesMacro"
-		InvokeMacro="ImageFrameConversionSourceMacro"		Condition="ConversionSourceAttributesSequenceNotInSharedFunctionalGroupSequence"
+		InvokeMacro="ImageFrameConversionSourceMacro"		Condition="ImageFrameConversionSourceMacroPresentInPerFrameFunctionalGroupSequence"
 	SequenceEnd
 ModuleEnd
 
@@ -374,6 +378,7 @@ Module="EnhancedPETAcquisition"
 	Name="TimeOfFlightInformationUsed"					Type="1"	StringEnumValues="TrueFalseFull"
 	InvokeMacro="MandatoryViewAndSliceProgressionDirectionMacro"
 	Name="IsocenterPosition"							Type="3"
+	Name="ScanProgressionDirection"						Type="3"	StringEnumValues="ScanProgressionDirection"
 ModuleEnd
 
 Module="EnhancedPETImage"
@@ -410,7 +415,7 @@ Module="EnhancedPETImage"
 	Name="LossyImageCompression"					Type="1C"	StringEnumValues="LossyImageCompression"	Condition="NotLegacyConvertedPET" mbpo="true"
 	Name="LossyImageCompressionRatio"				Type="1C"	Condition="LossyImageCompressionIs01"	NotZeroError=""
 	Name="LossyImageCompressionMethod"				Type="1C"	StringDefinedTerms="LossyImageCompressionMethod"	Condition="LossyImageCompressionIs01"
-	Verify="LossyImageCompressionMethod"						Condition="LossyImageCompressionMethodInconsistentWithTransferSyntax"	ThenWarningMessage="method inconsistent with transfer syntax" ShowValueWithMessage="true"
+	Verify="LossyImageCompressionMethod"						Condition="LossyImageCompressionMethodInconsistentWithTransferSyntax"	ThenWarningMessage="method inconsistent with Transfer Syntax" ShowValueWithMessage="true"
 	Name="PresentationLUTShape"						Type="1"	StringEnumValues="IdentityPresentationLUTShape"
 	Sequence="IconImageSequence"					Type="3"	VM="1"
 		InvokeMacro="IconImageSequenceMacro"

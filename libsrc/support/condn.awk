@@ -1,4 +1,4 @@
-#  condn.awk Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  condn.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 # create C++ headers from conditions template 
 
 # can set these values on the command line:
@@ -167,6 +167,30 @@ NR==1	{
 			RLENGTH-length("ElementPresentInPathFromRoot=\"")-1);
 	}
 
+	sequencepresentinpathhasitems=0
+	sequencepresentinpathfromroothasitems=""
+	if (match($0,"SequencePresentInPathFromRootHasItems=\"[^\"]*\"")) {
+		sequencepresentinpathhasitems=1;
+		sequencepresentinpathfromroothasitems=substr($0,RSTART+length("SequencePresentInPathFromRootHasItems=\""),
+			RLENGTH-length("SequencePresentInPathFromRootHasItems=\"")-1);
+	}
+
+	elementpresentinpathfirstitem=0
+	elementpresentinpathfromrootfirstitem=""
+	if (match($0,"ElementPresentInPathFromRootFirstItem=\"[^\"]*\"")) {
+		elementpresentinpathfirstitem=1;
+		elementpresentinpathfromrootfirstitem=substr($0,RSTART+length("ElementPresentInPathFromRootFirstItem=\""),
+			RLENGTH-length("ElementPresentInPathFromRootFirstItem=\"")-1);
+	}
+
+	sequencepresentinpathfirstitemhasitems=0
+	sequencepresentinpathfromrootfirstitemhasitems=""
+	if (match($0,"SequencePresentInPathFromRootFirstItemHasItems=\"[^\"]*\"")) {
+		sequencepresentinpathfirstitem=1;
+		sequencepresentinpathfromrootfirstitem=substr($0,RSTART+length("SequencePresentInPathFromRootFirstItemHasItems=\""),
+			RLENGTH-length("SequencePresentInPathFromRootFirstItemHasItems=\"")-1);
+	}
+
 	grouppresent=0;
 	grouppresentmask=""
 	if (match($0,"GroupPresent=\"[^\"]*\"")) {
@@ -270,7 +294,12 @@ NR==1	{
 	if (match($0,"SequenceHasOneItem=\"[^\"]*\"")) {
 		sequencehasoneitem=1;
 	}
-	
+
+	sequencehastwoitems=0
+	if (match($0,"SequenceHasTwoItems=\"[^\"]*\"")) {
+		sequencehastwoitems=1;
+	}
+
 	sequencehasmultipleitems=0
 	if (match($0,"SequenceHasMultipleItems=\"[^\"]*\"")) {
 		sequencehasmultipleitems=1;
@@ -310,12 +339,35 @@ NR==1	{
 			}
 		}
 		if (elementpresentinpath) {
-			# For now we only support descending from root into items of a top level sequence
 			if (length(elementpresentinpathfromroot) > 0) {
 				print "\tcondition" nestinglevel " " operator "=" modifier "(ElementPresentInPathFromRoot(rootlist,TagFromName(" element "),TagFromName(" elementpresentinpathfromroot "))?1:0);"
 			}
 			else {
 				print "Error - Must specify sequence attribute argument for ElementPresentInPathFromRoot " FNR >"/dev/tty"
+			}
+		}
+		if (sequencepresentinpathhasitems) {
+			if (length(sequencepresentinpathfromroothasitems) > 0) {
+				print "\tcondition" nestinglevel " " operator "=" modifier "(SequencePresentInPathFromRootHasItems(rootlist,TagFromName(" element "),TagFromName(" sequencepresentinpathfromroothasitems "))?1:0);"
+			}
+			else {
+				print "Error - Must specify sequence attribute argument for SequencePresentInPathFromRootHasItems " FNR >"/dev/tty"
+			}
+		}
+		if (elementpresentinpathfirstitem) {
+			if (length(elementpresentinpathfromrootfirstitem) > 0) {
+				print "\tcondition" nestinglevel " " operator "=" modifier "(ElementPresentInPathFromRootFirstItem(rootlist,TagFromName(" element "),TagFromName(" elementpresentinpathfromrootfirstitem "))?1:0);"
+			}
+			else {
+				print "Error - Must specify sequence attribute argument for ElementPresentInPathFromRoot " FNR >"/dev/tty"
+			}
+		}
+		if (sequencepresentinpathfirstitemhasitems) {
+			if (length(sequencepresentinpathfromrootfirstitemhasitems) > 0) {
+				print "\tcondition" nestinglevel " " operator "=" modifier "(SequencePresentInPathFromRootFirstItemHasItems(rootlist,TagFromName(" element "),TagFromName(" sequencepresentinpathfromrootfirstitemhasitems "))?1:0);"
+			}
+			else {
+				print "Error - Must specify sequence attribute argument for SequencePresentInPathFromRootFirstItemHasItems " FNR >"/dev/tty"
 			}
 		}
 		if (elementpresentinroot) {
@@ -361,6 +413,9 @@ NR==1	{
 		}
 		if (sequencehasoneitem) {
 			print "\tcondition" nestinglevel " " operator "=" modifier "(SequenceHasOneItem(list,TagFromName(" element "))?1:0);"
+		}
+		if (sequencehastwoitems) {
+			print "\tcondition" nestinglevel " " operator "=" modifier "(SequenceHasTwoItems(list,TagFromName(" element "))?1:0);"
 		}
 		if (sequencehasmultipleitems) {
 			print "\tcondition" nestinglevel " " operator "=" modifier "(SequenceHasMultipleItems(list,TagFromName(" element "))?1:0);"

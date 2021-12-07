@@ -1,4 +1,4 @@
-#  elmtoxml.awk Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  elmtoxml.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 # create XML from element dictionary template 
 
 NR==1	{

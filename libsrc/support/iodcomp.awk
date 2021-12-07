@@ -1,4 +1,4 @@
-#  iodcomp.awk Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  iodcomp.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 # create C++ headers from composite iod template
 
 # can set these values on the command line:
@@ -70,7 +70,7 @@ NR==1	{
 	}
 	else if (role == "verify") {
 		print "bool"
-		print "CompositeIOD_" iodcomp "::verify(AttributeList *list,bool verbose,TextOutputStream& log,ElementDictionary *dict) const"
+		print "CompositeIOD_" iodcomp "::verify(AttributeList *list,bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict) const"
 		print "{"
 		print "\tconst char *iodcomp = \"" iodcomp "\";"
 		print "\t(void)iodcomp;  // Quiets compiler in case iodcomp empty"
@@ -117,7 +117,7 @@ NR==1	{
 		print "\tconst char *identify(void) const { return \"" iodcomp "\"; }"
 		print "\tbool        retired(void) const { return " retired "; }"
 		print "\tvoid        write(TextOutputStream& stream,AttributeList *list,ElementDictionary *dict) const ;"
-		print "\tbool        verify(AttributeList *list,bool verbose,TextOutputStream& log,ElementDictionary *dict) const;"
+		print "\tbool        verify(AttributeList *list,bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict) const;"
 		print "};"
 		print ""
 	}
@@ -176,7 +176,7 @@ NR==1	{
 	}
 	else if (role == "verify") {
 		# should put in required module checking here ?
-		print "\tif (" module " && !" module "->verify(list,NULL/*parentlist*/,list/*rootlist*/,verbose,log,dict)) success=false;"
+		print "\tif (" module " && !" module "->verify(list,NULL/*parentlist*/,list/*rootlist*/,verbose,newformat,log,dict)) success=false;"
 		print "\tif (verbose)"
 		print "\t\tlog << \"" iodcomp " success after verifying " module " \" << (success ? \"success\" : \"failure\") << endl;";
 		print ""

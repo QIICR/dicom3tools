@@ -1,4 +1,4 @@
-/* dcstream.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* dcstream.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_dcstream__
 #define __Header_dcstream__
 

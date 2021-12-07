@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)rawnjl2.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)rawnjl2.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "bnstream.h"
 #include "bnopt.h"
 #include "mesgtext.h"
@@ -1095,12 +1095,12 @@ main(int argc,char **argv)
 //cerr << "\tFill with " << nfill << " samples of Ra " << Ra << endl;
 							// Fill with nfill values of Ra
 							while (nfill--) {
-//if (!(col<(COLUMNS-1))) {
-//	cerr << "Fail at line 367 ... !(col<(COLUMNS-1))" << endl;
-//	cerr << "\tstill to fill " << nfill+1 << endl;
-//	cerr << "\trow is " << row << endl;
-//	cerr << "\tcol is " << col << endl;
-//}
+if (!(col<(COLUMNS-1))) {
+	cerr << "Fail at line 367 ... !(col<(COLUMNS-1))" << endl;
+	cerr << "\tstill to fill " << nfill+1 << endl;
+	cerr << "\trow is " << row << endl;
+	cerr << "\tcol is " << col << endl;
+}
 								Assert(col<(COLUMNS-1));
 								thisRow[col]=Ra;
 //cerr << "pixel[" << row << "," << col << "] = " << thisRow[col] << endl;

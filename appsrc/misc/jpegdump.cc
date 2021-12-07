@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)jpegdump.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)jpegdump.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <iostream>
 #else
@@ -28,6 +28,20 @@ const Uint16 JPEG_MARKER_APPC = 0xffec;
 const Uint16 JPEG_MARKER_APPD = 0xffed;
 const Uint16 JPEG_MARKER_APPE = 0xffee;
 const Uint16 JPEG_MARKER_APPF = 0xffef;
+
+
+const Uint16 JPEG_MARKER_JPG0 = 0xfff0;		// Reserved for JPEG extensions (per 10918-1)
+const Uint16 JPEG_MARKER_JPG1 = 0xfff1;
+const Uint16 JPEG_MARKER_JPG2 = 0xfff2;
+const Uint16 JPEG_MARKER_JPG3 = 0xfff3;
+const Uint16 JPEG_MARKER_JPG4 = 0xfff4;
+const Uint16 JPEG_MARKER_JPG5 = 0xfff5;
+const Uint16 JPEG_MARKER_JPG6 = 0xfff6;
+const Uint16 JPEG_MARKER_JPG9 = 0xfff9;
+const Uint16 JPEG_MARKER_JPGA = 0xfffa;
+const Uint16 JPEG_MARKER_JPGB = 0xfffb;
+const Uint16 JPEG_MARKER_JPGC = 0xfffc;
+const Uint16 JPEG_MARKER_JPGD = 0xfffd;
 
 const Uint16 JPEG_MARKER_COM = 0xfffe;
 const Uint16 JPEG_MARKER_DAC = 0xffcc;
@@ -83,6 +97,19 @@ const unsigned char JPEG_LSE_ID_L1   = 0x01;
 const unsigned char JPEG_LSE_ID_L2   = 0x02;
 const unsigned char JPEG_LSE_ID_L3   = 0x03;
 const unsigned char JPEG_LSE_ID_L4   = 0x04;
+
+// JPEG-LS Extensions (14495-2)
+
+const unsigned char JPEG_LSE_ID_L5   = 0x05;
+const unsigned char JPEG_LSE_ID_L6   = 0x06;
+const unsigned char JPEG_LSE_ID_L7   = 0x07;
+const unsigned char JPEG_LSE_ID_L8   = 0x08;
+const unsigned char JPEG_LSE_ID_L9   = 0x09;
+const unsigned char JPEG_LSE_ID_LA   = 0x0A;
+const unsigned char JPEG_LSE_ID_LB   = 0x0B;
+const unsigned char JPEG_LSE_ID_LC   = 0x0C;
+const unsigned char JPEG_LSE_ID_LD   = 0x0D;
+
 
 // New for JPEG 2000 (15444-1:2000)
 
@@ -205,6 +232,19 @@ struct JPEGMarkerDictionaryEntry {
 	JPEG_MARKER_APPD, "APPD", "Reserved for Application Use",
 	JPEG_MARKER_APPE, "APPE", "Reserved for Application Use",
 	JPEG_MARKER_APPF, "APPF", "Reserved for Application Use",
+
+	JPEG_MARKER_JPG0, "JPG0", "Reserved for JPEG extensions",
+	JPEG_MARKER_JPG1, "JPG1", "Reserved for JPEG extensions",
+	JPEG_MARKER_JPG2, "JPG2", "Reserved for JPEG extensions",
+	JPEG_MARKER_JPG3, "JPG3", "Reserved for JPEG extensions",
+	JPEG_MARKER_JPG4, "JPG4", "Reserved for JPEG extensions",
+	JPEG_MARKER_JPG5, "JPG5", "Reserved for JPEG extensions",
+	JPEG_MARKER_JPG6, "JPG6", "Reserved for JPEG extensions",
+	JPEG_MARKER_JPG9, "JPG9", "Reserved for JPEG extensions",
+	JPEG_MARKER_JPGA, "JPGA", "Reserved for JPEG extensions",
+	JPEG_MARKER_JPGB, "JPGB", "Reserved for JPEG extensions",
+	JPEG_MARKER_JPGC, "JPGC", "Reserved for JPEG extensions",
+	JPEG_MARKER_JPGD, "JPGD", "Reserved for JPEG extensions",
 
 	JPEG_MARKER_COM, "COM", "Comment",
 	JPEG_MARKER_DAC, "DAC", "Define Arithmetic Conditioning Table(s)",
@@ -663,8 +703,26 @@ public:
 					break;
 				case JPEG_LSE_ID_L4:	// > 16 bit X and Y parameters
 					break;
+				case JPEG_LSE_ID_L5:	//
+					break;
+				case JPEG_LSE_ID_L6:	//
+					break;
+				case JPEG_LSE_ID_L7:	//
+					break;
+				case JPEG_LSE_ID_L8:	//
+					break;
+				case JPEG_LSE_ID_L9:	//
+					break;
+				case JPEG_LSE_ID_LA:	//
+					break;
+				case JPEG_LSE_ID_LB:	//
+					break;
+				case JPEG_LSE_ID_LC:	//
+					break;
+				case JPEG_LSE_ID_LD:	//
+					break;
 				default:
-					Assert(0);
+					//Assert(0);
 					break;
 			}
 
@@ -677,7 +735,9 @@ public:
 
 	void dump(ostream &out) const
 		{
-			out << endl << "\tJPEG_LSE_Parameters - ID " << ios::dec << (unsigned)id << " ";
+			out << endl << "\tJPEG_LSE_Parameters - ID ";
+			writeZeroPaddedHexNumber(out,(unsigned)id,1);
+			out << " ";
 			switch (id) {
 				case JPEG_LSE_ID_L1:
 					out << "Coding parameters";
@@ -691,8 +751,36 @@ public:
 				case JPEG_LSE_ID_L4:
 					out << "> 16 bit X and Y parameters";
 					break;
+				case JPEG_LSE_ID_L5:
+					out << "Extension - Extended Golomb coding ";
+					break;
+				case JPEG_LSE_ID_L6:
+					out << "Extension - Near-lossless coding with NEAR value re-specification";
+					break;
+				case JPEG_LSE_ID_L7:
+					out << "Extension - Near-lossless coding with visual quantization";
+					break;
+				case JPEG_LSE_ID_L8:
+					out << "Extension - Extended prediction specification";
+					break;
+				case JPEG_LSE_ID_L9:
+					out << "Extension - Fixed length coding MCU start";
+					break;
+				case JPEG_LSE_ID_LA:
+					out << "Extension - Fixed length coding MCU end";
+					break;
+				case JPEG_LSE_ID_LB:
+					out << "Extension - unused";
+					break;
+				case JPEG_LSE_ID_LC:
+					out << "Extension - Preset coding parameters";
+					break;
+				case JPEG_LSE_ID_LD:
+					out << "Extension - Inverse colour transform";
+					break;
 				default:
-					Assert(0);
+					out << "Extension - unrecognized";
+					//Assert(0);
 					break;
 			}
 			out << ":" << endl;
@@ -711,8 +799,27 @@ public:
 					break;
 				case JPEG_LSE_ID_L4:	// > 16 bit X and Y parameters
 					break;
+				case JPEG_LSE_ID_L5:	//
+					break;
+				case JPEG_LSE_ID_L6:	//
+					break;
+				case JPEG_LSE_ID_L7:	//
+					break;
+				case JPEG_LSE_ID_L8:	//
+					break;
+				case JPEG_LSE_ID_L9:	//
+					break;
+				case JPEG_LSE_ID_LA:	//
+					break;
+				case JPEG_LSE_ID_LB:	//
+					break;
+				case JPEG_LSE_ID_LC:	//
+					break;
+				case JPEG_LSE_ID_LD:	//
+					break;
 				default:
-					Assert(0);
+					//Assert(0);
+					break;
 			}
 		}
 };

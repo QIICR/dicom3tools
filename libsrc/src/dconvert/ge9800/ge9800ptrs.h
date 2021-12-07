@@ -1,4 +1,4 @@
-/* ge9800ptrs.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* ge9800ptrs.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 // Offsets are in bytes from 0
 // Offsets extracted from header are in 2 byte words - blocks are 512 bytes long
 

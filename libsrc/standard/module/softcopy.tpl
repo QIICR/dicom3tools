@@ -35,6 +35,10 @@ Module="GraphicAnnotation"
 			Name="BoundingBoxTextHorizontalJustification"	Type="1C"	Condition="BoundingBoxTopLeftHandCornerPresent"	StringEnumValues="BoundingBoxTextHorizontalJustification"
 			Name="AnchorPoint"								Type="1C"	Condition="AnchorPointNeeded" mbpo="true"
 			Name="AnchorPointVisibility"					Type="1C"	Condition="AnchorPointPresent"	StringEnumValues="YesNoLetter"
+			Name="CompoundGraphicInstanceID"				Type="3"
+			Name="GraphicGroupID"							Type="3"
+			Name="TrackingID"								Type="1C"	Condition="TrackingUIDIsPresent"
+			Name="TrackingUID"								Type="1C"	Condition="TrackingIDIsPresent"
 		SequenceEnd
 		Sequence="GraphicObjectSequence"					Type="1C"	VM="1-n"	Condition="RequireGraphicObjectSequence"
 			Name="GraphicAnnotationUnits"					Type="1"	StringEnumValues="AnnotationUnits"
@@ -45,10 +49,87 @@ Module="GraphicAnnotation"
 			Verify="GraphicData"										VM="4"	Condition="GraphicTypeIsCIRCLE"
 			Verify="GraphicData"										VM="8"	Condition="GraphicTypeIsELLIPSE"
 			Name="GraphicType"								Type="1"	StringEnumValues="GraphicType"
+			InvokeMacro="LineStyleSequenceMacro"
 			Name="GraphicFilled"							Type="1C"	NoCondition=""	StringEnumValues="YesNoLetter"	# very hard to check
+			InvokeMacro="FillStyleSequenceMacro"
+			Name="CompoundGraphicInstanceID"				Type="3"
+			Name="GraphicGroupID"							Type="3"
+			Name="TrackingID"								Type="1C"	Condition="TrackingUIDIsPresent"
+			Name="TrackingUID"								Type="1C"	Condition="TrackingIDIsPresent"
+		SequenceEnd
+		Sequence="CompoundGraphicSequence"					Type="3"	VM="1-n"
+			Name="CompoundGraphicInstanceID"				Type="1"
+			Name="CompoundGraphicUnits"						Type="1"	StringEnumValues="CompoundGraphicUnits"
+			Name="GraphicDimensions"						Type="1"	BinaryEnumValues="Two"
+			Name="NumberOfGraphicPoints"					Type="1"	NotZeroError=""
+			Name="GraphicData"								Type="1"
+			Name="CompoundGraphicType"						Type="1"	StringEnumValues="CompoundGraphicType"
+			InvokeMacro="TextStyleSequenceMacro"
+			InvokeMacro="LineStyleSequenceMacro"
+			Name="RotationAngle"							Type="3"
+			Name="RotationPoint"							Type="1C"	Condition="RotationAngleIsPresentOrCompoundGraphicTypeCUTLINEOrINFINITELINE"
+			Name="GapLength"								Type="1C"	Condition="CompoundGraphicTypeCUTLINEOrINFINITELINEOrCROSSHAIR"
+			Name="DiameterOfVisibility"						Type="1C"	Condition="CompoundGraphicTypeCROSSHAIR"
+			Sequence="MajorTicksSequence"					Type="1C"	VM="2-n"	Condition="CompoundGraphicTypeAXIS"
+				Name="TickPosition"							Type="1"
+				Name="TickLabel"							Type="1"
+			SequenceEnd
+			Name="TickAlignment"							Type="1C"	Condition="CompoundGraphicTypeRULEROrAXISOrCROSSHAIR"	StringEnumValues="TickAlignment"
+			Name="TickLabelAlignment"						Type="1C"	Condition="CompoundGraphicTypeRULEROrAXISOrCROSSHAIR"	StringEnumValues="TickLabelAlignment"
+			Name="ShowTickLabel"							Type="1C"	Condition="CompoundGraphicTypeRULEROrAXISOrCROSSHAIR"	StringEnumValues="YesNoLetter"
+			Name="GraphicFilled"							Type="1C"	Condition="CompoundGraphicTypeRECTANGLEOrELLIPSE"		StringEnumValues="YesNoLetter"
+			InvokeMacro="FillStyleSequenceMacro"						Condition="GraphicFilledIsY"
+			Name="GraphicGroupID"							Type="3"
 		SequenceEnd
 	SequenceEnd
 ModuleEnd
+
+DefineMacro="TextStyleSequenceMacro"
+	Sequence="TextStyleSequence"							Type="3"	VM="1"
+		Name="FontName"										Type="3"
+		Name="FontNameType"									Type="1C"	Condition="FontNameIsPresent"	StringDefinedTerms="FontNameType"
+		Name="CSSFontName"									Type="1"
+		Name="TextColorCIELabValue"							Type="1"
+		Name="HorizontalAlignment"							Type="1C"	NoCondition=""	StringEnumValues="HorizontalAlignment"	# too hard to check BoundingBoxTopLeftHandCorner is in sibling sequence
+		Name="VerticalAlignment"							Type="1C"	NoCondition=""	StringEnumValues="VerticalAlignment"	# too hard to check BoundingBoxTopLeftHandCorner is in sibling sequence
+		Name="ShadowStyle"									Type="1"	StringEnumValues="ShadowStyle"
+		Name="ShadowOffsetX"								Type="1C"	Condition="ShadowStyleNotOFF"
+		Name="ShadowOffsetY"								Type="1C"	Condition="ShadowStyleNotOFF"
+		Name="ShadowColorCIELabValue"						Type="1C"	Condition="ShadowStyleNotOFF"
+		Name="ShadowOpacity"								Type="1C"	Condition="ShadowStyleNotOFF"
+		Name="Underlined"									Type="1"	StringEnumValues="YesNoLetter"
+		Name="Bold"											Type="1"	StringEnumValues="YesNoLetter"
+		Name="Italic"										Type="1"	StringEnumValues="YesNoLetter"
+	SequenceEnd
+MacroEnd
+
+DefineMacro="LineStyleSequenceMacro"
+	Sequence="LineStyleSequence"							Type="3"	VM="1"
+		Name="PatternOnColorCIELabValue"					Type="1"
+		Name="PatternOffColorCIELabValue"					Type="3"
+		Name="PatternOnOpacity"								Type="1"
+		Name="PatternOffOpacity"							Type="3"
+		Name="LineThickness"								Type="1"
+		Name="LineDashingStyle"								Type="1"	StringEnumValues="LineDashingStyle"
+		Name="LinePattern"									Type="1C"	Condition="LineDashingStyleDASHED"
+		Name="ShadowStyle"									Type="1"	StringEnumValues="ShadowStyle"
+		Name="ShadowOffsetX"								Type="1"	# should probably be conditional like in TextStyleSequence - need CP :(
+		Name="ShadowOffsetY"								Type="1"	# should probably be conditional like in TextStyleSequence - need CP :(
+		Name="ShadowColorCIELabValue"						Type="1"	# should probably be conditional like in TextStyleSequence - need CP :(
+		Name="ShadowOpacity"								Type="1"	# should probably be conditional like in TextStyleSequence - need CP :(
+	SequenceEnd
+MacroEnd
+
+DefineMacro="FillStyleSequenceMacro"
+	Sequence="FillStyleSequence"							Type="3"	VM="1"
+		Name="PatternOnColorCIELabValue"					Type="1"
+		Name="PatternOffColorCIELabValue"					Type="3"
+		Name="PatternOnOpacity"								Type="1"
+		Name="PatternOffOpacity"							Type="1"
+		Name="FillMode"										Type="1"	StringEnumValues="FillMode"
+		Name="FillPattern"									Type="1C"	Condition="FillModeSTIPPELED"
+	SequenceEnd
+MacroEnd
 
 Module="SpatialTransformation"
 	Name="ImageRotation"					Type="1"	BinaryEnumValues="ImageRotationValues"
@@ -64,6 +145,14 @@ Module="GraphicLayer"
 		Name="GraphicLayerDescription"						Type="3"
 	SequenceEnd
 
+ModuleEnd
+
+Module="GraphicGroup"
+	Sequence="GraphicGroupSequence"							Type="1"	VM="1-n"
+		Name="GraphicGroupID"								Type="1"
+		Name="GraphicGroupLabel"							Type="1"
+		Name="GraphicGroupDescription"						Type="3"
+	SequenceEnd
 ModuleEnd
 
 Module="SoftcopyPresentationLUT"

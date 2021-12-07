@@ -1,6 +1,7 @@
-static const char *CopyrightIdentifier(void) { return "@(#)modulev.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)modulev.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attr.h"
 #include "attrlist.h"
+#include "attrseq.h"
 #include "attrval.h"
 #include "elmdict.h"
 #include "elmconst.h"
@@ -16,43 +17,114 @@ static const char *CopyrightIdentifier(void) { return "@(#)modulev.cc Copyright 
 #include "modulec.h"
 
 static void
-LogElementAndModule(const char *module,const char *element,
+LogElementAndModule(const char *module,const char *element,/*const Attribute *attr,ElementDictionary *dict,*/
 		TextOutputStream& log)
 {
-	if (element) log << " " << MMsgDC(Element) << "=<" << element << ">";
-	if (module)  log << " " << MMsgDC(Module)  << "=<" << module  << ">";
+	/*if (attr)         log << " " << MMsgDC(Element) << "=<" << String_Use(attr->buildFullPathInInstanceToCurrentAttribute(dict)) << ">";
+	else */if (element) log << " " << MMsgDC(Element) << "=<" << element << ">";
+	if (module)       log << " " << MMsgDC(Module)  << "=<" << module  << ">";
+}
+
+static void
+LogElement(const char *element,const Attribute *attr,AttributeList *list,ElementDictionary *dict,
+		TextOutputStream& log)
+{
+	if (attr) {
+		log << "<" << String_Use(attr->buildFullPathInInstanceToCurrentAttribute(dict)) << ">";
+	}
+	else if (element) {
+		log << "<";
+		if (list) {
+			// follow pattern used internally in AttributeList::getParentSequenceAttribute() for the last sequence item list ...
+			SequenceAttribute *seq = (SequenceAttribute *)(list->getParentSequenceAttribute());
+			if (seq) {
+				log << String_Use(seq->buildFullPathInInstanceToCurrentAttribute(dict));
+				log << "[";
+				int itemNumber = seq->whatItemNumberIsList(list);
+				if (itemNumber != 0) {		// zero is flag that it could not be found
+					log << itemNumber;
+				}
+				log << "]/";
+			}
+			else {
+				log << "/";
+			}
+		}
+		//else will not be preceded by "/", indicating no path found ... could do "//" like XPath :(
+		log << element;
+		Tag tag;
+		if (dict && dict->getTag(element,tag)) {
+			log << "(";
+			writeZeroPaddedHexNumberWithoutShowBase(log,tag.getGroup(),4);
+			log << ",";
+			writeZeroPaddedHexNumberWithoutShowBase(log,tag.getElement(),4);
+			log << ")";
+		}
+		log << ">";
+	}
+}
+
+static void
+LogModule(const char *module,
+		TextOutputStream& log)
+{
+	if (module)       log << MMsgDC(Module)  << "=<" << module  << ">";
 }
 
 static void
 ViolationMessage(const char *error,const char *elementtype,
-		const char *module,const char *element,
-		TextOutputStream& log,bool verbose)
+		const char *module,const char *element,const Attribute *attr,AttributeList *list,ElementDictionary *dict,
+		bool verbose,bool newformat,TextOutputStream& log)
 {
 	(void)verbose;
-	log << EMsgDC(Null) << error << " " << elementtype;
-	LogElementAndModule(module,element,log);
+	log << EMsgDC(Null);
+	if (newformat) {
+		LogElement(element,attr,list,dict,log);
+		log << " - " << error << " for " << elementtype << " - ";
+		LogModule(module,log);
+	}
+	else {
+		log << error << " " << elementtype;
+		LogElementAndModule(module,element,log);
+	}
 	log << endl;
 }
 
 static void
 WarningMessage(const char *error,const char *elementtype,
-		const char *module,const char *element,
-		TextOutputStream& log,bool verbose)
+		const char *module,const char *element,const Attribute *attr,AttributeList *list,ElementDictionary *dict,
+		bool verbose,bool newformat,TextOutputStream& log)
 {
 	(void)verbose;
-	log << WMsgDC(Null) << error << " " << elementtype;
-	LogElementAndModule(module,element,log);
+	log << WMsgDC(Null);
+	if (newformat) {
+		LogElement(element,attr,list,dict,log);
+		log << " - " << error << " for " << elementtype << " - ";
+		LogModule(module,log);
+	}
+	else {
+		log << error << " " << elementtype;
+		LogElementAndModule(module,element,log);
+	}
 	log << endl;
 }
 
 static void
 ValidMessage(const char *elementtype,
-		const char *module,const char *element,
-		TextOutputStream& log,bool verbose)
+		const char *module,const char *element,const Attribute *attr,AttributeList *list,ElementDictionary *dict,
+		bool verbose,bool newformat,TextOutputStream& log)
 {
 	if (verbose) {
-		log << MMsgDC(ValidElement) << " - " << elementtype;
-		LogElementAndModule(module,element,log);
+		log << MMsgDC(ValidElement);
+		if (newformat) {
+			LogElement(element,attr,list,dict,log);
+			log << " for " << elementtype << " - ";
+			LogModule(module,log);
+		}
+		else {
+			log << " - " << elementtype;
+			LogElementAndModule(module,element,log);
+		}
 		log << endl;
 	}
 }
@@ -60,8 +132,9 @@ ValidMessage(const char *elementtype,
 static bool
 verifyRequired(Attribute *attr,
 	const char *module,const char *element,
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
+	AttributeList *list,
 	Uint32 multiplicityMin,Uint32 multiplicityMax)
 {
 	// Normalized Required Data Element
@@ -72,11 +145,11 @@ verifyRequired(Attribute *attr,
 			reason=MMsgDC(EmptyAttribute);
 		}
 		else {
-			if (!attr->verifyVR(module,element,log,dict)) {
+			if (!attr->verifyVR(module,element,verbose,newformat,log,dict)) {
 				reason=MMsgDC(BadValueRepresentation);
 			}
 			else {
-				if (!attr->verifyVM(module,element,log,dict,multiplicityMin,multiplicityMax)) {
+				if (!attr->verifyVM(module,element,verbose,newformat,log,dict,multiplicityMin,multiplicityMax)) {
 					reason=MMsgDC(BadAttributeValueMultiplicity);
 				}
 			}
@@ -87,18 +160,19 @@ verifyRequired(Attribute *attr,
 	}
 
 	if (reason)
-		ViolationMessage(reason,MMsgDC(NormalizedRequired),module,element,log,verbose);
+		ViolationMessage(reason,MMsgDC(NormalizedRequired),module,element,attr,list,dict,verbose,newformat,log);
 	else if (attr)
-		ValidMessage(MMsgDC(NormalizedRequired),module,element,log,verbose);
+		ValidMessage(MMsgDC(NormalizedRequired),module,element,attr,list,dict,verbose,newformat,log);
 
 	return !reason;
 }
 
 static bool
-verifyType1 (Attribute *attr,
+verifyType1(Attribute *attr,
 	const char *module,const char *element,
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
+	AttributeList *list,
 	Uint32 multiplicityMin,Uint32 multiplicityMax)
 {
 	// Type 1 - Required Data Element
@@ -109,11 +183,11 @@ verifyType1 (Attribute *attr,
 			reason=MMsgDC(EmptyAttribute);
 		}
 		else {
-			if (!attr->verifyVR(module,element,log,dict)) {
+			if (!attr->verifyVR(module,element,verbose,newformat,log,dict)) {
 				reason=MMsgDC(BadValueRepresentation);
 			}
 			else {
-				if (!attr->verifyVM(module,element,log,dict,multiplicityMin,multiplicityMax)) {
+				if (!attr->verifyVM(module,element,verbose,newformat,log,dict,multiplicityMin,multiplicityMax)) {
 					reason=MMsgDC(BadAttributeValueMultiplicity);
 				}
 			}
@@ -124,9 +198,9 @@ verifyType1 (Attribute *attr,
 	}
 
 	if (reason)
-		ViolationMessage(reason,MMsgDC(Type1),module,element,log,verbose);
+		ViolationMessage(reason,MMsgDC(Type1),module,element,attr,list,dict,verbose,newformat,log);
 	else if (attr)
-		ValidMessage(MMsgDC(Type1),module,element,log,verbose);
+		ValidMessage(MMsgDC(Type1),module,element,attr,list,dict,verbose,newformat,log);
 
 	return !reason;
 }
@@ -134,7 +208,7 @@ verifyType1 (Attribute *attr,
 static bool
 verifyType1C(Attribute *attr,
 	const char *module,const char *element,
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
 	bool (*condition)(AttributeList *,AttributeList *,AttributeList *),
 	bool mbpo,
@@ -156,7 +230,7 @@ verifyType1C(Attribute *attr,
 			conditionNotSatisfied=true;
 			if (!mbpo) {
 				ViolationMessage(MMsgDC(AttributePresentWhenConditionUnsatisfiedWithoutMayBePresentOtherwise),
-					MMsgDC(Type1C),module,element,log,verbose);
+					MMsgDC(Type1C),module,element,attr,list,dict,verbose,newformat,log);
 			}
 		}
 //cerr << "verifyType1C(): " << element << " conditionNotSatisfied = " << conditionNotSatisfied << endl;
@@ -168,11 +242,11 @@ verifyType1C(Attribute *attr,
 			reason= conditionNotSatisfied ? MMsgDC(EmptyAttributeWhenConditionUnsatisfied) : MMsgDC(EmptyAttribute);
 		}
 		else {
-			if (!attr->verifyVR(module,element,log,dict)) {
+			if (!attr->verifyVR(module,element,verbose,newformat,log,dict)) {
 				reason=MMsgDC(BadValueRepresentation);
 			}
 			else {
-				if (!attr->verifyVM(module,element,log,dict,multiplicityMin,multiplicityMax)) {
+				if (!attr->verifyVM(module,element,verbose,newformat,log,dict,multiplicityMin,multiplicityMax)) {
 					reason=MMsgDC(BadAttributeValueMultiplicity);
 					attr=0;
 				}
@@ -185,9 +259,9 @@ verifyType1C(Attribute *attr,
 	}
 
 	if (reason)
-		ViolationMessage(reason,MMsgDC(Type1C),module,element,log,verbose);
+		ViolationMessage(reason,MMsgDC(Type1C),module,element,attr,list,dict,verbose,newformat,log);
 	else if (attr)
-		ValidMessage(MMsgDC(Type1C),module,element,log,verbose);
+		ValidMessage(MMsgDC(Type1C),module,element,attr,list,dict,verbose,newformat,log);
 
 	return !reason;
 }
@@ -195,8 +269,9 @@ verifyType1C(Attribute *attr,
 static bool
 verifyType2 (Attribute *attr,
 	const char *module,const char *element,
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
+	AttributeList *list,
 	Uint32 multiplicityMin,Uint32 multiplicityMax)
 {
 	// Type 2 - Required Data Element (May be Empty)
@@ -207,11 +282,11 @@ verifyType2 (Attribute *attr,
 			// may be empty
 		}
 		else {
-			if (!attr->verifyVR(module,element,log,dict)) {
+			if (!attr->verifyVR(module,element,verbose,newformat,log,dict)) {
 				reason=MMsgDC(BadValueRepresentation);
 			}
 			else {
-				if (!attr->verifyVM(module,element,log,dict,multiplicityMin,multiplicityMax)) {
+				if (!attr->verifyVM(module,element,verbose,newformat,log,dict,multiplicityMin,multiplicityMax)) {
 					reason=MMsgDC(BadAttributeValueMultiplicity);
 				}
 			}
@@ -222,9 +297,9 @@ verifyType2 (Attribute *attr,
 	}
 
 	if (reason)
-		ViolationMessage(reason,MMsgDC(Type2),module,element,log,verbose);
+		ViolationMessage(reason,MMsgDC(Type2),module,element,attr,list,dict,verbose,newformat,log);
 	else if (attr)
-		ValidMessage(MMsgDC(Type2),module,element,log,verbose);
+		ValidMessage(MMsgDC(Type2),module,element,attr,list,dict,verbose,newformat,log);
 
 	return !reason;
 }
@@ -232,7 +307,7 @@ verifyType2 (Attribute *attr,
 static bool
 verifyType2C(Attribute *attr,
 	const char *module,const char *element,
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
 	bool (*condition)(AttributeList *,AttributeList *,AttributeList *),
 	bool mbpo,
@@ -250,18 +325,18 @@ verifyType2C(Attribute *attr,
 		if (condition && !(*condition)(list,parentlist,rootlist)) {
 			if (!mbpo) {
 				ViolationMessage(MMsgDC(AttributePresentWhenConditionUnsatisfiedWithoutMayBePresentOtherwise),
-					MMsgDC(Type2C),module,element,log,verbose);
+					MMsgDC(Type2C),module,element,attr,list,dict,verbose,newformat,log);
 			}
 		}
 		if (attr->getVL() == 0) {
 			// may be empty
 		}
 		else {
-			if (!attr->verifyVR(module,element,log,dict)) {
+			if (!attr->verifyVR(module,element,verbose,newformat,log,dict)) {
 				reason=MMsgDC(BadValueRepresentation);
 			}
 			else {
-				if (!attr->verifyVM(module,element,log,dict,multiplicityMin,multiplicityMax)) {
+				if (!attr->verifyVM(module,element,verbose,newformat,log,dict,multiplicityMin,multiplicityMax)) {
 					reason=MMsgDC(BadAttributeValueMultiplicity);
 				}
 			}
@@ -273,9 +348,9 @@ verifyType2C(Attribute *attr,
 	}
 
 	if (reason)
-		ViolationMessage(reason,MMsgDC(Type2C),module,element,log,verbose);
+		ViolationMessage(reason,MMsgDC(Type2C),module,element,attr,list,dict,verbose,newformat,log);
 	else if (attr)
-		ValidMessage(MMsgDC(Type2C),module,element,log,verbose);
+		ValidMessage(MMsgDC(Type2C),module,element,attr,list,dict,verbose,newformat,log);
 
 	return !reason;
 }
@@ -283,8 +358,9 @@ verifyType2C(Attribute *attr,
 static bool
 verifyType3 (Attribute *attr,
 	const char *module,const char *element,
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
+	AttributeList *list,
 	Uint32 multiplicityMin,Uint32 multiplicityMax)
 {
 	// Type 3 - Optional Data Element
@@ -295,11 +371,11 @@ verifyType3 (Attribute *attr,
 			// may be empty
 		}
 		else {
-			if (!attr->verifyVR(module,element,log,dict)) {
+			if (!attr->verifyVR(module,element,verbose,newformat,log,dict)) {
 				reason=MMsgDC(BadValueRepresentation);
 			}
 			else {
-				if (!attr->verifyVM(module,element,log,dict,multiplicityMin,multiplicityMax)) {
+				if (!attr->verifyVM(module,element,verbose,newformat,log,dict,multiplicityMin,multiplicityMax)) {
 					reason=MMsgDC(BadAttributeValueMultiplicity);
 				}
 			}
@@ -310,9 +386,9 @@ verifyType3 (Attribute *attr,
 	}
 
 	if (reason)
-		ViolationMessage(reason,MMsgDC(Type3),module,element,log,verbose);
+		ViolationMessage(reason,MMsgDC(Type3),module,element,attr,list,dict,verbose,newformat,log);
 	else if (attr)
-		ValidMessage(MMsgDC(Type3),module,element,log,verbose);
+		ValidMessage(MMsgDC(Type3),module,element,attr,list,dict,verbose,newformat,log);
 
 	return !reason;
 }
@@ -320,7 +396,7 @@ verifyType3 (Attribute *attr,
 static bool
 verifyType3C(Attribute *attr,
 	const char *module,const char *element,
-	bool verbose,TextOutputStream& log,
+	bool verbose,bool newformat,TextOutputStream& log,
 	ElementDictionary *dict,
 	bool (*condition)(AttributeList *,AttributeList *,AttributeList *),
 	// mbpo never applies
@@ -337,17 +413,17 @@ verifyType3C(Attribute *attr,
 	if (attr) {
 		if (condition && !(*condition)(list,parentlist,rootlist)) {
 			WarningMessage(MMsgDC(Unexpected),
-				MMsgDC(Type3C),module,element,log,verbose);
+				MMsgDC(Type3C),module,element,attr,list,dict,verbose,newformat,log);
 		}
 		if (attr->getVL() == 0) {
 			// may be empty
 		}
 		else {
-			if (!attr->verifyVR(module,element,log,dict)) {
+			if (!attr->verifyVR(module,element,verbose,newformat,log,dict)) {
 				reason=MMsgDC(BadValueRepresentation);
 			}
 			else {
-				if (!attr->verifyVM(module,element,log,dict,multiplicityMin,multiplicityMax)) {
+				if (!attr->verifyVM(module,element,verbose,newformat,log,dict,multiplicityMin,multiplicityMax)) {
 					reason=MMsgDC(BadAttributeValueMultiplicity);
 					attr=0;
 				}
@@ -359,9 +435,9 @@ verifyType3C(Attribute *attr,
 	}
 
 	if (reason)
-		ViolationMessage(reason,MMsgDC(Type3C),module,element,log,verbose);
+		ViolationMessage(reason,MMsgDC(Type3C),module,element,attr,list,dict,verbose,newformat,log);
 	else if (attr)
-		ValidMessage(MMsgDC(Type3C),module,element,log,verbose);
+		ValidMessage(MMsgDC(Type3C),module,element,attr,list,dict,verbose,newformat,log);
 
 	return !reason;
 }

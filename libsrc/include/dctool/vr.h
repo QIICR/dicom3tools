@@ -1,4 +1,4 @@
-/* attr.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* vr.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 // utility methods for value representation
 
 #ifndef __Header_vr__

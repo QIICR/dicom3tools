@@ -64,5 +64,5 @@ MR2images.64.572.218.916.1
 .BR dccp(1) ,
 .BR dcintro(1)
 .SH AUTHOR
-Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS

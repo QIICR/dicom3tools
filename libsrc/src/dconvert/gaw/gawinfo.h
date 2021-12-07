@@ -1,4 +1,4 @@
-/* gawinfo.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* gawinfo.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_gawinfo__
 #define __Header_gawinfo__
 

@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dcpost.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dcpost.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <fstream>
 #else
@@ -415,7 +415,7 @@ main(int argc, char *argv[])
 	ManagedAttributeList localizer_list;
 		
 	if (veryverbose) log << "******** While reading ... " << localizer_filename << " ... ********" << endl; 
-	localizer_list.read(din,&log,veryveryverbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags);
+	localizer_list.read(din,false/*newformat*/,&log,veryveryverbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags);
 
 	if (!localizer_list.good()) {
 		log << localizer_list.errors()
@@ -483,7 +483,7 @@ main(int argc, char *argv[])
 		ManagedAttributeList list;
 		
 		if (veryverbose) log << "******** While reading ... " << filename << " ... ********" << endl; 
-		list.read(din,&log,veryveryverbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags);
+		list.read(din,false/*newformat*/,&log,veryveryverbose,0xffffffff,true,dicom_input_options.uselengthtoend,dicom_input_options.ignoreoutofordertags);
 
 		if (!list.good()) {
 			log << list.errors()

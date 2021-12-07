@@ -1,4 +1,4 @@
-/* sompptrs.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* sompptrs.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #define	SOMP_Offset_BINHDR_ptr	0
 #define	SOMP_Offset_TEXTHDR_ptr	3072
 

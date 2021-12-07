@@ -1,4 +1,4 @@
-.TH DCIODVFY 1 "6 December 2016" "DICOM PS3" "DICOM PS3 - Validate DICOM objects"
+.TH DCIODVFY 1 "2 August 2021" "DICOM PS3" "DICOM PS3 - Validate DICOM objects"
 .SH NAME
 dciodvfy \- ACR/NEMA DICOM PS3 ... DICOM PS3 - Validate DICOM objects
 .SH SYNOPSIS
@@ -13,6 +13,9 @@ dciodvfy \- ACR/NEMA DICOM PS3 ... DICOM PS3 - Validate DICOM objects
 ]
 [
 .B \-dump
+]
+[
+.B \-new|newformat
 ]
 [
 .B \-v|verbose
@@ -65,6 +68,13 @@ Dump the attribute list; differs from dcdump in that the list is decorated with 
 not the attribute is used in the IOD and what information entity the attribute belongs to based on the IOD.
 .RE
 .TP
+.B \-new|newformat
+.RS
+Use new format for error messages that includes full path to offending attribute,
+and uses standardardized order of type of error or warning, path to attribute,
+message, value (if any) and additional information.
+.RE
+.TP
 .B \-verbose
 .RS
 Display byte offset from file start and message start, in hexadecimal, and dump contents while reading and once read.
@@ -84,15 +94,20 @@ Show the name of the file supplied in the arguments; a hyphen will be reported i
 .RE
 % dciodvfy test.dc3
 .RE
-Warning - Value dubious for this VR - (0x0008,0x0090) ...
-.RE
-            Retired Person Name form 
+Warning - Value dubious for this VR - (0x0010,0x0010) PN Patient's Name  PN [0] = <SMITH> - Retired Person Name form
 .RE
 MRImage 
 .RE
 Error - Missing attribute Type 1 Required ...
 .RE
           Element=<FileMetaInformationVersion> Module=...
+.RE
+
+% dciodvfy -new test.dc3
+.RE
+Warning - </PatientName(0010,0010)> - Value dubious for this VR [PN] - <SMITH> - Retired Person Name form
+.RE
+...
 .RE
 
 .RE
@@ -133,5 +148,5 @@ Error - Missing attribute Type 1 Required ...
 .BR dcfile(1) ,
 .BR dcintro(1)
 .SH AUTHOR
-Copyright (c) 1993-2016, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS

@@ -1,4 +1,4 @@
-/* attrtype.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attrtype.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_attrtype__
 #define __Header_attrtype__
 
@@ -27,7 +27,7 @@ public:
 	ApplicationEntityAttribute(Tag t,const char *v)
 		: NonNumericStringAttribute(t,v) {}
 	const char *	getVR() const	{ return "AE"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 class AgeStringAttribute : public NonNumericStringAttribute {
@@ -37,7 +37,7 @@ public:
 		: NonNumericStringAttribute(t,v) {}
 
 	const char *	getVR() const	{ return "AS"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 class CodeStringAttribute : public NonNumericStringAttribute {
@@ -58,7 +58,7 @@ public:
 		}
 
 	const char *	getVR() const	{ return "CS"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 class CodeStringFileComponentAttribute : public CodeStringFileComponentAttributeBase {
@@ -69,7 +69,7 @@ public:
 		: CodeStringFileComponentAttributeBase(t,v) {}
 
 	const char *	getVR() const	{ return "CS"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 class DateStringAttribute : public NonNumericStringAttribute {
@@ -84,7 +84,7 @@ public:
 	DateStringAttribute(Tag t,DateTime const & datetime);
 
 	const char *	getVR() const	{ return "DA"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 class DateTimeStringAttribute : public NonNumericStringAttribute {
@@ -97,7 +97,7 @@ public:
 	DateTimeStringAttribute(Tag t,Date const & date,Time const & time);
 
 	const char *	getVR() const	{ return "DT"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 class DecimalStringAttribute : public NumericStringAttribute {
@@ -135,7 +135,7 @@ public:
 		}
 
 	const char *	getVR() const	{ return "DS"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 class IntegerStringAttribute : public NumericStringAttribute {
@@ -154,7 +154,7 @@ public:
 		: NumericStringAttribute(t,v)	{}
 
 	const char *	getVR() const	{ return "IS"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 class LongStringAttribute : public NonNumericStringAttribute {
@@ -177,16 +177,16 @@ public:
 		: NonNumericStringAttribute(t,v) {}
 
 	const char *	getVR() const	{ return "LO"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
-class LongTextAttribute : public LongTextAttributeBase {
+class LongTextAttribute : public TextAttributeBase {
 public:
-	LongTextAttribute(Tag t) : LongTextAttributeBase(t) {}
+	LongTextAttribute(Tag t) : TextAttributeBase(t) {}
 	LongTextAttribute(Tag t,const char *v)
-		: LongTextAttributeBase(t,v) {}
+		: TextAttributeBase(t,v) {}
 	const char *	getVR() const	{ return "LT"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 class PersonNameAttribute : public NonNumericStringAttribute {
@@ -195,7 +195,7 @@ public:
 	PersonNameAttribute(Tag t,const char *v)
 		: NonNumericStringAttribute(t,v) {}
 	const char *	getVR() const	{ return "PN"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 class ShortStringAttribute : public NonNumericStringAttribute {
@@ -218,16 +218,16 @@ public:
 		: NonNumericStringAttribute(t,v) {}
 
 	const char *	getVR() const	{ return "SH"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
-class ShortTextAttribute : public TextAttribute {
+class ShortTextAttribute : public TextAttributeBase {
 public:
-	ShortTextAttribute(Tag t) : TextAttribute(t) {}
+	ShortTextAttribute(Tag t) : TextAttributeBase(t) {}
 	ShortTextAttribute(Tag t,const char *v)
-		: TextAttribute(t,v) {}
+		: TextAttributeBase(t,v) {}
 	const char *	getVR() const	{ return "ST"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 class TimeStringAttribute : public NonNumericStringAttribute {
@@ -242,7 +242,7 @@ public:
 	TimeStringAttribute(Tag t,DateTime const & datetime);
 
 	const char *	getVR() const	{ return "TM"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 class UIStringAttribute : public NonNumericStringAttribute {
@@ -252,7 +252,7 @@ public:
 		: NonNumericStringAttribute(t,v) {}
 
 	const char *	getVR() const	{ return "UI"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 
 	BinaryOutputStream& writeData(BinaryOutputStream& stream)
 		{
@@ -305,25 +305,25 @@ public:
 		: NonNumericStringAttribute(t,v) {}
 
 	const char *	getVR() const	{ return "UC"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
-class UniversalResourceAttribute : public LongTextAttributeBase {
+class UniversalResourceAttribute : public TextAttributeBase {
 public:
-	UniversalResourceAttribute(Tag t) : LongTextAttributeBase(t) {}
+	UniversalResourceAttribute(Tag t) : TextAttributeBase(t) {}
 	UniversalResourceAttribute(Tag t,const char *v)
-		: LongTextAttributeBase(t,v) {}
+		: TextAttributeBase(t,v) {}
 	const char *	getVR() const	{ return "UR"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
-class UnlimitedTextAttribute : public LongTextAttributeBase {
+class UnlimitedTextAttribute : public TextAttributeBase {
 public:
-	UnlimitedTextAttribute(Tag t) : LongTextAttributeBase(t) {}
+	UnlimitedTextAttribute(Tag t) : TextAttributeBase(t) {}
 	UnlimitedTextAttribute(Tag t,const char *v)
-		: LongTextAttributeBase(t,v) {}
+		: TextAttributeBase(t,v) {}
 	const char *	getVR() const	{ return "UT"; }
-	bool validateVR(TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
+	bool validateVR(bool verbose,bool newformat,TextOutputStream& stream,SpecificCharacterSetInfo *specificCharacterSetInfo,ElementDictionary *dict) const;
 };
 
 /* ********************* Numeric Binary Attributes ********************* */

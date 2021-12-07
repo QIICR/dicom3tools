@@ -19,6 +19,12 @@ StringValues="YesNoFullUnknown" {
 	UNKNOWN
 }
 
+StringValues="YesNoFullUndefined" {
+YES,
+NO,
+UNDEFINED
+}
+
 StringValues="YesLetter" {
 	Y = Yes
 }
@@ -92,10 +98,6 @@ StringValues="ProcedureCodeScheme" {
 	W4  = WHO Record Number With ASTM Extensions,
 	WC  = WHO ATC,
 	UMD = MDNS
-}
-
-StringValues="CodingSchemeDesignatorForSNOMEDDICOMMicroglossary"	{
-	99SDM = SNOMED DICOM Microglossary
 }
 
 StringValues="CodingSchemeDesignatorForSNOMED"	{
@@ -268,6 +270,7 @@ StringValues="MiscellaneousCodingSchemeDesignators"	{
 	99NCIAIM = NCI Annotation Imaging Markup,
 	99HOLXDXA = Hologic DXA,
 	99KINETDX = Siemens Acuson Ultrasound,
+	99NUMA = NUMA,
 	ACR = ACR Index for Radiological Diagnosis,
 	ART = WHO Adverse Reaction terms,
 	AS4 = ASTM,
@@ -277,6 +280,7 @@ StringValues="MiscellaneousCodingSchemeDesignators"	{
 	BI = BI-RADS,
 	C4  = CPT-4,
 	C5  = CPT-5,
+	caDSR = Cancer Data Standard Repository,
 	CAS = Chemical Abstract Codes,
 	CD2 = American Dental Association Current Dental Terminology 2,
 	CDCA = CDC Analyte Codes,
@@ -285,6 +289,7 @@ StringValues="MiscellaneousCodingSchemeDesignators"	{
 	CE  = CEN ECG Diagnostic Codes,
 	CST = COSTART coding system for adverse drug reactions,
 	CTV3 = NHS Clinical Terms Version 3 (Read Codes),
+	DC = Dublin Core,
 	DCM = DICOM Controlled Terminology,
 	DCMUID = DICOM UID Registry,
 	E   = Euclides AFP codes,
@@ -320,6 +325,7 @@ StringValues="MiscellaneousCodingSchemeDesignators"	{
 	MA = Adult Mouse Anatomy Ontology,
 	MCD = Medicaid billing codes/names,
 	MCR = Medicare billing codes/names,
+	MDC = ISO/IEEE 11073 Medical Device Nomenclature,
 	MDDX = Medispan diagnostic codes,
 	MDNS = Universal Medical Device Nomenclature System,
 	MEDC = Medical Economics Drug Codes,
@@ -327,13 +333,19 @@ StringValues="MiscellaneousCodingSchemeDesignators"	{
 	MEDX = Medical Economics Diagnostic Codes,
 	MGI = Mouse Genome Initiative,
 	MGPI = Medispan GPI hierarchical drug codes,
+	MSH = NLM Medical Subject Headings,
 	MVX = CDC Vaccine Codes,
+	NBD = NASPE/BPEG Defibrillator Code,
+	NBG = NASPE/BPEG Generic Pacemaker Code,
 	NCDR = American College of Cardiology National Cardiovascular Data Registry Cath Lab Module,
 	NCIt = NCI Thesaurus,
 	NDC = National Drug Codes FDA,
+	NEU = NeuroNames,
 	NIC = Nursing Interventions Iowa Intervention Project,
+	NICIP = UK National Health Service National Interim Clinical Imaging Procedures (NICIP) Short Code,
 	NPI = HCFA National Provider Identifier,
 	POS = HCFA Place of Service (POS) Codes for Professional Claims,
+	PUBCHEM_CID = US National Center for Biotechnology Information (NCBI) PubChem Compound CID,
 	RADLEX = RadLex,
 	RC  = Read Clinical Classification of Medicine,
 	RFC3066 = IETF RFC 3066 language codes,
@@ -404,7 +416,8 @@ StringValues="InterpretationStatusID" {
 StringValues="Sex" {
 	M = Male,
 	F = Female,
-	O = Other
+	O = Other,
+	***EMPTYVALUE***
 }
 
 StringValues="Laterality" {
@@ -579,6 +592,7 @@ StringValues="BodyPartExaminedAnimal" {
 }
 
 StringValues="Modality"	{
+	ANN = Annotation,
 	AR = Autorefraction,
 	AU = Audio,
 	BI = Biomagnetic Imaging,
@@ -604,6 +618,7 @@ StringValues="Modality"	{
 	KO = Key Object Selection,
 	LEN = Lensometry,
 	LS = Laser Surface Scan,
+	M3D = Model for 3D Manufacturing,
 	MG = Mammography,
 	MR = Magnetic Resonance,
 	NM = Nuclear Medicine,
@@ -612,6 +627,8 @@ StringValues="Modality"	{
 	OP = Ophthalmic Photography,
 	OPM	= Ophthalmic Mapping,
 	OPT	= Ophthalmic Tomography,
+	OPTBSV	= Ophthalmic Tomography B-scan Volume Analysis,
+	OPTENF	= Ophthalmic Tomography En Face,
 	OPV	= Ophthalmic Visual Field,
 	OT = Other,
 	PLAN = Plan,
@@ -843,6 +860,25 @@ StringValues="PhotometricInterpretationMonochrome" {
 	MONOCHROME2
 }
 
+StringValues="PhotometricInterpretationMonochrome2" {
+	MONOCHROME2
+}
+
+StringValues="PhotometricInterpretationMonochromeOrPaletteColor" {
+	MONOCHROME1,
+	MONOCHROME2,
+	PALETTE COLOR,
+}
+
+StringValues="PhotometricInterpretationMonochrome2OrPaletteColor" {
+	MONOCHROME2,
+	PALETTE COLOR,
+}
+
+StringValues="PhotometricInterpretationPaletteColor" {
+	PALETTE COLOR,
+}
+
 StringValues="PhotometricInterpretationRGB" {
 	RGB
 }
@@ -852,7 +888,7 @@ StringValues="PhotometricInterpretationMonochrome2OrRGB" {
 	RGB
 }
 
-StringValues="PhotometricInterpretationMonochrome2OrRGBorYBR_FULL422" {
+StringValues="PhotometricInterpretationMonochrome2OrRGBOrYBR_FULL422" {
 	MONOCHROME2,
 	YBR_FULL_422,
 	RGB
@@ -862,13 +898,33 @@ StringValues="PhotometricInterpretationYBRFull422" {
 	YBR_FULL_422
 }
 
+StringValues="PhotometricInterpretationYBRFull422OrRGB" {
+	YBR_FULL_422,
+	RGB
+}
+
+StringValues="PhotometricInterpretationYBRICT" {
+	YBR_ICT
+}
+
 StringValues="PhotometricInterpretationYBRRCT" {
 	YBR_RCT
+}
+
+StringValues="PhotometricInterpretationYBRRCTOrRGB" {
+	YBR_RCT,
+	RGB
 }
 
 StringValues="PhotometricInterpretationYBRRCTOrICT" {
 	YBR_RCT,
 	YBR_ICT
+}
+
+StringValues="PhotometricInterpretationYBRRCTOrICTOrRGB" {
+	YBR_RCT,
+	YBR_ICT,
+	RGB
 }
 
 StringValues="PhotometricInterpretationYBRPartial420" {
@@ -879,14 +935,14 @@ StringValues="PhotometricInterpretationYBRFull" {
 	YBR_FULL
 }
 
-StringValues="PhotometricInterpretationYBRFullOrRGBorYBR_RCTorYBR_ICT" {
+StringValues="PhotometricInterpretationYBRFullOrRGBOrYBR_RCTOrYBR_ICT" {
 	YBR_FULL,
 	YBR_RCT,
 	YBR_ICT,
 	RGB
 }
 
-StringValues="PhotometricInterpretationRGBorYBR_FULL_422orYBR_RCTorYBR_ICTorYBR_PARTIAL_420" {
+StringValues="PhotometricInterpretationRGBOrYBR_FULL_422OrYBR_RCTOrYBR_ICTOrYBR_PARTIAL_420" {
 	YBR_FULL_422,
 	YBR_PARTIAL_420,
 	YBR_RCT,
@@ -894,7 +950,7 @@ StringValues="PhotometricInterpretationRGBorYBR_FULL_422orYBR_RCTorYBR_ICTorYBR_
 	RGB
 }
 
-StringValues="PhotometricInterpretationMonochrome2OrRGBorYBR_FULL_422orYBR_RCTorYBR_ICTorYBR_PARTIAL_420" {
+StringValues="PhotometricInterpretationMonochrome2OrRGBOrYBR_FULL_422OrYBR_RCTOrYBR_ICTOrYBR_PARTIAL_420" {
 	MONOCHROME2,
 	YBR_FULL_422,
 	YBR_PARTIAL_420,
@@ -903,12 +959,17 @@ StringValues="PhotometricInterpretationMonochrome2OrRGBorYBR_FULL_422orYBR_RCTor
 	RGB
 }
 
-StringValues="PhotometricInterpretationRGBorYBR_RCT" {
+StringValues="PhotometricInterpretationRGBOrYBR_RCT" {
 	YBR_RCT,
 	RGB
 }
 
-StringValues="PhotometricInterpretationYBRFullOrRGBorYBR_RCT" {
+StringValues="PhotometricInterpretationYBRFullOrRGB" {
+	YBR_FULL,
+	RGB
+}
+
+StringValues="PhotometricInterpretationYBRFullOrRGBOrYBR_RCT" {
 	YBR_FULL,
 	YBR_RCT,
 	RGB
@@ -939,6 +1000,18 @@ StringValues="ImageType2PrimaryOnly"	{
 StringValues="CTImageType3" {
 	AXIAL,
 	LOCALIZER
+}
+
+StringValues="CTImageType4" {
+	VMI,
+	MAT_SPECIFIC,
+	MAT_REMOVED,
+	MAT_FRACTIONAL,
+	EFF_ATOMIC_NUM,
+	ELECTRON_DENSITY,
+	MAT_MODIFIED,
+	MAT_VALUE_BASED,
+	***EMPTYVALUE***
 }
 
 StringValues="MRImageType3" {
@@ -1131,6 +1204,14 @@ StringValues="MIMETypeApplicationCDA"	{
 	TEXT/XML
 }
 
+# should really have a case insensitive match :(
+StringValues="MIMETypeApplicationSTL"	{
+	model/stl,
+	model/STL,
+	Model/STL,
+	MODEL/STL
+}
+
 StringValues="LossyImageCompressionMethod" {
 	ISO_10918_1 = JPEG Lossy Compression,
 	ISO_14495_1 = JPEG-LS Near-lossless Compression,
@@ -1149,7 +1230,8 @@ StringValues="ContentItemValueTypes" {
 	CODE,
 	NUMERIC,
 	IMAGE,
-	COMPOSITE
+	COMPOSITE,
+	WAVEFORM
 }
 
 StringValues="PixelIntensityRelationshipLUTFunction" {
@@ -1451,7 +1533,9 @@ StringValues="LongitudinalTemporalInformationModified" {
 
 StringValues="DimensionOrganizationType" {
 	3D,
-	3D_TEMPORAL
+	3D_TEMPORAL,
+	TILED_FULL,
+	TILED_SPARSE
 }
 
 StringValues="DimensionOrganizationType3D" {
@@ -1555,4 +1639,149 @@ StringValues="ParametricMapImagePixelPresentation" {
 	MONOCHROME
 }
 
+StringValues="CodingSchemeURLType" {
+	DOC,
+	OWL,
+	CSV
+}
 
+StringValues="LongitudinalTemporalEventType" {
+	ENROLLMENT,
+	BASELINE
+}
+
+StringValues="M3DModality" {
+	M3D
+}
+
+StringValues="InstanceOriginStatus" {
+	LOCAL,
+	IMPORTED
+}
+
+
+StringValues="ValueRepresentations" {
+	AE,
+	AS,
+	AT,
+	CS,
+	DA,
+	DS,
+	DT,
+	FL,
+	DF,
+	IS,
+	LO,
+	LT,
+	OB,
+	OD,
+	OF,
+	OL,
+	OW,
+	PN,
+	SH,
+	SL,
+	SQ,
+	SS,
+	ST,
+	TM,
+	UC,
+	UI,
+	UL,
+	UN,
+	UR,
+	US,
+	UT
+}
+
+StringValues="BlockIdentifyingInformationStatus" {
+	SAFE,
+	UNSAFE,
+	MIXED
+}
+
+StringValues="DeidentificationAction" {
+	D,
+	Z,
+	X,
+	U
+}
+
+StringValues="PatientAlternativeCalendar" {
+	PROLEPTIC GREGN,
+	JULIAN,
+	PROLEPTIC JULIAN,
+	EGYPTIAN REGNAL,
+	HEBREW,
+	HIJRI
+}
+
+StringValues="TypeOfInstances" {
+	DICOM,
+	CDA
+}
+
+StringValues="EncapsulatedDocumentRootValueTypes" {
+	CONTAINER
+}
+
+StringValues="EncapsulatedDocumentRelationshipType" {
+	CONTAINS,
+	HAS OBS CONTEXT,
+	HAS ACQ CONTEXT,
+	HAS CONCEPT MOD
+}
+
+StringValues="AttributeValueConstraintType" {
+	RANGE_INCL,
+	RANGE_EXCL,
+	GREATER_OR_EQUAL,
+	LESS_OR_EQUAL,
+	GREATER_THAN,
+	LESS_THAN,
+	EQUAL,
+	MEMBER_OF,
+	NOT_MEMBER_OF,
+	MEMBER_OF_CID,
+	UNCONSTRAINED
+}
+
+StringValues="ConstraintViolationSignificance" {
+	FAILURE,
+	WARNING,
+	INFORMATIVE
+}
+
+StringValues="OffsetDirection" {
+	SUPERIOR,
+	INFERIOR,
+	ANTERIOR,
+	POSTERIOR,
+	LEFT,
+	RIGHT,
+	PROXIMAL,
+	DISTAL,
+	MEDIAL,
+	LATERAL
+}
+
+StringValues="OutlineShapeType" {
+	RECTANGULAR,
+	CIRCULAR,
+	POLYGONAL
+}
+
+StringValues="PatientSupportPositionSpecificationMethod" {
+	ABSENT,
+	GLOBAL,
+	DEVICE_SPECIFIC
+}
+
+StringValues="RenderProjection" {
+	PERSPECTIVE
+}
+
+StringValues="ScanProgressionDirection" {
+	FEET_TO_HEAD,
+	HEAD_TO_FEET
+}

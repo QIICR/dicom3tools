@@ -22,9 +22,9 @@ iodandmodulerelationshipsbytag_simple.dat:	iodandmodulerelationshipsbytag.dat
 	head -1 <iodandmodulerelationshipsbytag.dat | awk -F, '{print $$1 "," $$2 "," $$3 "," $$4}' >iodandmodulerelationshipsbytag_simple.dat
 	sed -e '1d' <iodandmodulerelationshipsbytag.dat | awk -F, '{print $$1 "," $$2 "," $$3 "," $$4 "," $$5}' | sort -u -t , +2 >>iodandmodulerelationshipsbytag_simple.dat
 
-install.java:	TagFromName.java DicomDictionary.java
-	$(CP) TagFromName.java $(PIXELMEDTARGETDIR)
-	$(CP) DicomDictionary.java $(PIXELMEDTARGETDIR)
+install.java:	elmdict.xml elmdictie.xml
+	$(CP) elmdict.xml $(PIXELMEDTARGETDIR)
+	$(CP) elmdictie.xml $(PIXELMEDTARGETDIR)
 	
 TagFromName.java:	$(PROJECTLIBSUPPORTDIR)/elmtojava_TagFromName.awk \
 		elmdict/dicom3.tpl	\
@@ -85,6 +85,12 @@ InformationEntity.csv:	\
 		| xargs -L 1 $(PROJECTLIBSUPPORTDIR)/inserttagumberbeforekeyword.sh elmdict/dicom3.tpl \
 		| sort \
 		>>InformationEntity.csv
+
+elmdictie.xml:	\
+		$(PROJECTLIBSUPPORTDIR)/elmietoxml.awk \
+		iodcomp.tpl module.tpl Imakefile
+	cat iodcomp.tpl module.tpl \
+		| $(AWK) -f $(PROJECTLIBSUPPORTDIR)/elmietoxml.awk >elmdictie.xml
 
 elmdict.xml: \
 		elmdict/dicom3.tpl	\

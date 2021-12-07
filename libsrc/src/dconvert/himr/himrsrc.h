@@ -1,4 +1,4 @@
-/* himrsrc.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* himrsrc.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_himrsrc__
 #define __Header_himrsrc__
 

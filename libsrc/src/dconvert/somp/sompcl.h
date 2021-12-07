@@ -1,4 +1,4 @@
-/* sompcl.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* sompcl.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #include "ptyhdr.h"
 #include "somphdrp.h"
 #include "somphdrw.h"

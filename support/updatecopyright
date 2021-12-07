@@ -30,7 +30,7 @@ if [ -f COPYRIGHT ]
 then
 	copyright=`head -1 <COPYRIGHT`
 else
-	copyright='Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.'
+	copyright='Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.'
 fi
 
 date=`date +%y/%m/%d`

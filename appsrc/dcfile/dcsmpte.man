@@ -139,7 +139,7 @@ correctly handles Photometric Interpretation.
 .BR dcbriggs(1) ,
 .BR dcintro(1)
 .SH AUTHOR
-Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 The crosshatch lines are covered by the grayscales squares rather than
 over the top of them as is usually implemented and implied by the

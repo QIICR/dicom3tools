@@ -18,6 +18,10 @@ StringValues="VLPhotographyModality" {
 	XC
 }
 
+StringValues="DermoscopyPhotographyModality" {
+	DMS
+}
+
 StringValues="VLImageType3" {
 	STEREO L,
 	STEREO R,
@@ -43,7 +47,7 @@ StringValues="PhotometricInterpretationMonochrome2OrRGBorYBRFULL422orYBRRCTorYBR
 
 StringValues="AcquisitionContextValueTypes" {
 	TEXT,
-	NUM,
+	NUMERIC,
 	CODE,
 	DATE,
 	TIME,
@@ -83,6 +87,12 @@ StringValues="OphthalmicRefractiveMeasurementLaterality"	{
 	B = Both left and right
 }
 
+StringValues="VisualFieldStaticPerimetryTestMeasurementLaterality"	{
+	R = Right,
+	L = Left,
+	B = Both left and right
+}
+
 StringValues="OphthalmologyDetectorType"	{
 	CCD,
 	CMOS
@@ -116,9 +126,10 @@ StringValues="WholeSlideImageType1" {
 }
 
 StringValues="WholeSlideImageType3" {
-	LOCALIZER,
 	VOLUME,
-	LABEL
+	LABEL,
+	OVERVIEW,
+	THUMBNAIL
 }
 
 StringValues="WholeSlideImageType4" {
@@ -220,4 +231,127 @@ StringValues="OphthalmicAxialMeasurementsQualityImageSOPClassUIDs" {
 	1.2.840.10008.5.1.4.1.1.7.4 = Multi-frame True Color SecondaryCapture Image Storage
 }
 
+StringValues="VisualFieldStaticPerimetryTestMeasurementsScreeningBaselineType" {
+	CENTRAL,
+	PERIPHERAL
+}
 
+StringValues="VisualFieldStaticPerimetryTestMeasurementsStimulusResults" {
+	SEEN,
+	NOT SEEN,
+	SEEN AT MAX
+}
+
+StringValues="VisualFieldShape" {
+	RECTANGLE,
+	CIRCLE,
+	ELLIPSE
+}
+
+StringValues="OphthalmicVisualFieldModality" {
+	OPV
+}
+
+StringValues="LightSourcePolarization" {
+	POLARIZED,
+	NON_POLARIZED
+}
+
+StringValues="ContactMethod" {
+	CONTACT,
+	NON_CONTACT
+}
+
+StringValues="ImmersionMedia" {
+	ULTRASOUND_GEL,
+	ALCOHOL,
+	WATER,
+	MINERAL_OIL,
+	PLASTIC_CAP
+}
+
+StringValues="InteroperabilityIndex" {
+	R98,
+	THM,
+	R03
+}
+
+StringValues="LatitudeRef" {
+	N,
+	S
+}
+
+StringValues="LongitudeRef" {
+	E,
+	W
+}
+
+StringValues="GPSStatus" {
+	A,
+	V
+}
+
+StringValues="GPSMeasureMode" {
+	2,
+	3
+}
+
+StringValues="GPSSpeedUnits" {
+	K,
+	M,
+	N
+}
+
+StringValues="GPSDirection" {
+	T,
+	M
+}
+
+StringValues="GPSDistanceUnits" {
+	K,
+	M,
+	N
+}
+
+StringValues="OphthalmicAxialLengthMethod" {
+	MEASURED,
+	ESTIMATED,
+	POPULATION
+}
+
+StringValues="ImageType3MontageOnly" {
+	MONTAGE
+}
+
+StringValues="TypeOfOpticalCorrection" {
+	SPHERICAL,
+	TORIC
+}
+
+StringValues="CalculationCommentType" {
+	INFORMATIVE,
+	WARNING
+}
+
+StringValues="AnnotationModality" {
+	ANN
+}
+
+StringValues="AnnotationCoordinateType" {
+	2D,
+	3D
+}
+
+StringValues="AnnotationGroupGenerationType" {
+	AUTOMATIC,
+	SEMIAUTOMATIC,
+	MANUAL
+}
+
+StringValues="GraphicTypeForMicroscopyBulkSimpleAnnotations" {
+	POINT,
+	POLYLINE,
+	POLYGON,
+	ELLIPSE,
+	RECTANGLE
+}

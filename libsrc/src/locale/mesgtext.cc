@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)mesgtext.cc Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)mesgtext.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <iomanip>
 #else
@@ -72,5 +72,52 @@ const char *
 EMSGDC_Class::message(const char *index)
 {
 	return index && strlen(index) ? findDescription(index) : "";
+}
+
+char *
+EMSGDC_Class::error(const char *index,char *attributepath)
+{
+	ostrstream stream;
+	stream << findDescription("Error");
+	stream << " - <" << attributepath << ">";
+	delete[] attributepath;
+	stream << " - ";
+	if (index && strlen(index)) stream << findDescription(index) << ends;
+	return stream.str();
+}
+
+char *
+EMSGDC_Class::warning(const char *index,char *attributepath)
+{
+	ostrstream stream;
+	stream << findDescription("Warning");
+	stream << " - <" << attributepath << ">";
+	delete[] attributepath;
+	stream << " - ";
+	if (index && strlen(index)) stream << findDescription(index) << ends;
+	return stream.str();
+}
+
+char *
+EMSGDC_Class::abort(const char *index,char *attributepath)
+{
+	ostrstream stream;
+	stream << findDescription("Abort");
+	stream << " - <" << attributepath << ">";
+	delete[] attributepath;
+	stream << " - ";
+	if (index && strlen(index)) stream << findDescription(index) << ends;
+	return stream.str();
+}
+
+char *
+EMSGDC_Class::message(const char *index,char *attributepath)
+{
+	ostrstream stream;
+	stream << "<" << attributepath << ">";
+	delete[] attributepath;
+	stream << " - ";
+	if (index && strlen(index)) stream << findDescription(index) << ends;
+	return stream.str();
 }
 

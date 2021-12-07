@@ -98,6 +98,9 @@ CompositeIOD="RTStructureSet"		Condition="RTStructureSetInstance"
 		Module="RTSeries"					Usage="M"
 		Module="ClinicalTrialSeries"		Usage="U"	Condition="NeedModuleClinicalTrialSeries"
 	InformationEntityEnd
+	InformationEntity="FrameOfReference"
+		Module="FrameOfReference"			Usage="U"
+	InformationEntityEnd
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
 	InformationEntityEnd

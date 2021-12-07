@@ -436,7 +436,7 @@ wrote frame 1 from filename <IMAGES/1>
 .BR dcmerge(1), 
 .BR dctable(1)
 .SH AUTHOR
-Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 .LP
 Data Set Trailing Padding is explicitly removed from the input images,

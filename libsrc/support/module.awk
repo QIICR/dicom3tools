@@ -1,4 +1,4 @@
-#  module.awk Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  module.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 # create C++ headers from modules template 
 
 # can set these values on the command line:
@@ -76,7 +76,7 @@ NR==1	{
 	}
 	else if (role == "verify") {
 		print "bool"
-		print macroormodule "_" module "::verify(AttributeList *list,AttributeList *parentlist,AttributeList *rootlist,bool verbose,TextOutputStream& log,ElementDictionary *dict) const"
+		print macroormodule "_" module "::verify(AttributeList *list,AttributeList *parentlist,AttributeList *rootlist,bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict) const"
 		print "{"
 		#print "\tconst char *module = \"" module "\";"
 		print "\t(void)module;  // Quiets compiler in case module empty"
@@ -110,7 +110,7 @@ NR==1	{
 		print "\t            " macroormodule "_" module "(AttributeList *list,InformationEntity ie);"
 		print "\tconst char *identify(void) const { return \"" module "\"; }"
 		print "\tvoid        write(TextOutputStream& stream,AttributeList *list,ElementDictionary *dict) const ;"
-		print "\tbool        verify(AttributeList *list,AttributeList *parentlist,AttributeList *rootlist,bool verbose,TextOutputStream& log,ElementDictionary *dict) const;"
+		print "\tbool        verify(AttributeList *list,AttributeList *parentlist,AttributeList *rootlist,bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict) const;"
 		print "};"
 		print ""
 	}
@@ -195,6 +195,7 @@ NR==1	{
 				# do not reset it if already set (else calls during verify or write undo the work done during build)
 				print "\tif (" sequence ") {"
 				print "\t\tif (" sequence "->getInformationEntity() == UnknownIE) " sequence "->setInformationEntity(ie);"
+				print "\t\telse if (getDepthOfInformationEntity(" sequence "->getInformationEntity()) < getDepthOfInformationEntity(ie)) " sequence "->setInformationEntity(ie);"
 				print "\t}"
 				print ""
 			}
@@ -241,7 +242,7 @@ NR==1	{
 			indentcode(sequencenestingdepth)
 			print "\t\t\t\"" module "\",\"" sequence "\","
 			indentcode(sequencenestingdepth)
-			print "\t\t\tverbose,log,dict,"
+			print "\t\t\tverbose,newformat,log,dict,"
 			indentcode(sequencenestingdepth)
 			if (type == "1C" || type == "2C" || type == "3C") {
 				if (length(condition) > 0) {
@@ -261,6 +262,8 @@ NR==1	{
 				print "\t\t\tlist,parentlist,rootlist, "
 			}
 			else {
+				indentcode(sequencenestingdepth)
+				print "\t\t\tlist, "
 				if (length(condition) > 0) {
 					print "Error - unwanted Condition at line " FNR >"/dev/tty"
 				}
@@ -288,6 +291,10 @@ NR==1	{
 			indentcode(sequencenestingdepth)
 			print "\t\t\tint i; for (i=0; i<n; ++i) {"
 			if (role == "verify") {
+				indentcode(sequencenestingdepth)
+				print "\t\t\t\tif (verbose)"
+				indentcode(sequencenestingdepth)
+				print "\t\t\t\t\tlog << \"" sequence "\" << \" item [\" << (i+1) << \"]\" << endl;";
 				indentcode(sequencenestingdepth)
 				print "\t\t\t\tAttributeList *parentlist=list;"
 			}
@@ -477,6 +484,7 @@ NR==1	{
 				# do not reset it if already set (else calls during verify or write undo the work done during build)
 				print "\tif (" name ") {"
 				print "\t\tif (" name "->getInformationEntity() == UnknownIE) " name "->setInformationEntity(ie);"
+				print "\t\telse if (getDepthOfInformationEntity(" name "->getInformationEntity()) < getDepthOfInformationEntity(ie)) " name "->setInformationEntity(ie);"
 				print "\t}"
 				print ""
 			}
@@ -533,7 +541,7 @@ NR==1	{
 			indentcode(sequencenestingdepth)
 			print "\t\t\t\"" module "\",\"" name "\","
 			indentcode(sequencenestingdepth)
-			print "\t\t\tverbose,log,dict,"
+			print "\t\t\tverbose,newformat,log,dict,"
 			indentcode(sequencenestingdepth)
 			if (type == "1C" || type == "2C" || type == "3C") {
 				if (length(condition) > 0) {
@@ -553,6 +561,8 @@ NR==1	{
 				print "\t\t\tlist,parentlist,rootlist, "
 			}
 			else {
+				indentcode(sequencenestingdepth)
+				print "\t\t\tlist, "
 				if (length(condition) > 0) {
 					print "Error - unwanted Condition at line " FNR >"/dev/tty"
 				}
@@ -578,7 +588,7 @@ NR==1	{
 			indentcode(sequencenestingdepth)
 			print "\t\tif (" name " && !" name "->verifyVM("
 			indentcode(sequencenestingdepth)
-			print "\t\t\t\"" module "\",\"" name "\",log,dict," vmmin "," vmmax ",\"" condition "\")) success=false;"	# use condition as source
+			print "\t\t\t\"" module "\",\"" name "\",verbose,newformat,log,dict," vmmin "," vmmax ",\"" condition "\")) success=false;"	# use condition as source
 			if (length(condition) > 0) {
 				indentcode(sequencenestingdepth)
 				print "\t}"
@@ -595,7 +605,7 @@ NR==1	{
 			indentcode(sequencenestingdepth)
 			print "\t\t\tStringValueDescription_" stringdefinedterms ","
 			indentcode(sequencenestingdepth)
-			print "\t\t\tverbose,log,dict," selector ");"
+			print "\t\t\tverbose,newformat,log,dict," selector ");"
 			if (length(condition) > 0) {
 				indentcode(sequencenestingdepth)
 				print "\t}"
@@ -616,7 +626,7 @@ NR==1	{
 			indentcode(sequencenestingdepth)
 			print "\t\t\tStringValueDescription_" stringenumvalues ","
 			indentcode(sequencenestingdepth)
-			print "\t\t\tverbose,log,dict," selector ")) success=false;"
+			print "\t\t\tverbose,newformat,log,dict," selector ")) success=false;"
 			if (length(condition) > 0) {
 				indentcode(sequencenestingdepth)
 				print "\t}"
@@ -637,7 +647,7 @@ NR==1	{
 			indentcode(sequencenestingdepth)
 			print "\t\t\tBinaryValueDescription_" binaryenumvalues ","
 			indentcode(sequencenestingdepth)
-			print "\t\t\tverbose,log,dict," selector ")) success=false;"
+			print "\t\t\tverbose,newformat,log,dict," selector ")) success=false;"
 			if (length(condition) > 0) {
 				indentcode(sequencenestingdepth)
 				print "\t}"
@@ -658,7 +668,7 @@ NR==1	{
 			indentcode(sequencenestingdepth)
 			print "\t\t\tTagValueDescription_" tagenumvalues ","
 			indentcode(sequencenestingdepth)
-			print "\t\t\tverbose,log,dict," selector ")) success=false;"
+			print "\t\t\tverbose,newformat,log,dict," selector ")) success=false;"
 			if (length(condition) > 0) {
 				indentcode(sequencenestingdepth)
 				print "\t}"
@@ -679,7 +689,7 @@ NR==1	{
 			indentcode(sequencenestingdepth)
 			print "\t\t\tBinaryBitMapDescription_" binarybitmap ","
 			indentcode(sequencenestingdepth)
-			print "\t\t\tverbose,log,dict," selector ")) success=false;"
+			print "\t\t\tverbose,newformat,log,dict," selector ")) success=false;"
 			if (length(condition) > 0) {
 				indentcode(sequencenestingdepth)
 				print "\t}"
@@ -698,7 +708,7 @@ NR==1	{
 			indentcode(sequencenestingdepth)
 			print "\t\tif (" name " && !" name "->verifyNotZero("
 			indentcode(sequencenestingdepth)
-			print "\t\t\tverbose,log,dict," selector "," (notzero == "warning" ? "true" : "false") ")) success=false;"
+			print "\t\t\tverbose,newformat,log,dict," selector "," (notzero == "warning" ? "true" : "false") ")) success=false;"
 			if (length(condition) > 0) {
 				indentcode(sequencenestingdepth)
 				print "\t}"
@@ -711,11 +721,29 @@ NR==1	{
 				print "\tif (" messageConditionModifier "Condition_" condition "(list,parentlist,rootlist)) {"
 			}
 			indentcode(sequencenestingdepth)
-			print "\t\tlog << " messageErrorOrWarning "MsgDCNull() << \"" message " - attribute <" name ">\""
+			print "\t\tif (newformat) {"
+			print "\t\t\tAttribute *a = (*list)[TagFromName(" name ")];"
+			print "\t\t\tif (a) {"
 			if (showValueWithMessage == "true") {
-				print "\t\t\t<< \" = <\" << (const char *)AttributeValue((*list)[TagFromName(" name ")],\"\") << \">\""
+				#assume all the showValueWithMessage uses and conditions are for the 1st value, which they seem to be :(
+				print "\t\t\t\tlog << " messageErrorOrWarning "MsgDCQ(\"" message "\",a->buildFullPathInInstanceToValueOfCurrentAttribute(dict,1));"
+				print "\t\t\t\tlog << \" = <\" << (const char *)AttributeValue((*list)[TagFromName(" name ")],\"\") << \">\";"
 			}
-			print "\t\t\t<< endl;"
+			else {
+				print "\t\t\t\tlog << " messageErrorOrWarning "MsgDCQ(\"" message "\",a->buildFullPathInInstanceToCurrentAttribute(dict));"
+			}
+			print "\t\t\t}"
+			print "\t\t\telse {"
+			print "\t\t\t\tlog << list->" messageErrorOrWarning "MsgDCF(\"" message "\",\"" name "\");"
+			print "\t\t\t}"
+			print "\t\t}"
+			print "\t\telse {"
+			print "\t\t\tlog << " messageErrorOrWarning "MsgDCNull() << \"" message " - attribute <" name ">\";"
+			if (showValueWithMessage == "true") {
+				print "\t\t\tlog << \" = <\" << (const char *)AttributeValue((*list)[TagFromName(" name ")],\"\") << \">\";"
+			}
+			print "\t\t}"
+			print "\t\tlog << endl;"
 			if (length(condition) > 0) {
 				indentcode(sequencenestingdepth)
 				print "\t}"
@@ -744,7 +772,7 @@ NR==1	{
 				print "\tif (Condition_" condition "(list,parentlist,rootlist)) {"
 			}
 			indentcode(sequencenestingdepth)
-			print "\tif (!Macro_" invokedmacro "(list,ie).verify(list,parentlist,rootlist,verbose,log,dict)) success=false;"
+			print "\tif (!Macro_" invokedmacro "(list,ie).verify(list,parentlist,rootlist,verbose,newformat,log,dict)) success=false;"
 			if (length(condition) > 0) {
 				indentcode(sequencenestingdepth)
 				print "\t}"

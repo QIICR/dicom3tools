@@ -1,4 +1,4 @@
-/* gawptrs.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* gawptrs.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #define	GAW_Offset_FILEHDR_ptr		(fileinfo.explicitFileHdrPtr)
 
 #define	GAW_Offset_UIDHDR_ptr		(fileinfo.explicitFileHdrPtr+GAW_HeaderInstance_FILEHDR->IH_img_p_id)

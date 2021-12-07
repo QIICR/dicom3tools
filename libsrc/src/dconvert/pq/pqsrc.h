@@ -1,4 +1,4 @@
-/* pqsrc.h Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* pqsrc.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_pqsrc__
 #define __Header_pqsrc__
 

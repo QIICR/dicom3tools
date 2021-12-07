@@ -88,5 +88,5 @@ Display byte offset from file start and message start, in hexadecimal, and dump 
 .SH SEE ALSO
 .BR dcintro(1),dccp(1),ancreate(1)
 .SH AUTHOR
-Copyright (c) 1993-2015, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
