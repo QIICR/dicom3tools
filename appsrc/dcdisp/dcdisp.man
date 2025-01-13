@@ -192,7 +192,7 @@ Using ...
 .SH SEE ALSO
 .BR dcintro(1)
 .SH AUTHOR
-Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 Only handles 8-16 bit monochrome, palette color, and rgb photometric interpretations (with color-by-pixel planar configuration) only.
 .LP

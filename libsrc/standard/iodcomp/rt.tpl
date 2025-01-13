@@ -21,6 +21,9 @@ CompositeIOD="RTImage"		Condition="RTImageInstance"
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"

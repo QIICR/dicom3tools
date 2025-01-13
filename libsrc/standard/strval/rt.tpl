@@ -155,7 +155,8 @@ StringValues="ContourGeometricType"	{
 	POINT = single point,
 	OPEN_PLANAR = open contour containing coplanar points,
 	OPEN_NONPLANAR = open contour containing non-coplanar points,
-	CLOSED_PLANAR = closed contour (polygon) containing coplanar points
+	CLOSED_PLANAR = closed contour (polygon) containing coplanar points,
+	CLOSEDPLANAR_XOR = closed contour (polygon) containing coplanar points of an inner or outer contour combined using an XOR operator
 }
 
 StringValues="RTROIRelationship"	{

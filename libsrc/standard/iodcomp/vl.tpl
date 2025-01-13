@@ -19,6 +19,9 @@ CompositeIOD="VLEndoscopicImage"		Condition="VisibleLightEndoscopicImageInstance
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"
@@ -55,6 +58,9 @@ CompositeIOD="VLMicroscopicImage"		Condition="VisibleLightMicroscopicImageInstan
 	InformationEntityEnd
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
+	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
 	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
@@ -97,6 +103,9 @@ CompositeIOD="VLSlideCoordinatesMicroscopicImage"		Condition="VisibleLightSlideC
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"
@@ -137,6 +146,9 @@ CompositeIOD="VLPhotographicImage"		Condition="VisibleLightPhotographicImageInst
 		Module="GeneralEquipment"			Usage="M"
 		Module="VLPhotographicEquipment"	Usage="U"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"
@@ -176,6 +188,9 @@ CompositeIOD="VideoEndoscopicImage"			Condition="VideoEndoscopicImageInstance"
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"
@@ -214,6 +229,9 @@ CompositeIOD="VideoMicroscopicImage"		Condition="VideoMicroscopicImageInstance"
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"
@@ -251,6 +269,9 @@ CompositeIOD="VideoPhotographicImage"		Condition="VideoPhotographicImageInstance
 	InformationEntityEnd
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
+	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
 	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
@@ -292,6 +313,9 @@ CompositeIOD="OphthalmicPhotography8BitImage"		Condition="OphthalmicPhotography8
 	InformationEntityEnd
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"							Usage="M"
+	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"							Usage="M"
 	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"								Usage="M"
@@ -336,6 +360,9 @@ CompositeIOD="OphthalmicPhotography16BitImage"		Condition="OphthalmicPhotography
 	InformationEntityEnd
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"							Usage="M"
+	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"							Usage="M"
 	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"								Usage="M"
@@ -455,6 +482,9 @@ CompositeIOD="OphthalmicOpticalCoherenceTomographyEnFaceImage" Condition="Ophtha
 		Module="GeneralEquipment"							Usage="M"
 		Module="EnhancedGeneralEquipment"					Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"							Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"								Usage="M"
 		Module="ImagePixel"									Usage="M"
@@ -530,9 +560,16 @@ CompositeIOD="VLWholeSlideMicroscopyImage"		Condition="VLWholeSlideMicroscopyIma
 		Module="GeneralEquipment"							Usage="M"
 		Module="EnhancedGeneralEquipment"					Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"							Usage="M"
+	InformationEntityEnd
+	InformationEntity="MultiResolutionPyramid"
+		Module="MultiResolutionPyramid"						Usage="U"	Condition="NeedModuleMultiResolutionPyramid"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"								Usage="M"
 		Module="GeneralReference"							Usage="U"	Condition="NeedModuleGeneralReference"
+		Module="MicroscopeSlideLayerTileOrganization"		Usage="M"
 		Module="ImagePixel"									Usage="M"
 		Module="AcquisitionContext"							Usage="M"
 		Module="MultiFrameFunctionalGroupsCommon"			Usage="M"
@@ -809,6 +846,9 @@ CompositeIOD="DermoscopicPhotographyImage"		Condition="DermoscopicPhotographyIma
 		Module="EnhancedGeneralEquipment"	Usage="M"
 		Module="VLPhotographicEquipment"	Usage="U"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"
@@ -852,6 +892,7 @@ CompositeIOD="MicroscopyBulkSimpleAnnotations" Condition="MicroscopyBulkSimpleAn
 	InformationEntity="Annotation"
 		Module="MicroscopyBulkSimpleAnnotations"						Usage="M"
 		Module="ICCProfile"												Usage="U"	Condition="NeedModuleICCProfile"
+		Module="Specimen"												Usage="U"	Condition="NeedModuleSpecimen"
 		Module="CommonInstanceReference"								Usage="M"
 		Module="SOPCommon"												Usage="M"
 	InformationEntityEnd

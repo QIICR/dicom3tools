@@ -26,7 +26,7 @@ filenames with a .dcm extension.
 .SH SEE ALSO
 .BR antodc(1)
 .SH AUTHOR
-Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 .LP
 The search for the corresponding header file expects the extension to be lower case.

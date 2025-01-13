@@ -196,7 +196,9 @@ do
 #echo 1>&2 "Position = ${position}"
 	echo >>"${FQHTMLFILE}" "<tr><td>${position}</td>"
 	positionWithPeriodEscaped=`echo "${position}" | sed -e 's/[.]/[.]/'`
-	grepstring="[^0-9-.]${positionWithPeriodEscaped}\$"
+#echo 1>&2 "positionWithPeriodEscaped = ${positionWithPeriodEscaped}"
+	grepstring="[^.0-9-]${positionWithPeriodEscaped}\$"
+#echo 1>&2 "grepstring = ${grepstring}"
 	egrep "${grepstring}" "${SORTEDBYPOSITION}" | awk '{print $2}' >"${CURRENTPOSITIONFILES}"
 #cat 1>&2 <"${CURRENTPOSITIONFILES}"
 	rm -f "${ROWFILE}"

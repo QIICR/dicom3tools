@@ -1,0 +1,78 @@
+.TH DCCIDUMP 1 "12 June 2022" "DICOM PS3" "DICOM PS3 - Describe DICOM SR content"
+.SH NAME
+dccidump \- ACR/NEMA DICOM PS3 ... DICOM PS3 - Describe DICOM Content Items
+.SH SYNOPSIS
+.HP 10
+.B dccidump
+.so man1/gen.so
+[
+.B \-v|verbose
+]
+[
+.B \-vv|veryverbose
+]
+[
+.B \-filename
+]
+[
+.B \-identifier
+]
+.so man1/optin.so
+.SH DESCRIPTION
+.LP
+.B dccidump
+reads the named dicom input file and describes any Content Item Macro items (defined by the presence of Value Type) contained therein.
+.SH OPTIONS
+The attribute values, description and verbose output go to standard error.
+.PP
+The basic input switches are described in dcintro(1). Options specific to this program are:
+.TP
+.B \-verbose
+.RS
+Describe the parsing process; does not actually do anything at present.
+.RE
+.TP
+.B \-veryverbose
+.RS
+Display byte offset from file start and message start, in hexadecimal, and dump contents of the DICOM dataset while reading.
+.RE
+.TP
+.B \-filename
+.RS
+Show the name of the file supplied in the arguments; a hyphen will be reported if no filename was supplied.
+.RE
+.TP
+.B \-identifier
+.RS
+Preceed each content item with the dot delimited numeric identifier of the sequence attribute containing the content item relative to the root of the nested sequence item tree, and the item number in the sequence in brackets.
+.RE
+.SH ENVIRONMENT
+.LP
+\ 
+.SH EXAMPLES
+.LP
+.RE
+\ 
+.RE
+% dccidump -identifier wsi.dcm
+.RE
+		1.81[1].6[1].1: Specimen Preparation Step Content Item Sequence
+.RE
+			1.81[1].6[1].1[1]: TEXT: (121041,DCM,"Specimen Identifier")  = "TCGA-05-4244-01"
+.RE
+			1.81[1].6[1].1[2]: CODE: (434711009,SCT,"Specimen container")  = (434711009,SCT,"Specimen container")
+.RE
+			1.81[1].6[1].1[3]: CODE: (371439000,SCT,"Specimen type")  = (119376003,SCT,"Tissue specimen")
+.RE
+			1.81[1].6[1].1[4]: CODE: (111701,DCM,"Processing type")  = (17636008,SCT,"Specimen Collection")
+.RE
+			1.81[1].6[1].1[5]: CODE: (17636008,SCT,"Specimen Collection")  = (118292001,SCT,"Removal")
+.RE
+.SH FILES
+.LP
+\ 
+.SH SEE ALSO
+.BR dcintro(1)
+.SH AUTHOR
+Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+.SH BUGS

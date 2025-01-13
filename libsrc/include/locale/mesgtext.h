@@ -1,4 +1,4 @@
-/* mesgtext.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* mesgtext.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_mesgtext__
 #define __Header_mesgtext__
 

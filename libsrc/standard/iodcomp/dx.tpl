@@ -22,6 +22,9 @@ CompositeIOD="DXImageForProcessing"			Condition="DXImageForProcessingInstance"
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"
@@ -74,6 +77,9 @@ CompositeIOD="DXImageForPresentation"			Condition="DXImageForPresentationInstanc
 	InformationEntityEnd
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
+	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
 	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
@@ -128,6 +134,9 @@ CompositeIOD="MammographyImageForProcessing"			Condition="MammographyImageForPro
 	InformationEntityEnd
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
+	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
 	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
@@ -184,6 +193,9 @@ CompositeIOD="MammographyImageForPresentation"			Condition="MammographyImageForP
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"
@@ -238,6 +250,9 @@ CompositeIOD="MammographyImageForProcessingIHEMammo"			Condition="MammographyIma
 	InformationEntityEnd
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
+	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
 	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
@@ -296,6 +311,9 @@ CompositeIOD="MammographyImageForProcessingIHEMammoPartialViewOption"			Conditio
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"
@@ -352,6 +370,9 @@ CompositeIOD="MammographyImageForPresentationIHEMammo"			Condition="MammographyI
 	InformationEntityEnd
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
+	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
 	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
@@ -411,6 +432,9 @@ CompositeIOD="MammographyImageForPresentationIHEMammoPartialViewOption"			Condit
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"
@@ -469,6 +493,9 @@ CompositeIOD="IntraoralImageForProcessing"			Condition="IntraoralImageForProcess
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"
@@ -523,6 +550,9 @@ CompositeIOD="IntraoralImageForPresentation"			Condition="IntraoralImageForPrese
 	InformationEntityEnd
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
+	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
 	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
@@ -579,6 +609,9 @@ CompositeIOD="IntraoralImageForPresentationDentalMedia"			Condition="IntraoralIm
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"
 		Module="GeneralReference"			Usage="U"	Condition="NeedModuleGeneralReference"
@@ -633,6 +666,9 @@ CompositeIOD="DXImageForPresentationDentalMedia"			Condition="DXImageForPresenta
 	InformationEntityEnd
 	InformationEntity="Equipment"
 		Module="GeneralEquipment"			Usage="M"
+	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"			Usage="M"
 	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"				Usage="M"

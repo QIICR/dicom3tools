@@ -1,4 +1,4 @@
-#  sopcl.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  sopcl.awk Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 # create C++ headers from SOP class template 
 
 NR==1	{

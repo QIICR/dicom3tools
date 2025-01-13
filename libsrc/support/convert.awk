@@ -1,4 +1,4 @@
-#  convert.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  convert.awk Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 # create a C++ header file to read keywords & make dicom attributes
 # according to a description in the input template file
 

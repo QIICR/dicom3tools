@@ -1,4 +1,4 @@
-/* rdindex.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* rdindex.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_rdindex__
 #define __Header_rdindex__
 

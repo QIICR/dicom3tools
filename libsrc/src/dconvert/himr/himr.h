@@ -1,4 +1,4 @@
-/* himr.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* himr.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_himr__
 #define __Header_himr__
 

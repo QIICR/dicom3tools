@@ -30,7 +30,7 @@ if [ -f COPYRIGHT ]
 then
 	copyright=`head -1 <COPYRIGHT`
 else
-	copyright='Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.'
+	copyright='Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.'
 fi
 
 date=`date +%y/%m/%d`
@@ -99,7 +99,7 @@ dodirectory() {
 		if [ -f $i ]
 		then
 			echo Updating $i
-			sed -i "s/^Copyright ([Cc]) [0-9][0-9-]*.*Clunie.*\$/${copyright}/" $i
+			gsed -i "s/^Copyright ([Cc]) [0-9][0-9-]*.*Clunie.*\$/${copyright}/" $i
 		fi
 	done
 }

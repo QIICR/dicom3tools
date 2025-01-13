@@ -1,4 +1,4 @@
-#  transyn.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  transyn.awk Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 # create C++ defines from SOP class template 
 
 NR==1	{
@@ -65,6 +65,11 @@ NR==1	{
 		encap=substr($0,RSTART+length("Encap=\""),
 			RLENGTH-length("Encap=\"")-1);
 
+	standardfamily=""
+	if (match($0,"StandardFamily=\"[^\"]*\""))
+		standardfamily=substr($0,RSTART+length("StandardFamily=\""),
+			RLENGTH-length("StandardFamily=\"")-1);
+
 	if (role == "define") {
 		print "#define\t" name "TransferSyntaxUID\t\"" uid "\""
 	}
@@ -104,7 +109,7 @@ NR==1	{
 			ppixel="**BAD**"
 		}
 
-		print "\t\"" uid "\",\"" desc "\"," pendian "," pvr "," pencap "," ppixel ","
+		print "\t\"" uid "\",\"" desc "\"," pendian "," pvr "," pencap "," ppixel ",\"" standardfamily "\","
 	}
 
 	}

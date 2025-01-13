@@ -1,4 +1,4 @@
-/* gen.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* gen.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_gen__
 #define __Header_gen__
 

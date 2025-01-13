@@ -1,0 +1,66 @@
+.TH DCTABLE 1 "8 July 2023" "DICOM PS3" "DICOM PS3 - Make tables of attribute values"
+.SH NAME
+dctable_decompressingprn \- ACR/NEMA DICOM PS3 ... DICOM PS3 - Make tables of attribute values
+.SH SYNOPSIS
+.HP 10
+.B dctable_decompressingprn
+" inputfile1 [ inputfile2 ... ]"
+.so man1/gen.so
+[
+.B \-ignorereaderrors
+]
+[
+.B \-v|verbose
+]
+[
+.B \-r|recurse
+]
+[
+.B \-describe
+]
+[
+.B \-nofilename
+]
+[
+.B \-noembeddedquotes|decimal
+]
+[
+.B \-key|k " elementname|(0xgggg,0xeeee) ] ..."
+[
+.B \-input-nometa
+]
+[
+.B \-input-ts " uid"
+]
+[
+.B \-input-default
+]
+[
+.B \-input-byteorder|-input-endian " big|little"
+]
+[
+.B \-input-vr " implicit|explicit"
+]
+.SH DESCRIPTION
+.LP
+.B dctable
+reads the named (possibly bzip2 compressed) dicom input files and creates a tab delimited table of
+the values of the selected attributes, with each value enclosed in double
+quotes.
+.SH OPTIONS
+The table of attribute values go to standard output, and the verbose
+output and errors go to standard error.
+.PP
+The input switches are described in dctable(1).
+.RE
+.SH ENVIRONMENT
+.LP
+\ 
+\
+.SH FILES
+.LP
+\ 
+.SH SEE ALSO
+.BR dctable(1)
+.SH AUTHOR
+Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.

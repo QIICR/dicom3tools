@@ -1,4 +1,4 @@
-/* listsimp.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* listsimp.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_listsimp__
 #define __Header_listsimp__
 

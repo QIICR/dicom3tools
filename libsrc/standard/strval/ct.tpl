@@ -142,6 +142,18 @@ StringValues="RescaleTypeHounsfieldUnits" {
 	HU = Hounsfield Units
 }
 
+StringValues="RescaleTypeCTImage" {
+	OD,
+	HU,
+	US,
+	MGML,
+	Z_EFF,
+	ED,
+	EDW,
+	HU_MOD,
+	PCT
+}
+
 StringValues="MultienergySourceTechnique" {
 	SWITCHING_SOURCE,
 	CONSTANT_SOURCE

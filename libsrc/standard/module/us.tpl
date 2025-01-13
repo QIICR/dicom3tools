@@ -524,3 +524,150 @@ DefineMacro="QTUSUSImageDescriptionMacro" InformationEntity="FunctionalGroup"
 		Verify="FrameType"											ValueSelector="3"	StringEnumValues="EmptyValue"
 	SequenceEnd
 MacroEnd
+
+Module="MultiFrameFunctionalGroupsForPhotoacousticImage"
+	Sequence="SharedFunctionalGroupsSequence"			Type="1"	VM="1"
+		InvokeMacro="PixelMeasuresMacro"				Condition="PixelMeasuresSequenceNotInPerFrameFunctionalGroupSequence"
+		InvokeMacro="PlanePositionMacro"				Condition="PlanePositionSequenceNotInPerFrameFunctionalGroupSequenceAndUltrasoundAcquisitionGeometryIsPATIENT"
+		InvokeMacro="PlaneOrientationMacro"				Condition="PlaneOrientationSequenceNotInPerFrameFunctionalGroupSequenceAndUltrasoundAcquisitionGeometryIsPATIENT"
+		InvokeMacro="ReferencedImageMacro"				Condition="ReferencedImageMacroOKInSharedFunctionalGroupSequence"
+		InvokeMacro="DerivationImageMacro"				Condition="DerivationImageMacroOKInSharedFunctionalGroupSequence"
+		InvokeMacro="FrameVOILUTMacro"					Condition="FrameVOILUTSequenceOKInSharedFunctionalGroupSequenceAndIsMonochrome2"
+		InvokeMacro="RealWorldValueMappingMacro"		Condition="RealWorldValueMappingMacroOKInSharedFunctionalGroupSequenceAndIsMonochrome2"
+		InvokeMacro="ContrastBolusUsageMacro"			Condition="NeedContrastBolusUsageMacroInSharedFunctionalGroupSequence"
+		InvokeMacro="PatientOrientationInFrameMacro"	Condition="PatientOrientationInFrameMacroOKInSharedFunctionalGroupSequence"
+		InvokeMacro="FrameDisplayShutterMacro"			Condition="FrameDisplayShutterMacroOKInSharedFunctionalGroupSequence"
+		InvokeMacro="PlaneOrientationVolumeMacro"
+		InvokeMacro="TemporalPositionMacro"				Condition="TemporalPositionMacroOKInSharedFunctionalGroupSequence"
+		InvokeMacro="PhotoacousticExcitationCharacteristicsMacro"	Condition="PhotoacousticExcitationCharacteristicsMacroOKInSharedFunctionalGroupSequence"
+		InvokeMacro="PhotoacousticImageFrameTypeMacro"
+		InvokeMacro="PhotoacousticImageDataTypeMacro"
+		InvokeMacro="PhotoacousticReconstructionAlgorithmMacro"	Condition="PhotoacousticReconstructionAlgorithmMacroOKInSharedFunctionalGroupSequence"
+	SequenceEnd
+
+	Sequence="PerFrameFunctionalGroupsSequence"			Type="1"	VM="1-n"
+		InvokeMacro="FrameContentMacro"
+		InvokeMacro="PixelMeasuresMacro"				Condition="PixelMeasuresSequenceNotInSharedFunctionalGroupSequence"
+		InvokeMacro="PlanePositionMacro"				Condition="PlanePositionSequenceNotInSharedFunctionalGroupSequenceAndUltrasoundAcquisitionGeometryIsPATIENT"
+		InvokeMacro="PlaneOrientationMacro"				Condition="PlaneOrientationSequenceNotInSharedFunctionalGroupSequenceAndUltrasoundAcquisitionGeometryIsPATIENT"
+		InvokeMacro="ReferencedImageMacro"				Condition="ReferencedImageMacroOKInPerFrameFunctionalGroupSequence"
+		InvokeMacro="DerivationImageMacro"				Condition="DerivationImageMacroOKInPerFrameFunctionalGroupSequence"
+		InvokeMacro="FrameVOILUTMacro"					Condition="FrameVOILUTSequenceOKInPerFrameFunctionalGroupSequenceAndIsMonochrome2"
+		InvokeMacro="RealWorldValueMappingMacro"		Condition="RealWorldValueMappingMacroOKInPerFrameFunctionalGroupSequenceAndIsMonochrome2"
+		InvokeMacro="ContrastBolusUsageMacro"			Condition="NeedContrastBolusUsageMacroInPerFrameFunctionalGroupSequence"
+		InvokeMacro="PatientOrientationInFrameMacro"	Condition="PatientOrientationInFrameMacroOKInPerFrameFunctionalGroupSequence"
+		InvokeMacro="FrameDisplayShutterMacro"			Condition="FrameDisplayShutterMacroOKInPerFrameFunctionalGroupSequence"
+		InvokeMacro="PlanePositionVolumeMacro"
+		InvokeMacro="TemporalPositionMacro"				Condition="TemporalPositionMacroOKInPerFrameFunctionalGroupSequence"
+		InvokeMacro="PhotoacousticExcitationCharacteristicsMacro"	Condition="PhotoacousticExcitationCharacteristicsMacroOKInPerFrameFunctionalGroupSequence"
+	SequenceEnd
+ModuleEnd
+
+Module="PhotoacousticSeriesPseudo"
+	Name="Modality"											Type="1"	StringEnumValues="PhotoacousticModality"
+ModuleEnd
+
+Module="PhotoacousticImage"
+	Name="ImageType"										Type="1"	VM="4-n"
+	Verify="ImageType"													ValueSelector="0"	StringEnumValues="CommonEnhancedImageType1"
+	Verify="ImageType"													ValueSelector="1"	StringEnumValues="CommonEnhancedImageAndFrameType2"
+	Verify="ImageType"													ValueSelector="2"	StringDefinedTerms="PhotoacousticImageAndFrameType3"
+	Verify="ImageType"													ValueSelector="3"	StringDefinedTerms="CommonEnhancedImageType4"
+	Name="DimensionOrganizationType"						Type="1"	StringEnumValues="DimensionOrganizationType3DOr3DTemporal"
+	Name="AcquisitionDateTime"								Type="1"
+	InvokeMacro="CommonCTMRImageDescriptionImageLevelMacro"
+	Name="SamplesPerPixel"									Type="1"	BinaryEnumValues="SamplesPerPixelIsOneOrThree"
+	Name="PhotometricInterpretation"						Type="1"	StringDefinedTerms="PhotometricInterpretationForPhotoacousticImage"
+	Name="BitsAllocated"									Type="1"	BinaryEnumValues="BitsAre8Or16"
+	Name="BitsStored"										Type="1"	BinaryEnumValues="BitsAre8Or16"
+	Name="HighBit"											Type="1"	BinaryEnumValues="BitsAre7Or15"
+	Name="PixelRepresentation"								Type="1"	BinaryEnumValues="PixelRepresentationUnsigned"
+	Name="PlanarConfiguration"								Type="1C"	Condition="SamplesPerPixelGreaterThanOne"	BinaryEnumValues="PlanarConfigurationIsColorByPixel"
+	Name="PositionMeasuringDeviceUsed"						Type="1"	StringEnumValues="PhotoacousticPositionMeasuringDeviceUsed"
+	Name="LossyImageCompression"							Type="1"	StringEnumValues="LossyImageCompression"
+	Name="LossyImageCompressionRatio"						Type="1C"	Condition="LossyImageCompressionIs01"	NotZeroError=""
+	Name="LossyImageCompressionMethod"						Type="1C"	StringDefinedTerms="LossyImageCompressionMethod"	Condition="LossyImageCompressionIs01"
+	Verify="LossyImageCompressionMethod"								Condition="LossyImageCompressionMethodInconsistentWithTransferSyntax"	ThenWarningMessage="method inconsistent with Transfer Syntax" ShowValueWithMessage="true"
+	Name="PresentationLUTShape"								Type="1"	StringEnumValues="IdentityPresentationLUTShape"
+	Name="BurnedInAnnotation"								Type="1"	StringEnumValues="NoFull"
+	Name="RecognizableVisualFeatures"						Type="3"	StringEnumValues="YesNoFull"
+	Sequence="IconImageSequence"							Type="3"	VM="1"
+		InvokeMacro="IconImageSequenceMacro"
+	SequenceEnd
+ModuleEnd
+
+Module="PhotoacousticAcquisitionParameters"
+	Sequence="ExcitationWavelengthSequence"					Type="1"	VM="1-n"
+		Name="ExcitationWavelength"							Type="1"
+	SequenceEnd
+	Name="IlluminationTranslationFlag"						Type="3"	StringEnumValues="YesNoFull"
+	Sequence="IlluminationTypeCodeSequence"					Type="3"	VM="1"
+		InvokeMacro="CodeSequenceMacro"												DefinedContextID="11001"
+	SequenceEnd
+	Name="AcousticCouplingMediumFlag"						Type="1"	StringEnumValues="YesNoFull"
+	Sequence="AcousticCouplingMediumCodeSequence"			Type="2C"	VM="0-1"	Condition="AcousticCouplingMediumFlagIsYes"
+		InvokeMacro="CodeSequenceMacro"												DefinedContextID="11002"
+	SequenceEnd
+	Name="AcousticCouplingMediumTemperature"				Type="3"
+ModuleEnd
+
+Module="PhotoacousticTransducer"
+	Sequence="TransducerGeometryCodeSequence"				Type="1"	VM="1"
+		InvokeMacro="CodeSequenceMacro"												DefinedContextID="12033"
+	SequenceEnd
+	Sequence="TransducerResponseSequence"					Type="2"	VM="0-1"
+		Name="CenterFrequency"								Type="3"
+		Name="FractionalBandwidth"							Type="3"
+		Name="LowerCutoffFrequency"							Type="3"
+		Name="UpperCutoffFrequency"							Type="3"
+	SequenceEnd
+	Sequence="TransducerTechnologySequence"					Type="3"	VM="1"
+		InvokeMacro="CodeSequenceMacro"												DefinedContextID="11003"
+	SequenceEnd
+ModuleEnd
+
+Module="PhotoacousticReconstruction"
+	Sequence="SoundSpeedCorrectionMechanismCodeSequence"	Type="1"	VM="1"
+		InvokeMacro="CodeSequenceMacro"												DefinedContextID="11004"
+		Name="ObjectSoundSpeed"								Type="1C"	NoCondition=""	# too hard :( - root Sound Speed Correction Mechanism code is DCM:130818 or DCM:130819
+		Name="AcousticCouplingMediumSoundSpeed"				Type="1C"	NoCondition=""	# too hard :( - root Sound Speed Correction Mechanism code is DCM:130819
+		Sequence="ReferencedImageSequence"					Type="1C"	VM="1"	NoCondition=""	mbpo="true"	# too hard :( - root Sound Speed Correction Mechanism code is DCM:130820
+			InvokeMacro="ImageSOPInstanceReferenceMacro"
+		SequenceEnd
+	SequenceEnd
+ModuleEnd
+
+DefineMacro="PhotoacousticExcitationCharacteristicsMacro"
+	Sequence="PhotoacousticExcitationCharacteristicsSequence"	Type="1"	VM="1-n"
+		Name="ExcitationWavelength"								Type="1"
+		Name="ExcitationSpectralWidth"							Type="3"
+		Name="ExcitationEnergy"									Type="3"
+		Name="ExcitationPulseDuration"							Type="3"
+	SequenceEnd
+MacroEnd
+
+
+DefineMacro="PhotoacousticImageFrameTypeMacro"
+	Sequence="PhotoacousticImageFrameTypeSequence"	Type="1"	VM="1"
+		Name="FrameType"							Type="1"	VM="4"
+		Verify="FrameType"									ValueSelector="0"	StringEnumValues="CommonEnhancedFrameType1"
+		Verify="FrameType"									ValueSelector="1"	StringEnumValues="CommonEnhancedImageAndFrameType2"
+		Verify="FrameType"									ValueSelector="2"	StringDefinedTerms="PhotoacousticImageAndFrameType3"
+		Verify="FrameType"									ValueSelector="3"	StringDefinedTerms="CommonEnhancedFrameType4"
+		InvokeMacro="CommonCTMRImageDescriptionFrameLevelMacro"
+	SequenceEnd
+MacroEnd
+
+DefineMacro="PhotoacousticImageDataTypeMacro"
+	Sequence="ImageDataTypeSequence"			Type="1"	VM="1"
+		Sequence="ImageDataTypeCodeSequence"	Type="1"	VM="1"
+			InvokeMacro="CodeSequenceMacro"												DefinedContextID="11006"
+		SequenceEnd
+	SequenceEnd
+MacroEnd
+
+DefineMacro="PhotoacousticReconstructionAlgorithmMacro"
+	Sequence="ReconstructionAlgorithmSequence"	Type="3"	VM="1"
+		InvokeMacro="AlgorithmIdentificationMacro"										BaselineContextID="11005"
+	SequenceEnd
+MacroEnd

@@ -1,3 +1,215 @@
+241220:	libsrc/src/dctool/attrtypv.cc: Allow TAB character in control characters for text VRs (CP 1425)
+
+241114:	appsrc/dcfile/dciodvfy.cc: Allow single byte of padding for odd number of 8 bit LUT entries in 16 bit words (000607)
+
+241114:	appsrc/dcfile/dciodvfy.cc: Remove check on SegmentNumber monotonically increasing from 1 (not 0) if SegmentationType is LABELMAP (Sup 243)
+
+241111:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Ion Range Surface Compensator (CP 2401), Isodose levels for RT Dose visualization (CP 2402)
+
+241105:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Ocular Region Imaged Module in Ophthalmic Tomography (CP 2346)
+
+241003:	libsrc/standard/condn.tpl,module/base.tpl: Restore not requiring SegmentationMacro if TILED_FULL (CP 2331) lost when adding Label Map Segmentation
+
+240915:	libsrc/standard/sopcl.tpl,elmdict/dicom3.tpl: Add SOP Class and data elements for Height Map Segmentation and Revised Ophthalmic OCT En Face Image (Sup 240)
+
+240914:	libsrc/standard/condn.tpl,sopcl.tpl,iodcomp,module,strval/base.tpl: Add Label Map Segmentation, and remove related experimental profile (Sup 243)
+
+240913:	libsrc/standard/elmdict/dicom3.tpl: Add data element for Clarify Description related to Range Shifter Settings reusing DICONDE Material Density (CP 2373 FT2)
+
+240912:	libsrc/standard/elmdict/dicom3.tpl: Add data element for Differentiate acquisition techniques for RT 3D CBCT imaging (CP 2220)
+
+240822: libsrc/standard/module/base.tpl:	Correctly Add Ethnic Group Code Sequence (CP 2356)
+
+240728: libsrc/standard/condn.tpl,module/base.tpl: Report error when PositionReferenceIndicator not SLIDE_CORNER for microscopy (000605)
+
+240712:	appsrc/dcfile/dcacqmap.script,dcacqmap.man: Fix invalid character range in egrep for position files (000604), typo in documentation
+
+240623:	libsrc/standard/elmdict/diconde.tpl: Add DICONDE data elements for thermography imaging
+
+240612:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Table Top Position Alignment UID to Table Top positions (CP 2376)
+
+240612:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Improve RT equipment mapping for imaging (CP 2374)
+
+240611:	libsrc/standard/elmdict/dicom3.tpl,module/base.tpl:	Add Ethnic Group Code Sequence (CP 2356)
+
+240610:	libsrc/standard/elmdict/dicom3.tpl:	Add data element for updated RT Patient Setup Module (CP 2344)
+
+240515:	libsrc/standard/condn.tpl,module/base.tpl: Check ICCProfile and ColorSpace not present in top level dataset Image Pixel Module if Optical Path Module present (000603)
+
+240506:	libsrc/standard/module/vl.tpl: Check AnnotationGroupNumber is not zero (000602)
+
+240324:	libsrc/standard/condn.tpl,iodcomp/base.tpl: Detect FrameOfReference Module if FoR UID present even if position and orientation not, since MBPO in Secondary Capture IOD (CP 2330)
+
+240402:	appsrc/dcfile/dciodvfy.cc,libsrc/src/locale/mesgtext.tpl: Check AnnotationGroupUID is not duplicated (000601)
+
+240329:	libsrc/standard/elmdict/other.tpl: 3DHISTECH private data elements from conformance statement
+
+240329:	appsrc/dcfile/dcentvfy.cc,libsrc/src/locale/mesgtext.tpl: Check all ReferencedSOPInstanceUID instances are in set of supplied files (000600)
+
+240328:	appsrc/dcfile/dciodvfy.cc,libsrc/src/locale/mesgtext.tpl: Check sanity of Microscopy Bulk Simple Annotation indices and coordinates (000599)
+
+240328:	libsrc/include/dctool/attr.h,attrtype.h,attrtypo.h,src/dctool/attrmxrd.cc,attrtypo.cc: Add support of in-memory (small) OL VR data elements to get values to check (000599)
+
+240325:	libsrc/standard/elmdict/dicom3.tpl,module/base.tpl: Clinical Trial Identifiers need Issuers and may be multiple (CP2335)
+
+240324:	libsrc/standard/condn.tpl,iodcomp,module/base.tpl: Clarify Segment scan order for TILED_FULL (CP 2331) and remove CP2331 profile option to test TILED_FULL segmentations
+
+240324:	libsrc/standard/condn.tpl,iodcomp/base.tpl: Add Spatial Information to Secondary Capture IOD (CP 2330)
+
+240324:	libsrc/standard/elmdict/dicom3.tpl,module/vl.tpl: Add information about Vertex Distance to refraction correction parameters (CP 2324)
+
+240324:	libsrc/standard/elmdict/dicom3.tpl,module/base.tpl: Add Synthetic Data Flag (CP 2320)
+
+240316:	appsrc/dcfile/dcentvfy.cc: Check Frame of Reference IE attribute values same for same Series (000597)
+
+240312:	libsrc/standard/elmdict/philips.tpl: Add more observed private data elements
+
+240224:	appsrc/dcfile/dciodvfy.cc,libsrc/include/dctool/attr.h,attrothr.h,transyn.h,src/dctool/transyn.cc,transyne.h,locale/mesgtext.tpl,standard/transyn.tpl,support/transyn.awk: Add check that Basic Offset Table is valid if present, including length, point to Item Tag and begin with a JPEG/J2K SOI marker (000531) and point to even offsets (000526)
+
+240222:	appsrc/acrnema/andump.cc,libsrc/include/dctool/attr.h,attrtype.h,attrtypn.h,attrtypo.h,dcstream.h,vr.h,generic/bnstream.h,src/dctool/attr.cc,attrmxrd.cc,attrnew.cc,attrtypo.cc: Add 64 bit binary VRs (CP 1819)
+
+240215:	libsrc/standard/condn.tpl,module/vl.tpl: Correct spurious report of invalid CommonZCoordinateValue for nnotationCoordinateType not 3D when not actually present (000596)
+
+240214:	appsrc/dcfile/dcentvfy.cc: Check Equipment IE attribute values same for same Series (000595)
+
+240131:	libsrc/standard/condn.tpl,iodcomp,module,strval/base.tpl: Add profile option to test LABELMAP segmentations (Sup243)
+
+240118:	appsrc/dcfile/dciodvfy.cc,libsrc/src/locale/mesgtext.tpl: Check that SCOORD3D POLYGON are closed (first and last points same) (000592)
+
+240114:	libsrc/standard/elmdict/dicom3.tpl: Provide additional ROI parameters (CP 2296)
+
+240112:	libsrc/standard/elmdict/dicom3.tpl: Add new data elements for DICOMweb Storage Commitment Service (Sup 234)
+
+231125:	config/Configure: Build two architectures when clang >=15 but not with ld flag "-force_cpusubtype_ALL" that is no longer supported
+
+231115:	libsrc/standard/sopcl.tpl,elmdict/dicom3.tpl: Add Confocal Microscopy data elements and SOP Class UIDs (Sup 236)
+
+231114:	libsrc/standard/elmdict/dicom3.tpl: Add Beam Hold Transition Trigger Source (CP 2299)
+
+231114:	libsrc/standard/elmdict/dicom3.tpl: Add Dose Value Interpretation data element tag (CP 2297)
+
+231114:	libsrc/standard/elmdict/dicom3.tpl: Retire Referenced Patient Alias Sequence (CP 2281)
+
+231024:	libsrc/standard/module/base.tpl: Relax constraint on LUT Descriptor Value 3 when Palette Color LUT Macro not in Color Palette instance, allow it to be 8 or 16 (000591)
+
+231024:	libsrc/standard/elmdict/dicom3.tpl: Make capitalization of 'Per-Frame' in data element names consistent (upper case) - keywords already correct (editorial change in 2023e)
+
+231017:	libsrc/standard/strval/base.tpl: Add missing UID for ICDO3 coding scheme string value (previous incomplete CP2117)
+
+231011:	libsrc/standard/condn.tpl,iodcomp,module,strval/us.tpl,strval/base.tpl:	Add Photoacoustic Imaging (Sup 229)
+
+231011:	libsrc/standard/strval/rt.tpl: Add CLOSEDPLANAR_XOR to Contour Geometric Type for RTSS (CP2037)
+
+231004:	libsrc/standard/condn.tpl,iodcomp,module/base.tpl: Add profile option to test TILED_FULL segmentations (cp2331_02)
+
+231003:	libsrc/standard/condn.tpl: Do not require PatientOrientation for TILED_FULL SEG (000590)
+
+231003:	appsrc/dcfile/dciodvfy.cc,libsrc/src/locale/mesgtext.tpl: Check for unknown code sequence item values (000589)
+
+230926:	libsrc/standard/module/sr.tpl: Correct VM of ReferencedInstanceSequence in SR Document General Module from 1 to 1-n to match current standard
+
+230917:	libsrc/standard/condn.tpl,module/base.tpl: Apply TILED_FULL DimensionOrganizationType in top level (root) dataset condition to requirement for non-slide position and orientation functional groups for segmentations and parametric maps (000586), and also remove duplicate WSI-related attributes that were previously factored out into Microscope Slide Layer Tile Organization Module (CP 2135)
+
+230709:	libsrc/standard/elmdict/other.tpl; Add UIH MR private data elements described at https://github.com/rordenlab/dcm2niix/issues/225
+
+230708:	appsrc/dcfile/dctable_decompressingprn: Add old script that supports decompressing bzip2'd DICOM file before dctable to distribution
+
+230629:	libsrc/standard/elmdict/dicom3.tpl: Add manufacture date and installation date to Device and Equipment Identification (CP 2258)
+
+230626:	libsrc/standard/sopcl.tpl,elmdict/dicom3.tpl: Add Photoacoustic Imaging data elements and SOP Class (Sup 229)
+
+230615:	libsrc/standard/condn.tpl,module/base.tpl: Correct condition for exclusion of PlaneOrientationMacro for Segmentation with Whole Slide Imaging (CP 1830)
+
+230612: libsrc/standard/iodcomp/softcopy.tpl: Add Specimen Module to Presentation States (CP 2216)
+
+230612: libsrc/standard/iodcomp/vl.tpl: Add Specimen Module to Microscopy Bulk Simple Annotations (CP 2177)
+
+230405:	INSTALL: Update description of MacOS installation pre-requisites
+
+230403:	config/Configure: Only build two archiectures when clang >12 or >= 12.0.2, and update X11 include and lib path choices to use /opt/local
+
+230402:	config/Configure,libsrc/include/generic/basetype.h: Recognize Apple clang rather than LLVM when extracting g++ version, add arm64 architecture, and deal with libc++ differences from libstdc++ such as strstream
+
+230330: libsrc/standard/sopcl.tpl,elmdict/dicom3.tpl: Data element and SOP Class for Variable Modality LUT SPS (Sup 231)
+
+230224:	libsrc/src/dctool/dcopto.cc, libsrc/src/dctool/elmdict.cc: Do not insert trailing null rather than space for private owners and private data elements with string VRs in copy/create/convert tools replace command line arguments (000582)
+
+230121:	libsrc/standard/elmdict/dicom3.tpl: Retire the Robotic Base Location Indicator (CP 2245)
+
+230119:	libsrc/standard/module/softcopy.tpl: Add ability to select optical path and use VOI and Palette Color in Advanced Blending Presentation State (CP 2036, CP 2037)
+
+221230:	libsrc/standard/strval/ct.tpl: Extend list of Defined Terms for Rescale Type for classic CT Image to match current standard (Sup 158), and make error when not HU for non-LOCALIZER a warning (is enhanced requirement only and not mentioned in standard for classic)
+
+221225:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Enhanced RT Image (Sup 213)
+
+221224:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Support of new MLC types (CP 2229)
+
+221123:	libsrc/standard/elmdict/dicom3.tpl: Correct Inventory Level,List of UID Matching Sequence keywords
+
+221013:	libsrc/src/dctool/attrtypv.cc,v,locale/mesgtext.tpl: Check timezone in DT is correct length and form (000580) and  value content in DA, DT, TM even if incorrect length (000581)
+
+221002:	libsrc/standard/elmdict/dicom3.tpl,module/base.tpl: Add Clinical Trial Time Point Type Code Sequence to Study Module (CP 2197)
+
+220929:	libsrc/standard/elmdict/other.tpl: Add more UCSF BIRP private data elements from ACRIN 6698 ISPY2 Shared Private Tag Data Dictionary_20210520.xlsx (000579)
+
+220923:	libsrc/standard/elmdict/dicom3.tpl: Correct data element tag for Maximum Number of Records that collides with Updated Metadata Sequence (Sup 223 FT3)
+
+220016:	libsrc/standard/elmdict/other.tpl: Add UCSF BIRP private creator that have different case for XX than specified (000578)
+
+220707:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Conceptual Volume in Structure Set (CP 2184)
+
+220707:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for used ROI in Registration (CP 2183)
+
+220630:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for waveform filter description (CP 2162)
+
+220624:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for inventory supplement (Sup 223)
+
+220612:	appsrc/dcfile/dccidump.cc: Add utility to dump Content Item Macro content not related to SR (000576)
+
+220606:	libsrc/standard/strval/base.tpl: Add RRID coding scheme (CP 2164)
+
+220606:	libsrc/standard/iodcomp,module/softcopy.tpl: Add profile IDCVOIPaletteOpticalPath to test draft CP adding VOI and Palette Color to Advanced Blending Presentation State as well as Specimen Module (000575)
+
+220601:	libsrc/standard/condn.tpl,,sopcl.tpl,iodcomp,module,strval/softcopy.tpl: Add Advanced Blending Presentation State Storage IOD (Supp 189)
+
+220524:	libsrc/standard/module/base.tpl: Add AcquisitionUID left out of General Acquisition Module when CP 2135 was added (001361)
+
+220417:	libsrc/standard/strval/base.tpl: Update Coding Scheme UIDs and Designators to match current standard (2022b)
+
+220412:	libsrc/standard/elmdict/diconde.tpl: Add DICONDE data elements for Data Element Label Dictionary Module (ASTM E2339-21)
+
+220409:	libsrc/standard/elmdict/other.tpl: Add private PixelMed data elements for original file name and TIFF IFD
+
+220331:	libsrc/include/dctool/ie.h,src/dctool/ie.cc,standard/condn.tpl,elmdict/dicom3.tpl,iodcomp/base.tpl,dx.tpl,pet.tpl,rt.tpl,us.tpl,vl.tpl,xaxrf.tpl,module/base.tpl,vl.tpl,support/elmietoxml.awk: Add Acquisition and Pyramid Entities to Information Model, with UIDs and other Attributes (CP 2135); also add Annotation IE handling (Sup 222)
+
+220331:	libsrc/standard/condn.tpl,module/base.tpl,vl.tpl: Relax requirement for Slice Thickness, Pixel Spacing and Imaged Volume Width/Depth/Height for Whole Slide Microscopy LABEL and OVERVIEW images (CP 2086)
+
+220322:	libsrc/standard/condn.tpl,module/vl.tpl: Report missing Per-frame Functional Groups Sequence when WSI not TILED_FULL (000573)
+
+220320:	libsrc/standard/elmdict/philips.tpl: Add unknown Philips MR presentation state private tag with VR encountered
+
+220209:	libsrc/standard/elmdict/other.tpl: Add unknown Aperio private tag with VR encountered
+
+220120:	libsrc/src/dctool/attrtypo.cc: Remove odd length assertion failure when reading OB so dataset read can continue; will detect later if verifying (000571)
+
+220116:	libsrc/standard/elmdict/dicom3.tpl: CPACK 114 data elements (CP 2145, CP 2152, CP 2153, CP 2154, CP 2156, CP 2157)
+
+211115: libsrc/support/condn.awk: Fix broken implementation of SequencePresentInPathFromRootFirstItemHasItems in conditions to correct spurious dciodvfy warning that ReferencedSeriesSequence should not be present references to instances in derivation per-frame functional group are present (000570)
+
+211113:	libsrc/standard/elmdict/dicom3.tpl,module/base.tpl: Per-segment multiple algorithms and creators (CP 2115)
+
+211109:	libsrc/standard/condn.tpl,module/rt.tpl: Add missing conditions for BlockThickness and BlockTransmission (000569)
+
+211027:	libsrc/standard/elmdict/dicom3.tpl: Correct misspelled keyword for Number of Table Columns
+
+211027:	libsrc/standard/strval/sr.tpl: Add UIDREF to Mammography CAD SR Value Types (CP 2053)
+
+211026:	libsrc/standard/elmdict/dicom3.tpl: Correct capitalization of 'for' in keyword for (300A,0788)
+
+211025:	libsrc/standard/strval/base.tpl,elmdict/other.tpl: Add 99_APERIO Coding Scheme Designator and private data elements per GT450 DX samples and DCS
+
+211015:	appsrc/dcfile/dciodvfy.cc,libsrc/src/locale/mesgtext.tpl: Check when UIDs are re-used for different entities, such as same for SOP Instance and Study (000568)
+
 211009:	libsrc/include,src/dctool/ie.h,standard/condn.tpl,sopcl.tpl,iodcomp,module,strval/vl.tpl: Add Microscopy Bulk Simple Annotations (Sup 222)
 
 211005:	libsrc/standard/elmdict/dicom3.tpl: Add data elements for Tomotherapeutic and Robotic-Arm Treatment Modalities (Sup 176)
@@ -26,7 +238,7 @@
 
 210830:	libsrc/standard/module/xaxrf.tpl: Add missing Filter Beam Path Length Minimum, Maximum to XRay3DAngiographicAcquisition (CP 837)
 
-210830:	libsrc/standard/condn.tpl,base.tpl: Use of Segmentation and Parametric Maps with Whole Slide Imaging (CP 1830), Add Slide Orientation and Total Pixel Matrix information to Segmentation and Parametric Maps for TILED_FULL (CP 1984)
+210830:	libsrc/standard/condn.tpl,module/base.tpl: Use of Segmentation and Parametric Maps with Whole Slide Imaging (CP 1830), Add Slide Orientation and Total Pixel Matrix information to Segmentation and Parametric Maps for TILED_FULL (CP 1984)
 
 210830:	libsrc/standard/condn.tpl,elmdict/dicom3.tpl,iodcomp,module/vl.tpl,strval/base.tpl,vl.tpl: Add Ophthalmic Optical Coherence Tomography for Angiographic Imaging Storage SOP Classes (Sup 197)
 

@@ -1,4 +1,4 @@
-/* smptesrc.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* smptesrc.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_SMPTESrc__
 #define __Header_SMPTESrc__
 

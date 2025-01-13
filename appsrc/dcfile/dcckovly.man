@@ -31,6 +31,6 @@ There are no options.
 .LP
 \ 
 .SH AUTHOR
-Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 Cannot detect non-zero high bits in encapsulated images.

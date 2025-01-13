@@ -1,4 +1,4 @@
-/* genptrs.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* genptrs.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #define	GEN_Offset_FILEHDR_ptr		(fileinfo.explicitFileHdrPtr)
 
 #define	GEN_Offset_UIDHDR_ptr		(fileinfo.explicitFileHdrPtr+GEN_HeaderInstance_FILEHDR->IH_img_p_id)

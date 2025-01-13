@@ -21,6 +21,10 @@ Condition="EnhancedUltrasoundVolumeInstance"
 	Element="SOPClassUID"		StringConstantFromRootAttribute="EnhancedUSVolumeStorageSOPClassUID"
 ConditionEnd
 
+Condition="PhotoacousticImageInstance"
+	Element="SOPClassUID"		StringConstantFromRootAttribute="PhotoacousticImageStorageSOPClassUID"
+ConditionEnd
+
 Condition="BasicStructuredDisplayInstance"
 	Element="SOPClassUID"		StringConstantFromRootAttribute="BasicStructuredDisplayStorageSOPClassUID"
 ConditionEnd
@@ -48,6 +52,15 @@ ConditionEnd
 
 Condition="SegmentationInstance"
 	Element="SOPClassUID"		StringConstantFromRootAttribute="SegmentationStorageSOPClassUID"
+ConditionEnd
+
+Condition="LabelMapSegmentationInstance"
+	Element="SOPClassUID"		StringConstantFromRootAttribute="LabelMapSegmentationStorageSOPClassUID"
+ConditionEnd
+
+Condition="LabelMapOrSegmentationInstance"
+	Element="SOPClassUID"		StringConstantFromRootAttribute="SegmentationStorageSOPClassUID"
+	Element="SOPClassUID"		StringConstantFromRootAttribute="LabelMapSegmentationStorageSOPClassUID"
 ConditionEnd
 
 Condition="SurfaceSegmentationInstance"
@@ -230,6 +243,10 @@ ConditionEnd
 
 Condition="BlendingSoftcopyPresentationStateInstance"
 	Element="SOPClassUID"		StringConstantFromRootAttribute="BlendingSoftcopyPresentationStateStorageSOPClassUID"
+ConditionEnd
+
+Condition="AdvancedBlendingSoftcopyPresentationStateInstance"
+	Element="SOPClassUID"		StringConstantFromRootAttribute="AdvancedBlendingSoftcopyPresentationStateStorageSOPClassUID"
 ConditionEnd
 
 Condition="IsForProcessingSOPClass"
@@ -642,7 +659,7 @@ Condition="NeedModuleFrameOfReferenceInVLI"
 ConditionEnd
 
 Condition="NeedModuleImagePlane"
-	Element="PixelSpacing"			ElementPresent=""
+	Element="PixelSpacing"				ElementPresent=""
 	Element="ImageOrientationPatient"	ElementPresent=""
 	Element="ImagePositionPatient"		ElementPresent=""
 ConditionEnd
@@ -996,11 +1013,13 @@ Condition="PatientOrientationRequired"
 	# not required for RT dose, since either needed for grid (image) or not an image hence not applicable
 	Element="SOPClassUID"			Operator="And" Modifier="Not" StringConstantFromRootAttribute="RTDoseStorageSOPClassUID"
 	Element="SOPClassUID"			Operator="And" Modifier="Not" StringConstantFromRootAttribute="VLWholeSlideMicroscopyImageStorageSOPClassUID"
+	Element="SOPClassUID"			Operator="And" Modifier="Not" StringConstantFromRootAttribute="SegmentationStorageSOPClassUID"
 	(
 		Element="SOPClassUID"				StringConstantFromRootAttribute="SegmentationStorageSOPClassUID"
 		(
 			Element="PlaneOrientationSequence"					ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
 			Element="PlaneOrientationSequence"	Operator="Or"	ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+			Element="ImageOrientationSlide"		Operator="Or"	ElementPresentInRoot=""
 		) Operator="And"
 	) Operator="And" Modifier="Not"
 ConditionEnd
@@ -1833,6 +1852,16 @@ Condition="NeedIsocenterToCompensatorDistance"
 	Element="CompensatorMountingPosition"		Operator="And" StringValue="DOUBLE_SIDED"
 ConditionEnd
 
+Condition="MaterialIDNotEmpty"
+	Element="MaterialID"				ElementPresent=""
+	Element="MaterialID"				Operator="And" ValuePresent=""
+ConditionEnd
+
+Condition="MaterialIDEmptyOrAbsent"
+	Element="MaterialID"				Modifier="Not"	ElementPresent=""
+	Element="MaterialID"				Operator="Or"	Modifier="Not"	ValuePresent=""
+ConditionEnd
+
 Condition="NumberOfBoliNotZero"
 	Element="NumberOfBoli"			ElementPresent=""
 	Element="NumberOfBoli"			Operator="And" BinaryValue="> 0"
@@ -2303,6 +2332,10 @@ Condition="NeedModuleOverlayActivation"
 	Element="CurveActivationLayer"		ElementPresent=""
 ConditionEnd
 
+Condition="NeedModuleDisplayedArea"
+	Element="DisplayedAreaSelectionSequence"	ElementPresent=""
+ConditionEnd
+
 Condition="NeedModuleGraphicAnnotation"
 	Element="GraphicAnnotationSequence"	ElementPresent=""
 ConditionEnd
@@ -2758,6 +2791,19 @@ Condition="ImageTypeValue1OriginalOrMixedAndNotLegacyConvertedOrWholeSlide"
 }
 ConditionEnd
 
+Condition="ImageTypeValue1OriginalOrMixedAndNotTILED_FULLAndNotLegacyConvertedOrWholeSlide"
+	Element="SOPClassUID"						Modifier="Not" StringConstantFromRootAttribute="LegacyConvertedEnhancedCTImageStorageSOPClassUID"
+	Element="SOPClassUID"		Operator="And"	Modifier="Not" StringConstantFromRootAttribute="LegacyConvertedEnhancedMRImageStorageSOPClassUID"
+	Element="SOPClassUID"		Operator="And"	Modifier="Not" StringConstantFromRootAttribute="LegacyConvertedEnhancedPETImageStorageSOPClassUID"
+	Element="SOPClassUID"		Operator="And"	Modifier="Not" StringConstantFromRootAttribute="VLWholeSlideMicroscopyImageStorageSOPClassUID"
+	(
+		Element="ImageType"		ValueSelector="0"	StringValueFromRootAttribute="ORIGINAL"
+		Element="ImageType"		ValueSelector="0"	StringValueFromRootAttribute="MIXED"
+	) Operator="And"
+	Element="DimensionOrganizationType"		Operator="And"	Modifier="Not" StringValueFromRootAttribute="TILED_FULL"
+}
+ConditionEnd
+
 Condition="ImageTypeValue1OriginalOrMixedAndNotLegacyConverted"
 	Element="SOPClassUID"						Modifier="Not" StringConstantFromRootAttribute="LegacyConvertedEnhancedCTImageStorageSOPClassUID"
 	Element="SOPClassUID"		Operator="And"	Modifier="Not" StringConstantFromRootAttribute="LegacyConvertedEnhancedMRImageStorageSOPClassUID"
@@ -2951,6 +2997,28 @@ Condition="SegmentIdentificationSequenceNotInPerFrameFunctionalGroupSequence"
 	Element="SegmentIdentificationSequence"		Modifier="Not" ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
 ConditionEnd
 
+Condition="SegmentIdentificationSequenceNotInSharedFunctionalGroupSequenceAndNotTILED_FULL"
+	Element="SegmentIdentificationSequence"						Modifier="Not"	ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+	Element="DimensionOrganizationType"			Operator="And"	Modifier="Not"	StringValueFromRootAttribute="TILED_FULL"
+ConditionEnd
+
+Condition="SegmentIdentificationSequenceNotInPerFrameFunctionalGroupSequenceAndNotTILED_FULL"
+	Element="SegmentIdentificationSequence"						Modifier="Not"	ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+	Element="DimensionOrganizationType"			Operator="And"	Modifier="Not"	StringValueFromRootAttribute="TILED_FULL"
+ConditionEnd
+
+Condition="SegmentIdentificationSequenceNotInSharedFunctionalGroupSequenceAndNotTILED_FULLAndSegmentationTypeNotLabelMap"
+	Element="SegmentIdentificationSequence"						Modifier="Not"	ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+	Element="DimensionOrganizationType"			Operator="And"	Modifier="Not"	StringValueFromRootAttribute="TILED_FULL"
+	Element="SegmentationType"					Operator="And"	Modifier="Not"	StringValueFromRootAttribute="LABELMAP"
+ConditionEnd
+
+Condition="SegmentIdentificationSequenceNotInPerFrameFunctionalGroupSequenceAndNotTILED_FULLAndSegmentationTypeNotLabelMap"
+	Element="SegmentIdentificationSequence"						Modifier="Not"	ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+	Element="DimensionOrganizationType"			Operator="And"	Modifier="Not"	StringValueFromRootAttribute="TILED_FULL"
+	Element="SegmentationType"					Operator="And"	Modifier="Not"	StringValueFromRootAttribute="LABELMAP"
+ConditionEnd
+
 Condition="PixelMeasuresOrPlanePositionOrPlaneOrientationSequenceIsPresent"
 	Element="PixelMeasuresSequence"						  ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
 	Element="PixelMeasuresSequence"			Operator="Or" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
@@ -3036,6 +3104,7 @@ Condition="PlanePositionSequenceNotInSharedFunctionalGroupSequenceAndDerivationI
 	(
 		Element="PlanePositionSlideSequence"					  ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
 		Element="PlanePositionSlideSequence"		Operator="Or" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+		Element="ImageOrientationSlide"				Operator="Or" ElementPresentInRoot=""
 	) Operator="And" Modifier="Not"
 ConditionEnd
 
@@ -3073,6 +3142,7 @@ Condition="PlanePositionSequenceNotInPerFrameFunctionalGroupSequenceAndDerivatio
 	(
 		Element="PlanePositionSlideSequence"					  ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
 		Element="PlanePositionSlideSequence"		Operator="Or" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+		Element="ImageOrientationSlide"				Operator="Or" ElementPresentInRoot=""
 	) Operator="And" Modifier="Not"
 ConditionEnd
 
@@ -3088,12 +3158,12 @@ ConditionEnd
 
 Condition="PlanePositionSlideSequenceNotInPerFrameFunctionalGroupSequenceAndNotTILED_FULL"
 	Element="PlanePositionSlideSequence"		Modifier="Not" ElementPresentInPathFromRoot="PerFrameFunctionalGroupsSequence"
-	Element="DimensionOrganizationType"			Operator="And" Modifier="Not" StringValue="TILED_FULL"
+	Element="DimensionOrganizationType"			Operator="And" Modifier="Not" StringValueFromRootAttribute="TILED_FULL"
 ConditionEnd
 
 Condition="PlanePositionSlideSequenceNotInSharedFunctionalGroupSequenceAndNotTILED_FULL"
 	Element="PlanePositionSequence"				Modifier="Not" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
-	Element="DimensionOrganizationType"			Operator="And" Modifier="Not" StringValue="TILED_FULL"
+	Element="DimensionOrganizationType"			Operator="And" Modifier="Not" StringValueFromRootAttribute="TILED_FULL"
 ConditionEnd
 
 Condition="PlanePositionSlideSequenceNotInPerFrameFunctionalGroupSequenceAndNotPatientAndNotTILED_FULL"
@@ -3102,7 +3172,7 @@ Condition="PlanePositionSlideSequenceNotInPerFrameFunctionalGroupSequenceAndNotP
 		Element="PlanePositionSequence"					  ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
 		Element="PlanePositionSequence"		Operator="Or" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
 	) Operator="And" Modifier="Not"
-	Element="DimensionOrganizationType"			Operator="And" Modifier="Not" StringValue="TILED_FULL"
+	Element="DimensionOrganizationType"			Operator="And" Modifier="Not" StringValueFromRootAttribute="TILED_FULL"
 ConditionEnd
 
 Condition="PlanePositionSlideSequenceNotInSharedFunctionalGroupSequenceAndNotPatientAndNotTILED_FULL"
@@ -3111,7 +3181,7 @@ Condition="PlanePositionSlideSequenceNotInSharedFunctionalGroupSequenceAndNotPat
 		Element="PlanePositionSequence"					  ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
 		Element="PlanePositionSequence"		Operator="Or" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
 	) Operator="And" Modifier="Not"
-	Element="DimensionOrganizationType"			Operator="And" Modifier="Not" StringValue="TILED_FULL"
+	Element="DimensionOrganizationType"			Operator="And" Modifier="Not" StringValueFromRootAttribute="TILED_FULL"
 ConditionEnd
 
 Condition="PlanePositionSlideSequenceNotInPerFrameFunctionalGroupSequenceAndDerivationImageMacroNotPresentInEitherAndNotTILED_FULL_MBPOIfNotPatientRelative"
@@ -3127,7 +3197,7 @@ Condition="PlanePositionSlideSequenceNotInPerFrameFunctionalGroupSequenceAndDeri
 		Element="PlanePositionSequence"					  ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
 		Element="PlanePositionSequence"		Operator="Or" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
 	) Operator="And" Modifier="Not"
-	Element="DimensionOrganizationType"			Operator="And" Modifier="Not" StringValue="TILED_FULL"
+	Element="DimensionOrganizationType"			Operator="And" Modifier="Not" StringValueFromRootAttribute="TILED_FULL"
 ConditionEnd
 
 Condition="PlanePositionSlideSequenceNotInSharedFunctionalGroupSequenceAndDerivationImageMacroNotPresentInEitherAndNotTILED_FULL_MBPOIfNotPatientRelative"
@@ -3143,7 +3213,7 @@ Condition="PlanePositionSlideSequenceNotInSharedFunctionalGroupSequenceAndDeriva
 		Element="PlanePositionSequence"					  ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
 		Element="PlanePositionSequence"		Operator="Or" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
 	) Operator="And" Modifier="Not"
-	Element="DimensionOrganizationType"			Operator="And" Modifier="Not" StringValue="TILED_FULL"
+	Element="DimensionOrganizationType"			Operator="And" Modifier="Not" StringValueFromRootAttribute="TILED_FULL"
 ConditionEnd
 
 Condition="PlaneOrientationSequenceNotInSharedFunctionalGroupSequence"
@@ -3158,7 +3228,7 @@ Condition="PlaneOrientationSequenceNotInSharedFunctionalGroupSequenceAndNotSlide
 	) Operator="And" Modifier="Not"
 ConditionEnd
 
-Condition="PlaneOrientationSequenceNotInSharedFunctionalGroupSequenceAndDerivationImageMacroNotPresentInEitherMBPO"
+Condition="PlaneOrientationSequenceNotInSharedFunctionalGroupSequenceAndDerivationImageMacroNotPresentInEitherMBPOIfNotSlideRelative"
 	Element="PlaneOrientationSequence"			Modifier="Not" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
 	(
 		Element="PlaneOrientationSequence"				ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
@@ -3167,6 +3237,11 @@ Condition="PlaneOrientationSequenceNotInSharedFunctionalGroupSequenceAndDerivati
 			Element="DerivationImageSequence"		Operator="Or" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
 		) Operator="Or" Modifier="Not"
 	) Operator="And"
+	(
+		Element="PlanePositionSlideSequence"					  ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+		Element="PlanePositionSlideSequence"		Operator="Or" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+		Element="ImageOrientationSlide"				Operator="Or" ElementPresentInRoot=""
+	) Operator="And" Modifier="Not"
 ConditionEnd
 
 Condition="PlaneOrientationSequenceNotInSharedFunctionalGroupSequenceAndPixelMeasuresSequenceOrPlanePositionSequencePresent"
@@ -3191,7 +3266,7 @@ Condition="PlaneOrientationSequenceNotInPerFrameFunctionalGroupSequenceAndNotSli
 	) Operator="And" Modifier="Not"
 ConditionEnd
 
-Condition="PlaneOrientationSequenceNotInPerFrameFunctionalGroupSequenceAndDerivationImageMacroNotPresentInEitherMBPO"
+Condition="PlaneOrientationSequenceNotInPerFrameFunctionalGroupSequenceAndDerivationImageMacroNotPresentInEitherMBPOIfNotSlideRelative"
 	Element="PlaneOrientationSequence"			Modifier="Not" ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
 	(
 		Element="PlaneOrientationSequence"				ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
@@ -3200,6 +3275,11 @@ Condition="PlaneOrientationSequenceNotInPerFrameFunctionalGroupSequenceAndDeriva
 			Element="DerivationImageSequence"		Operator="Or" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
 		) Operator="Or" Modifier="Not"
 	) Operator="And"
+	(
+		Element="PlanePositionSlideSequence"					  ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+		Element="PlanePositionSlideSequence"		Operator="Or" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+		Element="ImageOrientationSlide"				Operator="Or" ElementPresentInRoot=""
+	) Operator="And" Modifier="Not"
 ConditionEnd
 
 Condition="PlaneOrientationSequenceNotInPerFrameFunctionalGroupSequenceAndPixelMeasuresSequenceOrPlanePositionSequencePresent"
@@ -6270,6 +6350,29 @@ Condition="SegmentationTypeIsFractional"
 	Element="SegmentationType"						StringValue="FRACTIONAL"
 ConditionEnd
 
+Condition="SegmentationTypeIsBinaryOrFractional"
+	Element="SegmentationType"						StringValue="BINARY"
+	Element="SegmentationType"						StringValue="FRACTIONAL"
+ConditionEnd
+
+Condition="SegmentationTypeIsLabelMap"
+	Element="SegmentationType"						StringValue="LABELMAP"
+ConditionEnd
+
+Condition="SegmentationTypeIsLabelMapAndBitsStoredIs8"
+	Element="SegmentationType"						StringValue="LABELMAP"
+	Element="BitsStored"			Operator="And"	BinaryValue="== 8"
+ConditionEnd
+
+Condition="SegmentationTypeIsLabelMapAndBitsStoredIs16"
+	Element="SegmentationType"						StringValue="LABELMAP"
+	Element="BitsStored"			Operator="And"	BinaryValue="== 16"
+ConditionEnd
+
+Condition="SegmentationTypeIsNotLabelMap"
+	Element="SegmentationType"						Modifier="Not" StringValue="LABELMAP"
+ConditionEnd
+
 Condition="SegmentAlgorithmTypeIsNotManual"
 	Element="SegmentAlgorithmType"					Modifier="Not" StringValue="MANUAL"
 ConditionEnd
@@ -6976,6 +7079,11 @@ Condition="SpecimenReferenceMacroOKInPerFrameFunctionalGroupSequence"
 	Element="SpecimenReferenceSequence"				Operator="And" ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
 ConditionEnd
 
+Condition="MissingPerFrameFunctionalGroupsSequenceForWholeSlideMicroscopy"
+	Element="PlanePositionSlideSequence"			Modifier="Not"	ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+	Element="DimensionOrganizationType"				Operator="And"	Modifier="Not"	ValueSelector="0"	StringValueFromRootAttribute="TILED_FULL"
+ConditionEnd
+
 Condition="NeedPlanePositionSlideMacroInSharedFunctionalGroupSequenceForWholeSlideMicroscopy"
 	Element="PlanePositionSlideSequence"			Modifier="Not"	ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
 	Element="DimensionOrganizationType"				Operator="And"	Modifier="Not"	ValueSelector="0"	StringValueFromRootAttribute="TILED_FULL"
@@ -7042,6 +7150,8 @@ Condition="PixelSpacingRequiredInPixelMeasures"
 		Element="VolumetricProperties"									ElementPresentInRoot=""
 		Element="VolumetricProperties"					Operator="And"	Modifier="Not" StringValueFromRootAttribute="DISTORTED"
 		Element="VolumetricProperties"					Operator="And"	Modifier="Not" StringValueFromRootAttribute="SAMPLED"
+		Element="ImageType"								Operator="And"	Modifier="Not" ValueSelector="2" StringValueFromRootAttribute="LABEL"
+		Element="ImageType"								Operator="And"	Modifier="Not" ValueSelector="2" StringValueFromRootAttribute="OVERVIEW"
 	) Operator="Or"
 	(
 		Element="SOPClassUID"											StringConstantFromRootAttribute="SegmentationStorageSOPClassUID"
@@ -7060,6 +7170,10 @@ Condition="SliceThicknessRequiredInPixelMeasures"
 		(
 			Element="VolumetricProperties"								StringValueFromRootAttribute="VOLUME"
 			Element="VolumetricProperties"								StringValueFromRootAttribute="SAMPLED"
+		) Operator="And"
+		(
+			Element="ImageType"											Modifier="Not" ValueSelector="2" StringValueFromRootAttribute="LABEL"
+			Element="ImageType"							Operator="And"	Modifier="Not" ValueSelector="2" StringValueFromRootAttribute="OVERVIEW"
 		) Operator="And"
 	) Operator="Or"
 	(
@@ -7137,6 +7251,10 @@ ConditionEnd
 
 Condition="DoubleFloatPixelPaddingValuePresent"
 	Element="DoubleFloatPixelPaddingValue"	ElementPresent=""
+ConditionEnd
+
+Condition="ImageTypeValue3IsVolume"
+	Element="ImageType"				ValueSelector="2" StringValueFromRootAttribute="VOLUME"
 ConditionEnd
 
 Condition="ImageTypeValue3IsTissueIntensity"
@@ -7904,6 +8022,16 @@ Condition="ExtendedOffsetTableNotPermitted"
 	) Operator="And"
 ConditionEnd
 
+Condition="ICCProfileNotPermittedWhenOpticalPathModule"
+	Element="ICCProfile"										ElementPresent=""
+	Element="OpticalPathSequence"				Operator="And"	ElementPresent=""
+ConditionEnd
+
+Condition="ColorSpaceNotPermittedWhenOpticalPathModule"
+	Element="ColorSpace"										ElementPresent=""
+	Element="OpticalPathSequence"				Operator="And"	ElementPresent=""
+ConditionEnd
+
 Condition="ApplicatorApertureShapeIsSquareOrCircular"
 	Element="ApplicatorApertureShape"			StringValue="SYM_SQUARE"
 	Element="ApplicatorApertureShape"			StringValue="SYM_CIRCULAR"
@@ -7969,12 +8097,6 @@ ConditionEnd
 
 Condition="NeedModuleOphthalmicOpticalCoherenceTomographyEnFaceImageQualityRating"
 	Element="OphthalmicEnFaceImageQualityRatingSequence"	ElementPresent=""
-ConditionEnd
-
-Condition="NeedImageOrientationSlideInSegmentationOrParametricMap"
-	Element="DimensionOrganizationType"			StringValue="TILED_FULL"
-	Element="PlanePositionSlideSequence"		Operator="Or"	ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
-	Element="PlanePositionSlideSequence"		Operator="Or"	ElementPresentInPathFromRootFirstItem="SharedFunctionalGroupsSequence"
 ConditionEnd
 
 Condition="BreastBiopsyTargetMacroOKInPerFrameFunctionalGroupSequence"
@@ -8074,6 +8196,11 @@ Condition="AnnotationCoordinateTypeIsNot3D"
 	Element="AnnotationCoordinateType"	Modifier="Not"	StringValueFromRootAttribute="3D"
 ConditionEnd
 
+Condition="CommonZCoordinateValueAndAnnotationCoordinateTypeIsNot3D"
+	Element="CommonZCoordinateValue"									ElementPresent=""
+	Element="AnnotationCoordinateType"	Operator="And"	Modifier="Not"	StringValueFromRootAttribute="3D"
+ConditionEnd
+
 Condition="AnnotationGroupGenerationTypeIsAutomaticOrSemiautomatic"
 	Element="AnnotationGroupGenerationType"					StringValue="AUTOMATIC"
 	Element="AnnotationGroupGenerationType"	Operator="Or"	StringValue="SEMIAUTOMATIC"
@@ -8094,4 +8221,152 @@ ConditionEnd
 Condition="GraphicTypeIsPOLYLINEOrPOLYGON"
 	Element="GraphicType"			StringValue="POLYLINE"
 	Element="GraphicType"			StringValue="POLYGON"
+ConditionEnd
+
+Condition="NeedImageOrientationSlide"
+	Element="DimensionOrganizationType"		StringValueFromRootAttribute="TILED_FULL"
+	(
+		Element="PlanePositionSlideSequence"					  ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+		Element="PlanePositionSlideSequence"		Operator="Or" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+	) Operator="Or"
+ConditionEnd
+
+Condition="NeedModuleMultiResolutionPyramid"
+	Element="PyramidUID"	ElementPresent=""
+	Element="PyramidLabel"	ElementPresent=""
+	Element="PyramidDescription"	ElementPresent=""
+ConditionEnd
+
+Condition="NeedModuleMicroscopeSlideLayerTileOrganizationInSegmentationOrParametricMap"
+	Element="DimensionOrganizationType"			StringValue="TILED_FULL"
+	Element="TotalPixelMatrixColumns"			ElementPresent=""
+	Element="TotalPixelMatrixRows"				ElementPresent=""
+	Element="TotalPixelMatrixFocalPlanes"		ElementPresent=""
+	Element="TotalPixelMatrixOriginSequence"	ElementPresent=""
+	Element="ImageOrientationSlide"				ElementPresent=""
+ConditionEnd
+
+Condition="NeedModuleGeneralAcquisitionInSegmentationOrParametricMap"
+	Element="AcquisitionNumber"		ElementPresent=""
+	Element="AcquisitionDate"		ElementPresent=""
+	Element="AcquisitionTime"		ElementPresent=""
+	Element="AcquisitionDateTime"	ElementPresent=""
+	Element="ImagesInAcquisition"	ElementPresent=""
+	Element="IrradiationEventUID"	ElementPresent=""
+ConditionEnd
+
+Condition="BlendingModeIsForeground"
+	Element="BlendingMode"			StringValue="FOREGROUND"
+ConditionEnd
+
+Condition="FrameContentSequenceInSharedFunctionalGroupSequence"
+	Element="FrameContentSequence"	ElementPresentInPathFromRootFirstItem="SharedFunctionalGroupsSequence"
+ConditionEnd
+
+Condition="PixelPresentationTRUE_COLORorCOLOR"
+	Element="PixelPresentation"				StringValue="TRUE_COLOR"
+	Element="PixelPresentation"				Operator="Or" StringValue="COLOR"
+ConditionEnd
+
+Condition="PlanePositionSequenceNotInSharedFunctionalGroupSequenceAndUltrasoundAcquisitionGeometryIsPATIENT"
+	Element="PlanePositionSequence"				Modifier="Not" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+	Element="UltrasoundAcquisitionGeometry"		Operator="And" StringValueFromRootAttribute="PATIENT"
+ConditionEnd
+
+Condition="PlanePositionSequenceNotInPerFrameFunctionalGroupSequenceAndUltrasoundAcquisitionGeometryIsPATIENT"
+	Element="PlanePositionSequence"				Modifier="Not" ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+	Element="UltrasoundAcquisitionGeometry"		Operator="And" StringValueFromRootAttribute="PATIENT"
+ConditionEnd
+
+Condition="PlaneOrientationSequenceNotInSharedFunctionalGroupSequenceAndUltrasoundAcquisitionGeometryIsPATIENT"
+	Element="PlaneOrientationSequence"			Modifier="Not" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+	Element="UltrasoundAcquisitionGeometry"		Operator="And" StringValueFromRootAttribute="PATIENT"
+ConditionEnd
+
+Condition="PlaneOrientationSequenceNotInPerFrameFunctionalGroupSequenceAndUltrasoundAcquisitionGeometryIsPATIENT"
+	Element="PlaneOrientationSequence"			Modifier="Not" ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+	Element="UltrasoundAcquisitionGeometry"		Operator="And" StringValueFromRootAttribute="PATIENT"
+ConditionEnd
+
+Condition="FrameVOILUTSequenceOKInPerFrameFunctionalGroupSequenceAndIsMonochrome2"
+	Element="FrameVOILUTSequence"				Modifier="Not" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+	Element="FrameVOILUTSequence"				Operator="And" ElementPresentInPathFromRoot="PerFrameFunctionalGroupsSequence"
+	Element="PhotometricInterpretation"			Operator="And" StringValueFromRootAttribute="MONONCHROME2"
+ConditionEnd
+
+Condition="FrameVOILUTSequenceOKInSharedFunctionalGroupSequenceAndIsMonochrome2"
+	Element="FrameVOILUTSequence"				Modifier="Not" ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+	Element="FrameVOILUTSequence"				Operator="And" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+	Element="PhotometricInterpretation"			Operator="And" StringValueFromRootAttribute="MONONCHROME2"
+ConditionEnd
+
+Condition="RealWorldValueMappingMacroOKInPerFrameFunctionalGroupSequenceAndIsMonochrome2"
+	Element="RealWorldValueMappingSequence"		Modifier="Not" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+	Element="RealWorldValueMappingSequence"		Operator="And" ElementPresentInPathFromRoot="PerFrameFunctionalGroupsSequence"
+	Element="PhotometricInterpretation"			Operator="And" StringValueFromRootAttribute="MONONCHROME2"
+ConditionEnd
+
+Condition="RealWorldValueMappingMacroOKInSharedFunctionalGroupSequenceAndIsMonochrome2"
+	Element="RealWorldValueMappingSequence"		Modifier="Not" ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+	Element="RealWorldValueMappingSequence"		Operator="And" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+	Element="PhotometricInterpretation"			Operator="And" StringValueFromRootAttribute="MONONCHROME2"
+ConditionEnd
+
+Condition="PhotoacousticExcitationCharacteristicsMacroOKInPerFrameFunctionalGroupSequence"
+	Element="PhotoacousticExcitationCharacteristicsSequence"	Modifier="Not" ElementPresentInPathFromRootFirstItem="SharedFunctionalGroupsSequence"
+	Element="PhotoacousticExcitationCharacteristicsSequence"	Operator="And" ElementPresentInPathFromRoot="PerFrameFunctionalGroupsSequence"
+ConditionEnd
+
+Condition="PhotoacousticExcitationCharacteristicsMacroOKInSharedFunctionalGroupSequence"
+	Element="PhotoacousticExcitationCharacteristicsSequence"	Modifier="Not" ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+	Element="PhotoacousticExcitationCharacteristicsSequence"	Operator="And" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+ConditionEnd
+
+Condition="PhotoacousticReconstructionAlgorithmMacroOKInSharedFunctionalGroupSequence"
+	Element="ReconstructionAlgorithmSequence"	Modifier="Not" ElementPresentInPathFromRootFirstItem="PerFrameFunctionalGroupsSequence"
+	Element="ReconstructionAlgorithmSequence"	Operator="And" ElementPresentInPathFromRoot="SharedFunctionalGroupsSequence"
+ConditionEnd
+
+Condition="AcousticCouplingMediumFlagIsYes"
+	Element="AcousticCouplingMediumFlag"	StringValue="YES"
+ConditionEnd
+
+Condition="NeedModulePhotoacousticTransducer"
+	Element="TransducerGeometryCodeSequence"	ElementPresent=""
+	Element="TransducerResponseSequence"		ElementPresent=""
+	Element="TransducerTechnologySequence"		ElementPresent=""
+ConditionEnd
+
+Condition="NeedModulePhotoacousticReconstruction"
+	Element="SoundSpeedCorrectionMechanismCodeSequence"	ElementPresent=""
+ConditionEnd
+
+Condition="SegmentNumberIsZeroButSegmentationTypeNotLabelMap"
+	Element="SegmentNumber"			BinaryValue="== 0"
+	Element="SegmentationType"		Operator="And"	Modifier="Not"	StringValueFromRootAttribute="LABELMAP"
+ConditionEnd
+
+Condition="RecommendedDisplayCIELabValuePresentButPaletteColorLabelMap"
+	Element="RecommendedDisplayCIELabValue"					ElementPresent=""
+	Element="SegmentationType"				Operator="And"	StringValueFromRootAttribute="LABELMAP"
+	Element="PhotometricInterpretation"		Operator="And"	StringValueFromRootAttribute="PALETTE COLOR"
+ConditionEnd
+
+Condition="ImagePositionPatientOrOrientationPresent"
+	Element="ImagePositionPatient"					ElementPresent=""
+	Element="ImageOrientationPatient"				ElementPresent=""
+ConditionEnd
+
+Condition="ImagePositionPatientOrOrientationOrFrameOfReferenceUIDPresent"
+	Element="ImagePositionPatient"					ElementPresent=""
+	Element="ImageOrientationPatient"				ElementPresent=""
+	Element="FrameOfReferenceUID"					ElementPresent=""
+ConditionEnd
+
+Condition="PositionReferenceIndicatorNotSlideCornerForSlide"
+	Element="PositionReferenceIndicator"	Modifier="Not"	StringValue="SLIDE_CORNER"
+	(
+		Element="SOPClassUID"								StringConstantFromRootAttribute="VLWholeSlideMicroscopyImageStorageSOPClassUID"
+		Element="SOPClassUID"				Operator="Or"	StringConstantFromRootAttribute="VisibleLightSlideCoordinatesMicroscopicImageStorageSOPClassUID"
+	) Operator="And"
 ConditionEnd

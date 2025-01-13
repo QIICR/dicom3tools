@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)attr.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)attr.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attr.h"
 // the following are for buildFullPathInInstanceToCurrentAttribute() only ...
 #include "attrlist.h"
@@ -158,6 +158,12 @@ Attribute::getValue(unsigned,Uint32&) const
 }
 
 bool
+Attribute::getValue(unsigned,Uint64&) const
+{
+	return false;
+}
+
+bool
 Attribute::getValue(unsigned,Int16&) const
 {
 	return false;
@@ -165,6 +171,12 @@ Attribute::getValue(unsigned,Int16&) const
 
 bool
 Attribute::getValue(unsigned,Int32&) const
+{
+	return false;
+}
+
+bool
+Attribute::getValue(unsigned,Int64&) const
 {
 	return false;
 }
@@ -205,6 +217,18 @@ Attribute::getValue(const Uint16 * &,Uint32 &) const
 	return false;
 }
 
+bool
+Attribute::getValue(const Uint32 * &,Uint32 &) const
+{
+	return false;
+}
+
+bool
+Attribute::getValue(const Uint64 * &,Uint32 &) const
+{
+	return false;
+}
+
 void
 Attribute::setValue(unsigned,Uint16)
 {
@@ -218,6 +242,12 @@ Attribute::setValue(unsigned,Uint32)
 }
 
 void
+Attribute::setValue(unsigned,Uint64)
+{
+	Assert(0);
+}
+
+void
 Attribute::setValue(unsigned,Int16)
 {
 	Assert(0);
@@ -225,6 +255,12 @@ Attribute::setValue(unsigned,Int16)
 
 void
 Attribute::setValue(unsigned,Int32)
+{
+	Assert(0);
+}
+
+void
+Attribute::setValue(unsigned,Int64)
 {
 	Assert(0);
 }
@@ -266,6 +302,18 @@ Attribute::setValue(const Uint16 *,Uint32)
 }
 
 void
+Attribute::setValue(const Uint32 *,Uint32)
+{
+	Assert(0);
+}
+
+void
+Attribute::setValue(const Uint64 *,Uint32)
+{
+	Assert(0);
+}
+
+void
 Attribute::addValue(Uint16)
 {
 	Assert(0);
@@ -278,6 +326,12 @@ Attribute::addValue(Uint32)
 }
 
 void
+Attribute::addValue(Uint64)
+{
+	Assert(0);
+}
+
+void
 Attribute::addValue(Int16)	
 {
 	Assert(0);
@@ -285,6 +339,12 @@ Attribute::addValue(Int16)
 
 void
 Attribute::addValue(Int32)	
+{
+	Assert(0);
+}
+
+void
+Attribute::addValue(Int64)
 {
 	Assert(0);
 }
@@ -327,6 +387,12 @@ Attribute::addValues(unsigned number,Uint32 *vptr)
 }
 
 void
+Attribute::addValues(unsigned number,Uint64 *vptr)
+{
+	while (number--) addValue(*vptr++);
+}
+
+void
 Attribute::addValues(unsigned number,Int16 *vptr)
 {
 	while (number--) addValue(*vptr++);
@@ -334,6 +400,12 @@ Attribute::addValues(unsigned number,Int16 *vptr)
 
 void
 Attribute::addValues(unsigned number,Int32 *vptr)
+{
+	while (number--) addValue(*vptr++);
+}
+
+void
+Attribute::addValues(unsigned number,Int64 *vptr)
 {
 	while (number--) addValue(*vptr++);
 }

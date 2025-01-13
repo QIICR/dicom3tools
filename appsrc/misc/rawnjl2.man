@@ -122,7 +122,7 @@ pixel) run mode.
 .LP
 http://www.jpeg.org/
 .SH AUTHOR
-Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 The near-lossless mode may trigger a bug that cause mapped error values
 to go negative and lead to a failed assertion. The standard seems unlcear

@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)transyn.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)transyn.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <iostream>
 #else
@@ -25,6 +25,7 @@ TransferSyntax::TransferSyntax(const char *uid)
 		VRtype=e->VRtype;
 		encapsulated=e->encapsulated;
 		pixelendian=e->pixelendian;
+		standardfamily=e->standardfamily;
 	}
 	else {
 		// Unrecognized transfer syntax, so assume EVRLE encapsulated, since that is what most new standard ones are
@@ -35,6 +36,7 @@ TransferSyntax::TransferSyntax(const char *uid)
 		VRtype=ExplicitVR;
 		encapsulated=false;
 		pixelendian=LittleEndian;
+		standardfamily="";
 	}
 }
 
@@ -46,6 +48,7 @@ TransferSyntax::TransferSyntax(VRType vr,Endian e,bool encap)
 	encapsulated=encap;
 	Description=0;
 	UID=0;
+	standardfamily="";
 }
 
 bool
@@ -60,6 +63,7 @@ TransferSyntax::operator==(const TransferSyntax& t2) const
 		    && getPixelEndian() == t2.getPixelEndian()
 		    && !getEncapsulated()
 		    && !t2.getEncapsulated();
+		    // not checking standardfamily :(
 	}
 	else {
 //cerr << "TransferSyntax::operator== comparing UID strings:" << endl;

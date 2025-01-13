@@ -1,4 +1,4 @@
-#  doubleoffset.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  doubleoffset.awk Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 # Usage:	mv ge9800.tpl ge9800.tpl.bak; awk -F\t -f doubleoffset.awk <ge9800.tpl.bak >ge9800.tpl; rm ge9800.tpl.bak
 
 	{

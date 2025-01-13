@@ -1,4 +1,4 @@
-/* imtnhdrm.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* imtnhdrm.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 // Manually define classes to handle "method" based blocks
 // (equivalent to automatically generated stuff in imtnhdrp.h)
 

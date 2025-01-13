@@ -1,4 +1,4 @@
-#  convcln.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  convcln.awk Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 #
 # Clean a conversion template by converting offset to dec from 0
 # in each block

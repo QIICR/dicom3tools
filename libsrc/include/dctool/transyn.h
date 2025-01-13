@@ -1,4 +1,4 @@
-/* transyn.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* transyn.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_transyn__
 #define __Header_transyn__
 
@@ -13,6 +13,7 @@ private:
 	VRType 			VRtype;
 	bool 			encapsulated;
 	Endian 			pixelendian;
+	const char *	standardfamily;
 public:	
 	TransferSyntax(const char *uid=DefaultTransferSyntaxUID);
 
@@ -24,6 +25,7 @@ public:
 	VRType		getVR(void) const		{ return VRtype; }
 	bool		getEncapsulated(void) const	{ return encapsulated; }
 	Endian		getPixelEndian(void) const	{ return pixelendian; }
+	const char *	getStandardFamily(void) const	{ return standardfamily; }
 
 	bool	isLittleEndian(void) const	{ return endian == LittleEndian; }
 	bool	isBigEndian(void) const		{ return endian == BigEndian; }
@@ -38,6 +40,10 @@ public:
 	bool	isNotEncapsulated(void) const	{ return !encapsulated; }
 
 	bool	isValid(void) const		{ return UID != 0; }
+	
+	bool	isISO10918JPEGFamily()		{ return standardfamily != NULL && strcmp(standardfamily,"ISO10918") == 0; }
+	bool	isISO14495JPEGLSFamily()	{ return standardfamily != NULL && strcmp(standardfamily,"ISO14495") == 0; }
+	bool	isISO15444JPEG2000Family()	{ return standardfamily != NULL && strcmp(standardfamily,"ISO15444") == 0; }
 
 	bool operator==(const TransferSyntax& t2) const;
 };

@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)elmdict.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)elmdict.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "elmtype.h"
 #include "elmdict.h"
 #include "elmentry.h"
@@ -69,6 +69,8 @@ const ElementDictionaryTableEntry *
 ElementDictionary::operator[] (Tag tag) const
 {
 	ElementDictionaryTableEntry *e = 0;
+//cerr << "ElementDictionary::operator[] (Tag tag): Tag group=" << hex << tag.getGroup() << dec << endl;
+//cerr << "ElementDictionary::operator[] (Tag tag): Tag element=" << hex << tag.getElement() << dec << endl;
 
 	// Repeating group/element mechanism is NOT applied to private groups
 	// except Papyrus 3.0 60xx annotations
@@ -77,9 +79,12 @@ ElementDictionary::operator[] (Tag tag) const
 	// exclusions to odd group rule such as Variable Pixel Data
 
 	if (tag.isPrivateGroup()) {
+//cerr << "ElementDictionary::operator[] (Tag tag): isPrivateGroup" << endl;
 		if (CurrentOwners) {
+//cerr << "ElementDictionary::operator[] (Tag tag): have CurrentOwners" << endl;
 			const char *owner=(*CurrentOwners)[tag];
 			if (owner) {
+//cerr << "ElementDictionary::operator[] (Tag tag): have Owner=<" << owner << ">" << endl;
 				// Try first with block in case owner is ambiguous
 				// (this is counter to the standard but happens)
 				IndexEntryTagAndOwnerAndBlock *ei=
@@ -91,8 +96,6 @@ ElementDictionary::operator[] (Tag tag) const
 				// block and hence is used as a "wildcard" ... this is
 				// the "standard" way to do it and is the most common path 
 				if (!ei) {
-//cerr << "Tag group=" << hex << tag.getGroup() << dec << endl;
-//cerr << "Tag element=" << hex << tag.getElement() << dec << endl;
 //cerr << "Owner=<" << owner << ">" << endl;
 					Tag testtag=tag.getRepeatingBase();
 //cerr << "Test tag group=" << hex << testtag.getGroup() << dec << endl;
@@ -113,14 +116,17 @@ ElementDictionary::operator[] (Tag tag) const
 							0)];
 					}
 				}
-				if (ei) e=Table+ei->getIndex();
+				if (ei) {
+//cerr << "ElementDictionary::operator[] (Tag tag): have IndexEntryTagAndOwnerAndBlock" << endl;
+					e=Table+ei->getIndex();
+				}
 			}
 		}
 	}
 	else {
 		Tag testtag=tag.getRepeatingBase();
 		IndexEntryTag *ei = (*TagIndex)[testtag];
-		if(ei) e=Table+ei->getIndex();
+		if (ei) e=Table+ei->getIndex();
 	}
 
 	// Don't assume all elements == 0 are GroupLength
@@ -145,6 +151,7 @@ const char *
 ElementDictionary::getValueRepresentation(Tag t) const
 {
 	const ElementDictionaryTableEntry *e = (*this)[t];
+//cerr << "ElementDictionary::getValueRepresentation[] (Tag t): " << (e ? "" : "do not") << " have entry" << endl;
 	return e ? e->ValueRepresentation : 0;
 }
 

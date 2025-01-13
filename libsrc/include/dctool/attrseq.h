@@ -1,4 +1,4 @@
-/* attrseq.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attrseq.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_attrseq__
 #define __Header_attrseq__
 

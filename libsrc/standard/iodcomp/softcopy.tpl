@@ -37,6 +37,7 @@ CompositeIOD="GrayscaleSoftcopyPresentationState"	Condition="GrayscaleSoftcopyPr
 		Module="ModalityLUT"						Usage="C"	Condition="NeedModuleModalityLUT"
 		Module="SoftcopyVOILUT"						Usage="C"	Condition="NeedModuleSoftcopyVOILUT"
 		Module="SoftcopyPresentationLUT"			Usage="M"
+		Module="Specimen"							Usage="U"	Condition="NeedModuleSpecimen"
 		Module="SOPCommon"							Usage="M"
 	InformationEntityEnd
 CompositeIODEnd
@@ -76,6 +77,7 @@ CompositeIOD="ColorSoftcopyPresentationState"	Condition="ColorSoftcopyPresentati
 		Module="GraphicLayer"						Usage="C"	Condition="NeedModuleGraphicLayer"
 		Module="GraphicGroup"						Usage="C"	Condition="NeedModuleGraphicGroup"
 		Module="ICCProfile"							Usage="M"
+		Module="Specimen"							Usage="U"	Condition="NeedModuleSpecimen"
 		Module="SOPCommon"							Usage="M"
 	InformationEntityEnd
 CompositeIODEnd
@@ -120,6 +122,7 @@ CompositeIOD="PseudoColorSoftcopyPresentationState"	Condition="PseudoColorSoftco
 		Module="SoftcopyVOILUT"						Usage="C"	Condition="NeedModuleSoftcopyVOILUT"
 		Module="PaletteColorLookupTable"			Usage="M"
 		Module="ICCProfile"							Usage="M"
+		Module="Specimen"							Usage="U"	Condition="NeedModuleSpecimen"
 		Module="SOPCommon"							Usage="M"
 	InformationEntityEnd
 CompositeIODEnd
@@ -155,6 +158,81 @@ CompositeIOD="BlendingSoftcopyPresentationState"	Condition="BlendingSoftcopyPres
 		Module="GraphicGroup"						Usage="C"	Condition="NeedModuleGraphicGroup"
 		Module="PaletteColorLookupTable"			Usage="M"
 		Module="ICCProfile"							Usage="M"
+		Module="Specimen"							Usage="U"	Condition="NeedModuleSpecimen"
+		Module="SOPCommon"							Usage="M"
+	InformationEntityEnd
+CompositeIODEnd
+
+CompositeIOD="AdvancedBlendingSoftcopyPresentationState"	Condition="AdvancedBlendingSoftcopyPresentationStateInstance"
+	InformationEntity="File"
+		Module="FileMetaInformation"				Usage="C"	Condition="NeedModuleFileMetaInformation"
+	InformationEntityEnd
+	InformationEntity="Patient"
+		Module="Patient"							Usage="M"
+		Module="ClinicalTrialSubject"				Usage="U"	Condition="NeedModuleClinicalTrialSubject"
+	InformationEntityEnd
+	InformationEntity="Study"
+		Module="GeneralStudy"						Usage="M"
+		Module="PatientStudy"						Usage="U"	# no condition ... all attributes type 3
+		Module="ClinicalTrialStudy"					Usage="U"	Condition="NeedModuleClinicalTrialStudy"
+	InformationEntityEnd
+	InformationEntity="Series"
+		Module="GeneralSeries"						Usage="M"
+		Module="ClinicalTrialSeries"				Usage="U"	Condition="NeedModuleClinicalTrialSeries"
+		Module="PresentationSeries"					Usage="M"
+	InformationEntityEnd
+	InformationEntity="Equipment"
+		Module="GeneralEquipment"					Usage="M"
+	InformationEntityEnd
+	InformationEntity="Presentation"
+		Module="PresentationStateIdentification"	Usage="M"
+		Module="AdvancedBlendingPresentationState"	Usage="M"
+		Module="AdvancedBlendingPresentationStateDisplay"	Usage="M"
+		Module="DisplayedArea"						Usage="U"	Condition="NeedModuleDisplayedArea"
+		Module="GraphicAnnotation"					Usage="C"	Condition="NeedModuleGraphicAnnotation"
+		Module="SpatialTransformation"				Usage="C"	Condition="NeedModuleSpatialTransformation"
+		Module="GraphicLayer"						Usage="C"	Condition="NeedModuleGraphicLayer"
+		Module="GraphicGroup"						Usage="C"	Condition="NeedModuleGraphicGroup"
+		Module="ICCProfile"							Usage="M"
+		Module="CommonInstanceReference"			Usage="M"
+		Module="Specimen"							Usage="U"	Condition="NeedModuleSpecimen"
+		Module="SOPCommon"							Usage="M"
+	InformationEntityEnd
+CompositeIODEnd
+
+CompositeIOD="AdvancedBlendingSoftcopyPresentationStateIDCVOIPaletteOpticalPath"	Condition="AdvancedBlendingSoftcopyPresentationStateInstance"	Profile="IDCVOIPaletteOpticalPath"
+	InformationEntity="File"
+		Module="FileMetaInformation"				Usage="C"	Condition="NeedModuleFileMetaInformation"
+	InformationEntityEnd
+	InformationEntity="Patient"
+		Module="Patient"							Usage="M"
+		Module="ClinicalTrialSubject"				Usage="U"	Condition="NeedModuleClinicalTrialSubject"
+	InformationEntityEnd
+	InformationEntity="Study"
+		Module="GeneralStudy"						Usage="M"
+		Module="PatientStudy"						Usage="U"	# no condition ... all attributes type 3
+		Module="ClinicalTrialStudy"					Usage="U"	Condition="NeedModuleClinicalTrialStudy"
+	InformationEntityEnd
+	InformationEntity="Series"
+		Module="GeneralSeries"						Usage="M"
+		Module="ClinicalTrialSeries"				Usage="U"	Condition="NeedModuleClinicalTrialSeries"
+		Module="PresentationSeries"					Usage="M"
+	InformationEntityEnd
+	InformationEntity="Equipment"
+		Module="GeneralEquipment"					Usage="M"
+	InformationEntityEnd
+	InformationEntity="Presentation"
+		Module="PresentationStateIdentification"	Usage="M"
+		Module="AdvancedBlendingPresentationStateIDCVOIPaletteOpticalPath"			Usage="M"
+		Module="AdvancedBlendingPresentationStateDisplay"	Usage="M"
+		Module="DisplayedArea"						Usage="U"	Condition="NeedModuleDisplayedArea"
+		Module="GraphicAnnotation"					Usage="C"	Condition="NeedModuleGraphicAnnotation"
+		Module="SpatialTransformation"				Usage="C"	Condition="NeedModuleSpatialTransformation"
+		Module="GraphicLayer"						Usage="C"	Condition="NeedModuleGraphicLayer"
+		Module="GraphicGroup"						Usage="C"	Condition="NeedModuleGraphicGroup"
+		Module="ICCProfile"							Usage="M"
+		Module="CommonInstanceReference"			Usage="M"
+		Module="Specimen"							Usage="U"	Condition="NeedModuleSpecimen"
 		Module="SOPCommon"							Usage="M"
 	InformationEntityEnd
 CompositeIODEnd
@@ -210,6 +288,7 @@ CompositeIOD="BasicStructuredDisplay"	Condition="BasicStructuredDisplayInstance"
 		Module="StructuredDisplayImageBox"			Usage="M"
 		Module="StructuredDisplayAnnotation"		Usage="U"	Condition="NeedModuleStructuredDisplayAnnotation"
 		Module="CommonInstanceReference"			Usage="M"
+		Module="Specimen"							Usage="U"	Condition="NeedModuleSpecimen"
 		Module="SOPCommon"							Usage="M"
 	InformationEntityEnd
 CompositeIODEnd

@@ -1,4 +1,4 @@
-.TH dcacqmap 1 "18 May 2010" "DICOM PS3" "Create visual map of acquisition pattern"
+.TH dcacqmap 1 "12 July 2024" "DICOM PS3" "Create visual map of acquisition pattern"
 .SH NAME
 dcacqmap \- ACR/NEMA DICOM PS3 ... Create visual map of acquisition pattern
 .SH SYNOPSIS
@@ -46,7 +46,7 @@ Position is derived from Image Position (Patient) and sorted along the normal to
 the Image Orientation (Patient). It is assumed (but not checked) that all the images
 have the same orientation (unless separated by using -byorientation) and the same Frame of Reference UID.
 .LP
-After partitioning by position, the Acqusition Time (or Number or Scan Options), Convolution Kernel and Slice Thickness
+After partitioning by position, the Acquisition Time (or Number or Scan Options), Convolution Kernel and Slice Thickness
 are then used to distinguish images acquired at the same spatial position.
 .LP
 An index.html will be created in the result folder, which will also contain sub-folders for
@@ -124,7 +124,7 @@ Use short names without special characters for all files created, e.g., for reco
 .BR dcsort(1) ,
 .BR dctable(1)
 .SH AUTHOR
-Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 .LP
 Currently only single-frame CT images have been tested. A different set of sub-keys below position would

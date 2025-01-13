@@ -55,5 +55,5 @@ are assumed to be decimal unless preceded by 0x (hexadecimal) or 0 (octal).
 .LP
 \ 
 .SH AUTHOR
-Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS

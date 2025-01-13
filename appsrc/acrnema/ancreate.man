@@ -253,7 +253,7 @@ Should be able to find no differences:
 .BR dcintro(3) ,
 .BR dcintro(5)
 .SH AUTHOR
-Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 In the attribute descriptions, the group, element, value length, and values are always in hexadecimal format, whether a leading "0x" is present or not. This is because dcdump adopts such a convention, with slightly different output on different platforms and compilers. In particular lib-g++ does not output the "x" in hexadecimal formats :(
 .LP

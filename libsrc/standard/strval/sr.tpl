@@ -106,6 +106,7 @@ StringValues="MammographyCADSRValueTypes" {
 	NUM,
 	DATE,
 	TIME,
+	UIDREF,
 	PNAME,
 	SCOORD,
 	COMPOSITE,

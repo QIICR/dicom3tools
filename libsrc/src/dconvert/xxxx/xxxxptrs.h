@@ -1,4 +1,4 @@
-/* xxxxptrs.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* xxxxptrs.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #define	XXXX_Offset_STDHDR_ptr	256
 #define	XXXX_Offset_IMGHDR_ptr	768
 #define	XXXX_Offset_MRHDR_ptr	(XXXX_Offset_IMGHDR_ptr+192)

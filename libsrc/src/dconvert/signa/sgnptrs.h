@@ -1,4 +1,4 @@
-/* sgnptrs.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* sgnptrs.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 // offsets are in bytes
 
 #define SGN_Offset_STUDYHDR_ptr		(6 * 512)

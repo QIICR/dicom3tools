@@ -740,6 +740,12 @@ StringValues="PositionMeasuringDeviceUsed" {
 	FREEHAND
 }
 
+StringValues="PhotoacousticPositionMeasuringDeviceUsed" {
+	RIGID,
+	TRACKED,
+	FREEHAND
+}
+
 StringValues="PositionMeasuringDeviceUsedRigid" {
 	RIGID
 }
@@ -962,5 +968,25 @@ StringValues="CodeValueForLOINCBreastUltrasound" {
 
 StringValues="CodeMeaningForLOINCBreastUltrasound" {
 	Breast US
+}
+
+StringValues="PhotoacousticModality" {
+	PA
+}
+
+StringValues="PhotoacousticImageAndFrameType3" {
+	VOLUME,
+	NON_PARALLEL,
+	PARALLEL
+}
+
+StringValues="PhotometricInterpretationForPhotoacousticImage" {
+	MONOCHROME2,
+	RGB,
+	YBR_FULL,
+	YBR_FULL_422,
+	YBR_PARTIAL_420,
+	YBR_RCT,
+	YBR_ICT
 }
 

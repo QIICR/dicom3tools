@@ -4,4 +4,4 @@
 
 #include "version.h"
 
-const char* dicom3tools_version_string = "1.00.snapshot.20211009110822";
+const char* dicom3tools_version_string = "1.00.snapshot.20241220063551";

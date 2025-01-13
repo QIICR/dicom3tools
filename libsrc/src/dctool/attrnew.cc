@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)attrnew.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)attrnew.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attrtype.h"
 #include "attrnew.h"
 #include "attrseq.h"
@@ -113,6 +113,9 @@ newAttribute(const char* vr,Tag tag)
 			case 'T':
 				a=new ShortTextAttribute(tag);
 				break;
+			case 'V':
+				a=new SignedVeryLongAttribute(tag);
+				break;
 			}
 			break;
 		case 'T':
@@ -144,6 +147,9 @@ newAttribute(const char* vr,Tag tag)
 				break;
 			case 'T':
 				a=new UnlimitedTextAttribute(tag);
+				break;
+			case 'V':
+				a=new UnsignedVeryLongAttribute(tag);
 				break;
 			}
 			break;

@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dcopto.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dcopto.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <fstream>
 #else
@@ -277,7 +277,17 @@ DicomOutputOptions::DicomOutputOptions(GetNamedOptions &options)
 			Tag tag;
 			if (getAttributeTagFromStringHexForm(args[0],tag)
 			 || dictionary.getTag(args[0],tag)) {
-				const char *vr=dictionary.getValueRepresentation(tag);
+//cerr << "DicomOutputOptions::DicomOutputOptions: tag = " << tag << endl;
+				const char *vr=NULL;
+				if (tag.isPrivateGroup() && tag.isPrivateOwner()) {	// (000582)
+					vr="LO";	// PS3.5-7.8.1;
+//cerr << "DicomOutputOptions::DicomOutputOptions: adding owner = " << args[1] << endl;
+					dictionary.addOwner(tag,args[1]);	// (000582) add owner so later uses of private elements in block are recognized and return correct VR
+				}
+				else {
+					vr=dictionary.getValueRepresentation(tag);
+				}
+//cerr << "DicomOutputOptions::DicomOutputOptions: vr = " << vr << endl;
 				if(!vr) vr="UN";
 				Attribute *a=newAttribute(vr,tag);
 				Assert(a);
@@ -312,7 +322,14 @@ DicomOutputOptions::DicomOutputOptions(GetNamedOptions &options)
 			Tag tag;
 			if (getAttributeTagFromStringHexForm(args[0],tag)
 			 || dictionary.getTag(args[0],tag)) {
-				const char *vr=dictionary.getValueRepresentation(tag);
+				const char *vr=NULL;
+				if (tag.isPrivateGroup() && tag.isPrivateOwner()) {	// (000582)
+					vr="LO";	// PS3.5-7.8.1;
+					dictionary.addOwner(tag,args[1]);	// (000582) add owner so later uses of private elements in block are recognized and return correct VR
+				}
+				else {
+					vr=dictionary.getValueRepresentation(tag);
+				}
 				if(!vr) vr="UN";
 				Attribute *a=newAttribute(vr,tag);
 				Assert(a);
@@ -348,7 +365,14 @@ DicomOutputOptions::DicomOutputOptions(GetNamedOptions &options)
 		Tag tag;
 		if (getAttributeTagFromStringHexForm(arg,tag)
 		 || dictionary.getTag(arg,tag)) {
-			const char *vr=dictionary.getValueRepresentation(tag);
+			const char *vr=NULL;
+			if (tag.isPrivateGroup() && tag.isPrivateOwner()) {	// (000582)
+				vr="LO";	// PS3.5-7.8.1;
+				dictionary.addOwner(tag,args[1]);	// (000582) add owner so later uses of private elements in block are recognized and return correct VR
+			}
+			else {
+				vr=dictionary.getValueRepresentation(tag);
+			}
 			if(!vr) vr="UN";
 			Attribute *a=newAttribute(vr,tag);
 			Assert(a);

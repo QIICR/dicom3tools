@@ -1,4 +1,4 @@
-/* basetype.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* basetype.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_basetype__
 #define __Header_basetype__
 
@@ -108,7 +108,11 @@ typedef double		Float64;
 #define	Int32_MAX	 0x7FFFFFFF
 
 #if defined(__GNUC__)  && __GNUC__ >= 3
+#if defined(_LIBCPP_VERSION)
+#include <strstream>
+#else
 #include <backward/strstream>
+#endif
 using std::istrstream;
 using std::ostrstream;
 #else

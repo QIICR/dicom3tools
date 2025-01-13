@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)attrmxrd.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)attrmxrd.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attrtype.h"
 #include "attrnew.h"
 #include "attrmxls.h"
@@ -11,7 +11,7 @@ static const char *CopyrightIdentifier(void) { return "@(#)attrmxrd.cc Copyright
 // This may be defined in attrtype.h previously ...
 
 #ifndef LARGESTOTHERDATATOKEEPINMEMORY
-#define LARGESTOTHERDATATOKEEPINMEMORY 524288
+#define LARGESTOTHERDATATOKEEPINMEMORY 8388608
 #endif
 
 // Want a routine to actually read rather than just use seekg(), since otherwise
@@ -1169,11 +1169,22 @@ cerr << ")"
 				}
 			}
 			else if (isOtherLongVR(vr)) {
+				if (vl <= LARGESTOTHERDATATOKEEPINMEMORY) {
+					a=new OtherLongSmallAttribute(tag);
+				}
+				else {
+					a=new OtherLongLargeAttribute(tag,
+							*stream,
+							stream->tellg());
+					// the skipping and vl setting is done later in read()
+				}
+			}
+			else if (isOtherVeryLongVR(vr)) {
 				//if (vl <= LARGESTOTHERDATATOKEEPINMEMORY) {
-				//	a=new OtherLongSmallAttribute(tag);
+				//	a=new OtherVeryLongSmallAttribute(tag);
 				//}
 				//else {
-					a=new OtherLongLargeAttribute(tag,
+					a=new OtherVeryLongLargeAttribute(tag,
 							*stream,
 							stream->tellg());
 					// the skipping and vl setting is done later in read()

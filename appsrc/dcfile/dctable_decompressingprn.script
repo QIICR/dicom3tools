@@ -1,0 +1,30 @@
+#!/bin/sh
+
+TMPFILE=/tmp/`basename $0`.$$.tmp
+
+filename="$1"
+shift
+#echo "Given ${filename}"
+
+filenamewithoutcompression=`echo "${filename}" | sed -e 's/[.]bz2$//'`
+if [ -f "${filenamewithoutcompression}" ]
+then
+	dctable "${filename}" $*
+else
+	if [ -f "${filename}" ]
+	then
+		compressedfilename="${filename}"
+	else
+		compressedfilename="${filename}.bz2"
+	fi
+	#echo "Looking for ${compressedfilename}"
+	if [ -f "${compressedfilename}" ]
+	then
+		#echo "Found ${compressedfilename}"
+		rm -f "${TMPFILE}"
+		bzcat <"${compressedfilename}" >"${TMPFILE}"
+		result=`dctable -nofilename "${TMPFILE}" $* | sed -e 's/\\\/\\\\\\\/g'`
+		echo 1>&2 "\"${filename}\"\t${result}"
+		rm "${TMPFILE}"
+	fi
+fi

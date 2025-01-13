@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dateconv.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dateconv.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "basetype.h"
 #include "convtype.h"
 #include "datetype.h"

@@ -1,4 +1,4 @@
-/* paceptrs.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* paceptrs.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #define	PACE_Offset_STDHDR_ptr	256
 #define	PACE_Offset_IMGHDR_ptr	768
 #define	PACE_Offset_MRHDR_ptr	(PACE_Offset_IMGHDR_ptr+192)

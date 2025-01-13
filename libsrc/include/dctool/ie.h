@@ -1,4 +1,4 @@
-/* ie.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* ie.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_ie__
 #define __Header_ie__
 
@@ -33,7 +33,9 @@ enum InformationEntity {
 	ColorPaletteIE,
 	SurfaceIE,
 	TractographyResultsIE,
-	AnnotationIE
+	AnnotationIE,
+	AcquisitionIE,
+	MultiResolutionPyramidIE
 };
 
 InformationEntity getInformationEntityFromDescription(const char *d);

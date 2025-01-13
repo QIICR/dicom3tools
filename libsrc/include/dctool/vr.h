@@ -1,4 +1,4 @@
-/* vr.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* vr.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 // utility methods for value representation
 
 #ifndef __Header_vr__
@@ -20,6 +20,8 @@ static bool isOtherFloatVR(const char *vr) { return vr && vr[0]=='O' && vr[1]=='
 
 static bool isOtherLongVR(const char *vr) { return vr && vr[0]=='O' && vr[1]=='L'; }
 
+static bool isOtherVeryLongVR(const char *vr) { return vr && vr[0]=='O' && vr[1]=='V'; }
+
 static bool isOtherByteVR(const char *vr) { return vr && vr[0]=='O' && vr[1]=='B'; }
 
 static bool isSequenceVR(const char *vr) { return vr && vr[0]=='S' &&  vr[1]=='Q'; }
@@ -38,7 +40,7 @@ static bool isUnlimitedTextVR(const char *vr) { return vr && vr[0]=='U' &&  vr[1
 
 static bool isOtherByteOrWordOrUnspecifiedVR(const char *vr) { return vr && vr[0]=='O' && (vr[1]=='B' || vr[1]=='W' || vr[1]=='X'); }
 
-static bool isOtherByteOrLongOrWordOrFloatOrDoubleVR(const char *vr) { return vr && vr[0]=='O' && (vr[1]=='B' || vr[1]=='D' || vr[1]=='F' || vr[1]=='L' || vr[1]=='W' || vr[1]=='X'); }
+static bool isOtherByteOrLongOrWordOrFloatOrDoubleVR(const char *vr) { return vr && vr[0]=='O' && (vr[1]=='B' || vr[1]=='D' || vr[1]=='F' || vr[1]=='L' || vr[1]=='V' || vr[1]=='W' || vr[1]=='X'); }
 
 // use strncmp throughout, because might have passed fixed length array of 2 characters that is not null terminated ...
 
@@ -90,6 +92,7 @@ isKnownExplicitValueRepresentation(const char *vr) {
 		|| strncmp(vr,"OD",2) == 0
 		|| strncmp(vr,"OF",2) == 0
 		|| strncmp(vr,"OL",2) == 0
+		|| strncmp(vr,"OV",2) == 0
 		|| strncmp(vr,"OW",2) == 0
 		|| strncmp(vr,"PN",2) == 0
 		|| strncmp(vr,"SH",2) == 0
@@ -149,6 +152,7 @@ isNumericVR(const char *vr)
 	return vr &&
 		(  strncmp(vr,"OB",2) == 0
 		|| strncmp(vr,"OL",2) == 0
+		|| strncmp(vr,"OV",2) == 0
 		|| strncmp(vr,"OW",2) == 0
 		|| strncmp(vr,"OX",2) == 0
 		|| strncmp(vr,"SL",2) == 0
@@ -185,6 +189,8 @@ sizeofNumericVR(const char *vr)
 	      || strncmp(vr,"UL",2) == 0
 	      || strncmp(vr,"XL",2) == 0)
 		return 4;
+	else if (strncmp(vr,"OV",2) == 0)
+		return 8;
 	else {
 		Assert(0);
 	}

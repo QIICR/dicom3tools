@@ -1,4 +1,4 @@
-#  condn.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  condn.awk Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 # create C++ headers from conditions template 
 
 # can set these values on the command line:
@@ -186,8 +186,8 @@ NR==1	{
 	sequencepresentinpathfirstitemhasitems=0
 	sequencepresentinpathfromrootfirstitemhasitems=""
 	if (match($0,"SequencePresentInPathFromRootFirstItemHasItems=\"[^\"]*\"")) {
-		sequencepresentinpathfirstitem=1;
-		sequencepresentinpathfromrootfirstitem=substr($0,RSTART+length("SequencePresentInPathFromRootFirstItemHasItems=\""),
+		sequencepresentinpathfirstitemhasitems=1;
+		sequencepresentinpathfromrootfirstitemhasitems=substr($0,RSTART+length("SequencePresentInPathFromRootFirstItemHasItems=\""),
 			RLENGTH-length("SequencePresentInPathFromRootFirstItemHasItems=\"")-1);
 	}
 

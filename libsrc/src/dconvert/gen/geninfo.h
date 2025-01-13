@@ -1,4 +1,4 @@
-/* geninfo.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* geninfo.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_geninfo__
 #define __Header_geninfo__
 

@@ -1,4 +1,4 @@
-/* attrtypn.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attrtypn.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_attrtypn__
 #define __Header_attrtypn__
 
@@ -19,6 +19,7 @@ private:
 			if (Size == 1) while (!i) { stream.write8((unsigned char)i()); ++i; }
 			if (Size == 2) while (!i) { stream.write16((Uint16)i()); ++i; }
 			if (Size == 4) while (!i) { stream.write32((Uint32)i()); ++i; }
+			if (Size == 8) while (!i) { stream.write64((Uint64)i()); ++i; }
 			return stream;
 		}
 
@@ -108,6 +109,10 @@ public:
 					Uint32 i=stream.read32();
 					addValue(i);
 				}
+				else if (size == 4) {
+					Uint64 i=stream.read64();
+					addValue(i);
+				}
 				length-=size;
 			}
 			return stream;
@@ -134,6 +139,13 @@ public:
 			if (success) vp=(Uint32)value;
 			return success;
 		}
+	bool	getValue(unsigned index,Uint64& vp) const
+		{
+			T value;
+			bool success=values.getValue(index,value);
+			if (success) vp=(Uint64)value;
+			return success;
+		}
 	bool	getValue(unsigned index,Int16& vp) const
 		{
 			T value;
@@ -146,6 +158,13 @@ public:
 			T value;
 			bool success=values.getValue(index,value);
 			if (success) vp=(Int32)value;
+			return success;
+		}
+	bool	getValue(unsigned index,Int64& vp) const
+		{
+			T value;
+			bool success=values.getValue(index,value);
+			if (success) vp=(Int64)value;
 			return success;
 		}
 	bool	getValue(unsigned index,Float32& vp) const
@@ -194,11 +213,19 @@ public:
 		{
 			values.setValue(index,(T)value);
 		}
+	void	setValue(unsigned index,Uint64 value)
+		{
+			values.setValue(index,(T)value);
+		}
 	void	setValue(unsigned index,Int16 value)
 		{
 			values.setValue(index,(T)value);
 		}
 	void	setValue(unsigned index,Int32 value)
+		{
+			values.setValue(index,(T)value);
+		}
+	void	setValue(unsigned index,Int64 value)
 		{
 			values.setValue(index,(T)value);
 		}
@@ -231,12 +258,22 @@ public:
 			Assert(isSufficientSpaceForOneMoreValue());
 			values.addValue((T)value);
 		}
+	void	addValue(Uint64 value)
+		{
+			Assert(isSufficientSpaceForOneMoreValue());
+			values.addValue((T)value);
+		}
 	void	addValue(Int16 value)
 		{
 			Assert(isSufficientSpaceForOneMoreValue());
 			values.addValue((T)value);
 		}
 	void	addValue(Int32 value)
+		{
+			Assert(isSufficientSpaceForOneMoreValue());
+			values.addValue((T)value);
+		}
+	void	addValue(Int64 value)
 		{
 			Assert(isSufficientSpaceForOneMoreValue());
 			values.addValue((T)value);
@@ -267,8 +304,10 @@ public:
 
 	void	addValues(unsigned number,Uint16 *vptr)		{ Attribute::addValues(number,vptr); }
 	void	addValues(unsigned number,Uint32 *vptr)		{ Attribute::addValues(number,vptr); }
+	void	addValues(unsigned number,Uint64 *vptr)		{ Attribute::addValues(number,vptr); }
 	void	addValues(unsigned number,Int16 *vptr)		{ Attribute::addValues(number,vptr); }
 	void	addValues(unsigned number,Int32 *vptr)		{ Attribute::addValues(number,vptr); }
+	void	addValues(unsigned number,Int64 *vptr)		{ Attribute::addValues(number,vptr); }
 	void	addValues(unsigned number,Float32 *vptr)	{ Attribute::addValues(number,vptr); }
 	void	addValues(unsigned number,Float64 *vptr)	{ Attribute::addValues(number,vptr); }
 	void	addValues(unsigned number,Tag *vptr)		{ Attribute::addValues(number,vptr); }

@@ -1,4 +1,4 @@
-/* attr.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attr.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 // public interface for Attribute class
 
 #ifndef __Header_attr__
@@ -96,6 +96,7 @@ public:
 	virtual bool	isOtherWordNonPixel(void) const	{ return false; }
 	virtual bool	isUnknown(void) const		{ return false; }
 	virtual bool	isSequence(void) const		{ return false; }
+	virtual bool	isEncapsulated(void) const	{ return false; }
 
 	virtual OtherUnspecifiedLargeAttributeBase *castToOtherData(void);
 
@@ -106,33 +107,45 @@ public:
 													// should be OK for SQ even if VL is 0xFFFFFFFF
 	virtual bool	isEmptyOrHasAllEmptyValues(void) const	{ return getVL() == 0 || isEmpty(); }	// overriden in string attributes
 													// should be OK for SQ even if VL is 0xFFFFFFFF
+													
+	virtual bool	isLargeAttributeLeftOnDisk(void) const	{ return false; }
 		
 	virtual bool	getValue(unsigned,Uint16&) const;
 	virtual bool	getValue(unsigned,Uint32&) const;
+	virtual bool	getValue(unsigned,Uint64&) const;
 	virtual bool	getValue(unsigned,Int16&) const;
 	virtual bool	getValue(unsigned,Int32&) const;
+	virtual bool	getValue(unsigned,Int64&) const;
 	virtual bool	getValue(unsigned,Float32&) const;
 	virtual bool	getValue(unsigned,Float64&) const;
 	virtual bool	getValue(unsigned,Tag&) const;
 	virtual bool	getValue(unsigned,char * &) const;
 	virtual bool	getValue(const unsigned char * & rvalue,Uint32 &rlength) const;
 	virtual bool	getValue(const Uint16 * & rvalue,Uint32 &rlengthinwords) const;
+	virtual bool	getValue(const Uint32 * & rvalue,Uint32 &rlengthinwords) const;
+	virtual bool	getValue(const Uint64 * & rvalue,Uint32 &rlengthinwords) const;
 
 	virtual void	setValue(unsigned,Uint16);
 	virtual void	setValue(unsigned,Uint32);
+	virtual void	setValue(unsigned,Uint64);
 	virtual void	setValue(unsigned,Int16);
 	virtual void	setValue(unsigned,Int32);
+	virtual void	setValue(unsigned,Int64);
 	virtual void	setValue(unsigned,Float32);
 	virtual void	setValue(unsigned,Float64);
 	virtual void	setValue(unsigned,Tag);
 	virtual void	setValue(unsigned,const char *);
 	virtual void	setValue(const unsigned char *values,Uint32 length);
 	virtual void	setValue(const Uint16 *values,Uint32 lengthinwords);
+	virtual void	setValue(const Uint32 *values,Uint32 lengthinwords);
+	virtual void	setValue(const Uint64 *values,Uint32 lengthinwords);
 
 	virtual void	addValue(Uint16);
 	virtual void	addValue(Uint32);
+	virtual void	addValue(Uint64);
 	virtual void	addValue(Int16)	;
 	virtual void	addValue(Int32)	;
+	virtual void	addValue(Int64)	;
 	virtual void	addValue(Float32);
 	virtual void	addValue(Float64);
 	virtual void	addValue(Tag);
@@ -140,8 +153,10 @@ public:
 
 	virtual void	addValues(unsigned,Uint16 *);
 	virtual void	addValues(unsigned,Uint32 *);
+	virtual void	addValues(unsigned,Uint64 *);
 	virtual void	addValues(unsigned,Int16 *);
 	virtual void	addValues(unsigned,Int32 *);
+	virtual void	addValues(unsigned,Int64 *);
 	virtual void	addValues(unsigned,Float32 *);
 	virtual void	addValues(unsigned,Float64 *);
 	virtual void	addValues(unsigned,Tag *);

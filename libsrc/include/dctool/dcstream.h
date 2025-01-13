@@ -1,4 +1,4 @@
-/* dcstream.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* dcstream.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_dcstream__
 #define __Header_dcstream__
 
@@ -54,6 +54,11 @@ public:
 			return *this;
 		}
 	DicomInputStream& operator>>(Uint32& rhs)
+		{
+			((BinaryInputStream&)*this).operator>>(rhs);
+			return *this;
+		}
+	DicomInputStream& operator>>(Uint64& rhs)
 		{
 			((BinaryInputStream&)*this).operator>>(rhs);
 			return *this;
@@ -118,6 +123,11 @@ public:
 			return *this;
 		}
 	DicomOutputStream& operator<<(Uint32 rhs)
+		{
+			((BinaryOutputStream&)*this).operator<<(rhs);
+			return *this;
+		}
+	DicomOutputStream& operator<<(Uint64 rhs)
 		{
 			((BinaryOutputStream&)*this).operator<<(rhs);
 			return *this;

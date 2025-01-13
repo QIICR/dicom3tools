@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)ie.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)ie.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "basetype.h"
 #include "ie.h"
 
@@ -34,7 +34,8 @@ getInformationEntityFromDescription(const char *d) {
 		else if (strcmp(d,"Surface") == 0)					ie = SurfaceIE;
 		else if (strcmp(d,"TractographyResults") == 0)		ie = TractographyResultsIE;
 		else if (strcmp(d,"Annotation") == 0)				ie = AnnotationIE;
-
+		else if (strcmp(d,"Acquisition") == 0)				ie = AcquisitionIE;
+		else if (strcmp(d,"MultiResolutionPyramid") == 0)	ie = MultiResolutionPyramidIE;
 	}
 	return ie;
 }
@@ -42,68 +43,72 @@ getInformationEntityFromDescription(const char *d) {
 const char *
 describeInformationEntity(InformationEntity ie) {
 	const char *d = "Unknown";
-	if      (ie == DirectoryIE)				d = "Directory";
-	else if (ie == DocumentIE)				d = "Document";
-	else if (ie == EncapsulatedDocumentIE)	d = "EncapsulatedDocument";
-	else if (ie == EquipmentIE)				d = "Equipment";
-	else if (ie == FileIE)					d = "File";
-	else if (ie == FrameOfReferenceIE)		d = "FrameOfReference";
-	else if (ie == HangingProtocolIE)		d = "HangingProtocol";
-	else if (ie == ImageIE)					d = "Image";
-	else if (ie == MRSpectroscopyIE)		d = "MRSpectroscopy";
-	else if (ie == PatientIE)				d = "Patient";
-	else if (ie == PlanIE)					d = "Plan";
-	else if (ie == PresentationIE)			d = "Presentation";
-	else if (ie == RawDataIE)				d = "RawData";
-	else if (ie == RealWorldValueMappingIE)	d = "RealWorldValueMapping";
-	else if (ie == SeriesIE)				d = "Series";
-	else if (ie == SpatialFiducialsIE)		d = "SpatialFiducials";
-	else if (ie == SpatialRegistrationIE)	d = "SpatialRegistration";
-	else if (ie == StructureSetIE)			d = "StructureSet";
-	else if (ie == StudyIE)					d = "Study";
-	else if (ie == TreatmentRecordIE)		d = "TreatmentRecord";
-	else if (ie == OverlayIE)				d = "Overlay";
-	else if (ie == CurveIE)					d = "Curve";
-	else if (ie == ModalityLUTIE)			d = "ModalityLUT";
-	else if (ie == VOILUTIE)				d = "VOILUT";
-	else if (ie == ColorPaletteIE)			d = "ColorPalette";
-	else if (ie == SurfaceIE)				d = "Surface";
-	else if (ie == TractographyResultsIE)	d = "TractographyResults";
-	else if (ie == AnnotationIE)			d = "Annotation";
+	if      (ie == DirectoryIE)					d = "Directory";
+	else if (ie == DocumentIE)					d = "Document";
+	else if (ie == EncapsulatedDocumentIE)		d = "EncapsulatedDocument";
+	else if (ie == EquipmentIE)					d = "Equipment";
+	else if (ie == FileIE)						d = "File";
+	else if (ie == FrameOfReferenceIE)			d = "FrameOfReference";
+	else if (ie == HangingProtocolIE)			d = "HangingProtocol";
+	else if (ie == ImageIE)						d = "Image";
+	else if (ie == MRSpectroscopyIE)			d = "MRSpectroscopy";
+	else if (ie == PatientIE)					d = "Patient";
+	else if (ie == PlanIE)						d = "Plan";
+	else if (ie == PresentationIE)				d = "Presentation";
+	else if (ie == RawDataIE)					d = "RawData";
+	else if (ie == RealWorldValueMappingIE)		d = "RealWorldValueMapping";
+	else if (ie == SeriesIE)					d = "Series";
+	else if (ie == SpatialFiducialsIE)			d = "SpatialFiducials";
+	else if (ie == SpatialRegistrationIE)		d = "SpatialRegistration";
+	else if (ie == StructureSetIE)				d = "StructureSet";
+	else if (ie == StudyIE)						d = "Study";
+	else if (ie == TreatmentRecordIE)			d = "TreatmentRecord";
+	else if (ie == OverlayIE)					d = "Overlay";
+	else if (ie == CurveIE)						d = "Curve";
+	else if (ie == ModalityLUTIE)				d = "ModalityLUT";
+	else if (ie == VOILUTIE)					d = "VOILUT";
+	else if (ie == ColorPaletteIE)				d = "ColorPalette";
+	else if (ie == SurfaceIE)					d = "Surface";
+	else if (ie == TractographyResultsIE)		d = "TractographyResults";
+	else if (ie == AnnotationIE)				d = "Annotation";
+	else if (ie == AcquisitionIE)				d = "Acquisition";
+	else if (ie == MultiResolutionPyramidIE)	d = "MultiResolutionPyramid";
 
 	return d;
 }
 
 int getDepthOfInformationEntity(InformationEntity ie) {
 	int depth = 999;
-	if      (ie == DirectoryIE)				depth = 1;
-	else if (ie == DocumentIE)				depth = 7;
-	else if (ie == EncapsulatedDocumentIE)	depth = 7;
-	else if (ie == EquipmentIE)				depth = 5;
-	else if (ie == FileIE)					depth = 1;
-	else if (ie == FrameOfReferenceIE)		depth = 6;
-	else if (ie == HangingProtocolIE)		depth = 7;
-	else if (ie == ImageIE)					depth = 7;
-	else if (ie == MRSpectroscopyIE)		depth = 7;
-	else if (ie == PatientIE)				depth = 2;
-	else if (ie == PlanIE)					depth = 7;
-	else if (ie == PresentationIE)			depth = 7;
-	else if (ie == RawDataIE)				depth = 7;
-	else if (ie == RealWorldValueMappingIE)	depth = 7;
-	else if (ie == SeriesIE)				depth = 4;
-	else if (ie == SpatialFiducialsIE)		depth = 7;
-	else if (ie == SpatialRegistrationIE)	depth = 7;
-	else if (ie == StructureSetIE)			depth = 7;
-	else if (ie == StudyIE)					depth = 3;
-	else if (ie == TreatmentRecordIE)		depth = 7;
-	else if (ie == OverlayIE)				depth = 7;
-	else if (ie == CurveIE)					depth = 7;
-	else if (ie == ModalityLUTIE)			depth = 7;
-	else if (ie == VOILUTIE)				depth = 7;
-	else if (ie == ColorPaletteIE)			depth = 7;
-	else if (ie == SurfaceIE)				depth = 7;
-	else if (ie == TractographyResultsIE)	depth = 7;
-	else if (ie == AnnotationIE)			depth = 7;
+	if      (ie == DirectoryIE)					depth = 1;
+	else if (ie == DocumentIE)					depth = 9;
+	else if (ie == EncapsulatedDocumentIE)		depth = 9;
+	else if (ie == EquipmentIE)					depth = 5;
+	else if (ie == FileIE)						depth = 1;
+	else if (ie == FrameOfReferenceIE)			depth = 6;
+	else if (ie == HangingProtocolIE)			depth = 9;
+	else if (ie == ImageIE)						depth = 9;
+	else if (ie == MRSpectroscopyIE)			depth = 9;
+	else if (ie == PatientIE)					depth = 2;
+	else if (ie == PlanIE)						depth = 9;
+	else if (ie == PresentationIE)				depth = 9;
+	else if (ie == RawDataIE)					depth = 9;
+	else if (ie == RealWorldValueMappingIE)		depth = 9;
+	else if (ie == SeriesIE)					depth = 4;
+	else if (ie == SpatialFiducialsIE)			depth = 9;
+	else if (ie == SpatialRegistrationIE)		depth = 9;
+	else if (ie == StructureSetIE)				depth = 9;
+	else if (ie == StudyIE)						depth = 3;
+	else if (ie == TreatmentRecordIE)			depth = 9;
+	else if (ie == OverlayIE)					depth = 9;
+	else if (ie == CurveIE)						depth = 9;
+	else if (ie == ModalityLUTIE)				depth = 9;
+	else if (ie == VOILUTIE)					depth = 9;
+	else if (ie == ColorPaletteIE)				depth = 9;
+	else if (ie == SurfaceIE)					depth = 9;
+	else if (ie == TractographyResultsIE)		depth = 9;
+	else if (ie == AnnotationIE)				depth = 9;
+	else if (ie == AcquisitionIE)				depth = 7;
+	else if (ie == MultiResolutionPyramidIE)	depth = 8;
 
 	return depth;
 }

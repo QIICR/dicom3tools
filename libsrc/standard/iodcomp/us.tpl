@@ -25,6 +25,9 @@ CompositeIOD="EnhancedUltrasoundVolume"			Condition="EnhancedUltrasoundVolumeIns
 		Module="GeneralEquipment"								Usage="M"
 		Module="EnhancedGeneralEquipment"						Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"								Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"									Usage="M"
 		Module="GeneralReference"								Usage="U"	Condition="NeedModuleGeneralReference"
@@ -80,6 +83,9 @@ CompositeIOD="EnhancedUltrasoundVolumeQTUS"			Condition="EnhancedUltrasoundVolum
 		Module="EnhancedGeneralEquipment"						Usage="M"
 		Module="QTUSEnhancedUltrasoundVolumeProfileEquipment"	Usage="M"
 	InformationEntityEnd
+	InformationEntity="Acquisition"
+		Module="GeneralAcquisition"								Usage="M"
+	InformationEntityEnd
 	InformationEntity="Image"
 		Module="GeneralImage"									Usage="M"
 		Module="GeneralReference"								Usage="U"	Condition="NeedModuleGeneralReference"
@@ -105,3 +111,53 @@ CompositeIOD="EnhancedUltrasoundVolumeQTUS"			Condition="EnhancedUltrasoundVolum
 	InformationEntityEnd
 CompositeIODEnd
 
+CompositeIOD="PhotoacousticImage" Condition="PhotoacousticImageInstance"
+	InformationEntity="File"
+		Module="FileMetaInformation"							Usage="C"	Condition="NeedModuleFileMetaInformation"
+	InformationEntityEnd
+	InformationEntity="Patient"
+		Module="Patient"										Usage="M"
+		Module="ClinicalTrialSubject"							Usage="U"	Condition="NeedModuleClinicalTrialSubject"
+	InformationEntityEnd
+	InformationEntity="Study"
+		Module="GeneralStudy"									Usage="M"
+		Module="PatientStudy"									Usage="U"	# no condition ... all attributes type 3
+		Module="ClinicalTrialStudy"								Usage="U"	Condition="NeedModuleClinicalTrialStudy"
+	InformationEntityEnd
+	InformationEntity="Series"
+		Module="GeneralSeries"									Usage="M"
+		Module="ClinicalTrialSeries"							Usage="U"	Condition="NeedModuleClinicalTrialSeries"
+		Module="EnhancedSeries"									Usage="M"
+		Module="PhotoacousticSeriesPseudo"						Usage="M"
+	InformationEntityEnd
+	InformationEntity="FrameOfReference"
+		Module="FrameOfReference"								Usage="M"
+		Module="UltrasoundFrameOfReference"						Usage="M"
+		Module="Synchronization"								Usage="M"
+	InformationEntityEnd
+	InformationEntity="Equipment"
+		Module="GeneralEquipment"								Usage="M"
+		Module="EnhancedGeneralEquipment"						Usage="M"
+	InformationEntityEnd
+	InformationEntity="Image"
+		Module="GeneralImage"									Usage="M"
+		Module="GeneralReference"								Usage="U"	Condition="NeedModuleGeneralReference"
+		Module="ImagePixel"										Usage="M"
+		Module="EnhancedContrastBolus"							Usage="C"	Condition="NeedModuleEnhancedContrastBolus"
+		Module="MultiFrameFunctionalGroupsCommon"				Usage="M"
+		Module="MultiFrameFunctionalGroupsForPhotoacousticImage"	Usage="M"
+		Module="MultiFrameDimension"							Usage="M"
+		Module="Device"											Usage="U"	Condition="NeedModuleDevice"
+		Module="AcquisitionContext"								Usage="M"
+		Module="Specimen"										Usage="U"	Condition="NeedModuleSpecimen"
+		Module="SupplementalPaletteColorLUT"					Usage="C"	Condition="NeedModuleSupplementalPaletteColorLUT"
+		Module="PhotoacousticImage"								Usage="M"
+		Module="PhotoacousticAcquisitionParameters"				Usage="M"
+		Module="PhotoacousticTransducer"						Usage="U"	Condition="NeedModulePhotoacousticTransducer"
+		Module="PhotoacousticReconstruction"					Usage="U"	Condition="NeedModulePhotoacousticReconstruction"
+		Module="ICCProfile"										Usage="U"	Condition="PixelPresentationTRUE_COLORorCOLOR"
+		Module="SOPCommon"										Usage="M"
+		Module="CommonInstanceReference"						Usage="U"	Condition="NeedModuleCommonInstanceReference"
+		Module="FrameExtraction"								Usage="C"	Condition="NeedModuleFrameExtraction"
+	InformationEntityEnd
+CompositeIODEnd

@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dciodvfy.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dciodvfy.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attrmxls.h"
 #include "mesgtext.h"
 #include "dcopt.h"
@@ -8,6 +8,79 @@ static const char *CopyrightIdentifier(void) { return "@(#)dciodvfy.cc Copyright
 #include "attrseq.h"
 
 #include "iodcomp.h"
+
+#include "hash.h"
+
+// copied from dcentvfy.cc - should refactor :(
+// This hash table stuff was based on elmhash.h, but differs in that value is string, not an index number
+//
+// ********************* stuff for StringByString *********************
+
+class StringEntryString {
+	HashKeyString key;
+	const char *value;
+public:
+	StringEntryString(void)		{}
+	StringEntryString(const char *s,const char *v)
+					{ key=HashKeyString(s); value=v; }
+	StringEntryString(StringEntryString *e)
+					{ key=e->key; value=e->value; }
+
+	HashKeyString	getKey(void) const	{ return key; }
+	const char *	getValue(void) const	{ return value; }
+
+	bool operator==(StringEntryString e)
+					{ return key == e.getKey(); }
+};
+
+class StringEntryStringList : public SimpleList<StringEntryString>
+{
+public:
+	~StringEntryStringList() {}	// only because buggy g++ 2.7.0 freaks
+};
+
+class StringEntryStringListIterator : public SimpleListIterator<StringEntryString>
+{
+public:
+	StringEntryStringListIterator(void)
+		: SimpleListIterator<StringEntryString>() {}
+	StringEntryStringListIterator(StringEntryStringList& list)
+		: SimpleListIterator<StringEntryString>(list) {}
+};
+
+class StringByString : public OpenHashTable <StringEntryString,
+					HashKeyString,
+					StringEntryStringList,
+					StringEntryStringListIterator>
+{
+public:
+	StringByString(unsigned long size)
+		: OpenHashTable<StringEntryString,
+				HashKeyString,
+				StringEntryStringList,
+				StringEntryStringListIterator>(size)
+		{}
+
+	// supply virtual functions for OpenHashTable ...
+
+	unsigned long	hash(const HashKeyString &key,unsigned long size)
+		{
+			const unsigned nchars = 10;
+			const unsigned shift  = 4;
+
+			unsigned n=nchars;
+			unsigned long value=0;
+			const char *s=key.getString();
+			while (n-- && *s) {
+				value=(value<<shift)|*s++;
+			}
+			return value%size; 
+		}
+
+	HashKeyString key(const StringEntryString &e)	{ return e.getKey(); }
+	
+	const char * get(const char *key) { StringEntryString *e=operator[](key); return e ? e->getValue() : NULL; }
+};
 
 // Similar to TextOutputStream& Tag::write(TextOutputStream& stream,ElementDictionary *dict) in libsrc/src/dctool/attrtag.cc
 // but without the VR
@@ -1458,6 +1531,7 @@ checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,Tag descriptorTag,Tag 
 							    << endl;
 						}
 						if (foundValuesToCheck) {
+							if (actualNumberOfEntries%2 == 1) ++actualNumberOfEntries;	// Allow single byte of padding for odd number of 8 bit LUT entries in 16 bit words (000607)
 							if (nLUTData*2 != actualNumberOfEntries) {
 								if (newformat) {
 									log << EMsgDCF(MMsgDC(LUTDataWrongLength),aLUTData);
@@ -1466,7 +1540,7 @@ checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,Tag descriptorTag,Tag 
 									log << EMsgDC(LUTDataWrongLength);
 								}
 								log << " - " << message
-								    << " - LUT Descriptor number of entries = " << actualNumberOfEntries
+								    << " - LUT Descriptor number of entries (with or without padding) = " << actualNumberOfEntries
 								    << " but number of 8 bit values = " << nLUTData*2
 								    << " packed into " << nLUTData << " 16 bit words"
 								    << endl;
@@ -1585,6 +1659,103 @@ checkLUTDataValuesMatchSpecifiedRange(AttributeList &list,bool verbose,bool newf
 		}
 	}
 	
+	return success;
+}
+
+static bool
+checkCodeSequenceItemsAreNotUnknown(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {	// (000589)
+	//cerr << "checkCodeSequenceItemsAreNotUnknown():" << endl;
+	bool success=true;
+	AttributeListIterator listi(list);
+	while (!listi) {
+		Attribute *a=listi();
+		Assert(a);
+		{
+			if (a && a->isSequence() && !a->isEmpty()) {
+				//cerr << "checkCodeSequenceItemsAreNotUnknown(): have Sequence" << endl;
+				AttributeList **al;
+				int n;
+				if ((n=a->getLists(&al)) > 0) {
+					//cerr << "checkCodeSequenceItemsAreNotUnknown(): have " << n << " items" << endl;
+					int i;
+					for (i=0; i<n; ++i) {
+						AttributeList *itemList = al[i];
+						Attribute *aCodeValue=(*itemList)[TagFromName(CodeValue)];
+						Attribute *aCodingSchemeDesignator=(*itemList)[TagFromName(CodingSchemeDesignator)];
+						Attribute *aCodeMeaning=(*itemList)[TagFromName(CodeMeaning)];
+						//cerr << "checkCodeSequenceItemsAreNotUnknown(): have CodeValue" << endl;
+						if (aCodeValue && aCodingSchemeDesignator) {
+							char *vCodingSchemeDesignator = NULL;
+							if (aCodingSchemeDesignator->getVM() > 0) {
+								aCodingSchemeDesignator->getValue(0,vCodingSchemeDesignator);
+							}
+							char *vCodeMeaning = NULL;
+							if (aCodeMeaning && aCodeMeaning->getVM() > 0) {
+								aCodeMeaning->getValue(0,vCodeMeaning);
+							}
+							// should really only be one value but check all anyway (should really extract CSD and CM separately too) :(
+							Uint16 nValues= aCodeValue->getVM();
+							if (nValues > 0 && vCodingSchemeDesignator) {
+								//cerr << "checkCodeSequenceItemsAreNotUnknown(): have CodeValue with " << nValues << " values" << endl;
+								bool isSRT = strcmp(vCodingSchemeDesignator,"SRT") == 0|| strcmp(vCodingSchemeDesignator,"SNM3") == 0 || strcmp(vCodingSchemeDesignator,"99SDM") == 0;
+								//cerr << "checkCodeSequenceItemsAreNotUnknown(): isSRT " << isSRT << endl;
+								bool isSCT = strcmp(vCodingSchemeDesignator,"SCT") == 0;
+								//cerr << "checkCodeSequenceItemsAreNotUnknown(): isSCT " << isSCT << endl;
+								if (isSRT || isSCT) {
+									int j;
+									for (j=0; j<nValues; ++j) {
+										bool bad = false;
+										char *value;
+										if (aCodeValue->getValue(j,value)) {
+											//cerr << "checkCodeSequenceItemsAreNotUnknown(): have CodeValue value [" <<j << "] \"" << value << "\"" << endl;
+											if (
+												(isSCT && strcmp(value,"261665006") == 0)
+											 || (isSRT && strcmp(value,"R-41198") == 0)
+											) {
+												//cerr << "checkCodeSequenceItemsAreNotUnknown(): setting bad true based on code value" << endl;
+												bad = true;
+											}
+											if (vCodeMeaning
+											 && (
+													strcmp(vCodeMeaning,"Unknown") == 0		// should really use trtolowercase but a pain to duplicate and delete string :(
+												 || strcmp(vCodeMeaning,"unknown") == 0
+												 || strcmp(vCodeMeaning,"UNKNOWN") == 0
+												)
+											 ) {
+												//cerr << "checkCodeSequenceItemsAreNotUnknown(): setting bad true based on code meaning" << endl;
+												bad = true;
+											 }
+
+											if (bad) {
+												if (newformat) {
+													log << WMsgDCF(MMsgDC(CodeSequenceContainsConceptForUnknown),aCodeValue);
+												}
+												else {
+													log << WMsgDC(CodeSequenceContainsConceptForUnknown);
+												}
+												log << " - code value is <" << value
+													<< "> - coding scheme is <" << vCodingSchemeDesignator
+													<< "> - coding meaning is <" << vCodeMeaning
+													<< ">" << endl;
+												//success=false;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					delete [] al;
+				}
+			}
+		}
+		{
+			if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkCodeSequenceItemsAreNotUnknown)) {
+				success=false;
+			}
+		}
+		++listi;
+	}
 	return success;
 }
 
@@ -2148,29 +2319,38 @@ static bool
 checkSegmentNumbersMonotonicallyIncreasingFromOneByOne(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
 //cerr << "checkSegmentNumbersMonotonicallyIncreasingFromOneByOne():" << endl;
 	bool success=true;
-	
-	Attribute *aSegmentSequence = list[TagFromName(SegmentSequence)];
-	if (aSegmentSequence && aSegmentSequence->isSequence()) {
-		AttributeList **aSegmentSequenceLists;
-		int nSegmentSequenceItems;
-		if ((nSegmentSequenceItems=aSegmentSequence->getLists(&aSegmentSequenceLists)) > 0) {
-			int s;
-			for (s=0; s<nSegmentSequenceItems; ++s) {
-				AttributeList *segmentList = aSegmentSequenceLists[s];
-				Attribute *aSegmentNumber = (*segmentList)[TagFromName(SegmentNumber)];
-				Uint16 vSegmentNumber = 0;
-				if (aSegmentNumber) {
-					(void)aSegmentNumber->getValue(0,vSegmentNumber);
-					if (vSegmentNumber != s + 1) {
-						if (newformat) {
-							log << EMsgDCF(MMsgDC(SegmentNumberNotMonotonicallyIncreasingFromOneByOne),aSegmentNumber);
+	bool isLabelmap=false;
+	{
+		Attribute *aSegmentationType=list[TagFromName(SegmentationType)];
+		char *vSegmentationType = NULL;
+		if (aSegmentationType && aSegmentationType->getValue(0,vSegmentationType) && strcmp(vSegmentationType,"LABELMAP") == 0) {
+			isLabelmap = true;
+		}
+	}
+	if (!isLabelmap) {
+		Attribute *aSegmentSequence = list[TagFromName(SegmentSequence)];
+		if (aSegmentSequence && aSegmentSequence->isSequence()) {
+			AttributeList **aSegmentSequenceLists;
+			int nSegmentSequenceItems;
+			if ((nSegmentSequenceItems=aSegmentSequence->getLists(&aSegmentSequenceLists)) > 0) {
+				int s;
+				for (s=0; s<nSegmentSequenceItems; ++s) {
+					AttributeList *segmentList = aSegmentSequenceLists[s];
+					Attribute *aSegmentNumber = (*segmentList)[TagFromName(SegmentNumber)];
+					Uint16 vSegmentNumber = 0;
+					if (aSegmentNumber) {
+						(void)aSegmentNumber->getValue(0,vSegmentNumber);
+						if (vSegmentNumber != s + 1) {
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(SegmentNumberNotMonotonicallyIncreasingFromOneByOne),aSegmentNumber);
+							}
+							else {
+								log << EMsgDC(SegmentNumberNotMonotonicallyIncreasingFromOneByOne);
+							}
+							log << " - have SegmentSequence item number " << (s+1) << " (from one) with SegmentNumber of " << vSegmentNumber << endl;
+							success = false;
+							break;	// only report first one
 						}
-						else {
-							log << EMsgDC(SegmentNumberNotMonotonicallyIncreasingFromOneByOne);
-						}
-						log << " - have SegmentSequence item number " << (s+1) << " (from one) with SegmentNumber of " << vSegmentNumber << endl;
-						success = false;
-						break;	// only report first one
 					}
 				}
 			}
@@ -2242,6 +2422,235 @@ checkReferencedSegmentNumbersHaveTarget(AttributeList &list,bool verbose,bool ne
 										success = false;
 									}
 								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return success;
+}
+
+static bool
+checkAnnotationGroupSequenceItemIsInternallyConsistent(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
+//cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent():" << endl;
+	bool success=true;
+
+	StringByString annotationGroupUIDForAnnotationGroupUID(20);
+
+	Attribute *aAnnotationCoordinateType = list[TagFromName(AnnotationCoordinateType)];
+	Attribute *aAnnotationGroupSequence = list[TagFromName(AnnotationGroupSequence)];
+	if (aAnnotationGroupSequence && aAnnotationGroupSequence->isSequence()) {
+		AttributeList **aAnnotationGroupSequenceLists;
+		int nAnnotationGroupSequenceItems;
+		if ((nAnnotationGroupSequenceItems=aAnnotationGroupSequence->getLists(&aAnnotationGroupSequenceLists)) > 0) {
+			int ag;
+			for (ag=0; ag<nAnnotationGroupSequenceItems; ++ag) {
+				AttributeList *annotationGroupList = aAnnotationGroupSequenceLists[ag];
+				Attribute *aAnnotationGroupUID = (*annotationGroupList)[TagFromName(AnnotationGroupUID)];
+				char *vAnnotationGroupUID;
+				if (aAnnotationGroupUID && aAnnotationGroupUID->getValue(0,vAnnotationGroupUID)) {
+					const char *existingAnnotationGroupUID = annotationGroupUIDForAnnotationGroupUID.get(vAnnotationGroupUID);
+					if (existingAnnotationGroupUID) {
+						if (newformat) {
+							log << EMsgDCF(MMsgDC(DuplicateAnnotationGroupUID),aAnnotationGroupUID)
+								<< " <" << vAnnotationGroupUID << ">"
+								<< endl;
+						}
+						else {
+							log << EMsgDC(DuplicateAnnotationGroupUID)
+								<< " " << vAnnotationGroupUID
+								<< endl;
+						}
+						success = false;
+					}
+					else {
+						annotationGroupUIDForAnnotationGroupUID+=new StringEntryString(vAnnotationGroupUID,vAnnotationGroupUID);
+					}
+				}
+				
+				Attribute *aNumberOfAnnotations = (*annotationGroupList)[TagFromName(NumberOfAnnotations)];
+				Attribute *aGraphicType = (*annotationGroupList)[TagFromName(GraphicType)];
+				Attribute *aCommonZCoordinateValue = (*annotationGroupList)[TagFromName(CommonZCoordinateValue)];
+				Attribute *aPointCoordinatesData = (*annotationGroupList)[TagFromName(PointCoordinatesData)];
+				Attribute *aDoublePointCoordinatesData = (*annotationGroupList)[TagFromName(DoublePointCoordinatesData)];
+				Attribute *aLongPrimitivePointIndexList = (*annotationGroupList)[TagFromName(LongPrimitivePointIndexList)];
+				
+				if (aNumberOfAnnotations && (aPointCoordinatesData || aDoublePointCoordinatesData)) {
+					Uint32 vNumberOfAnnotations = 0;
+					(void)aNumberOfAnnotations->getValue(0,vNumberOfAnnotations);
+//cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): vNumberOfAnnotations = " << vNumberOfAnnotations << endl;
+
+					Uint32 numberOfPointCoordinatesDataEntries = 0;
+					if (aPointCoordinatesData) {
+						// do not use getVM() since that is always 1 for OX VRs
+						Uint32 vlPointCoordinatesData = aPointCoordinatesData->getVL();
+						numberOfPointCoordinatesDataEntries = vlPointCoordinatesData / aPointCoordinatesData->getValueSize(); // OF VR so 32 bit values
+					}
+					else if (aDoublePointCoordinatesData) {
+						// do not use getVM() since that is always 1 for OX VRs
+						Uint32 vlDoublePointCoordinatesData = aDoublePointCoordinatesData->getVL();
+						numberOfPointCoordinatesDataEntries = vlDoublePointCoordinatesData / aDoublePointCoordinatesData->getValueSize(); // OD VR so 64 bit values
+					}
+//cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): numberOfPointCoordinatesDataEntries = " << numberOfPointCoordinatesDataEntries << endl;
+
+					if (aGraphicType && aAnnotationCoordinateType) {
+						char *vGraphicType;
+						char *vAnnotationCoordinateType;
+						if (aGraphicType->getValue(0,vGraphicType) && aAnnotationCoordinateType->getValue(0,vAnnotationCoordinateType)) {
+//cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): vGraphicType = " << vGraphicType << endl;
+//cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): vAnnotationCoordinateType = " << vAnnotationCoordinateType << endl;
+							int sizeOfCoordinateTuple = strcmp("2D",vAnnotationCoordinateType) == 0 || aCommonZCoordinateValue ? 2 : 3;
+//cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): sizeOfCoordinateTuple = " << sizeOfCoordinateTuple << endl;
+							if (numberOfPointCoordinatesDataEntries % sizeOfCoordinateTuple != 0) {
+								if (newformat) {
+									log << EMsgDCF(MMsgDC(PointCoordinatesDataNumberOfValuesNotMultipleOfSizeOfCoordinateTuple),aPointCoordinatesData ? aPointCoordinatesData : aDoublePointCoordinatesData)
+										<< " number of values in PointCoordinatesData = <" << numberOfPointCoordinatesDataEntries << ">"
+										<< " size of coordinate tuple = <" << sizeOfCoordinateTuple << ">"
+										<< " for AnnotationCoordinateType = <" << vAnnotationCoordinateType << ">"
+										<< " CommonZCoordinateValue <" << (aCommonZCoordinateValue ? "present" : "absent") << ">"
+										<< endl;
+								}
+								else {
+									log << EMsgDC(PointCoordinatesDataNumberOfValuesNotMultipleOfSizeOfCoordinateTuple)
+										<< " number of values in PointCoordinatesData = " << numberOfPointCoordinatesDataEntries
+										<< " size of coordinate tuple = " << sizeOfCoordinateTuple
+										<< " for " << vAnnotationCoordinateType << " AnnotationCoordinateType"
+										<< " with" << (aCommonZCoordinateValue ? "" : "out") << " CommonZCoordinateValue"
+										<< endl;
+								}
+								success = false;
+							}
+							Uint32 numberOfPointCoordinatesTuples = numberOfPointCoordinatesDataEntries / sizeOfCoordinateTuple;
+//cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): numberOfPointCoordinatesTuples = " << numberOfPointCoordinatesTuples << endl;
+							if (strcmp("POINT",vGraphicType) == 0) {
+//cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): have POINT GraphicType" << endl;
+								if (vNumberOfAnnotations != numberOfPointCoordinatesTuples) {
+									if (newformat) {
+										log << EMsgDCF(MMsgDC(PointCoordinatesDataNumberOfValuesDoesNotMatchNumberOfAnnotationsForPOINTGraphicType),aPointCoordinatesData ? aPointCoordinatesData : aDoublePointCoordinatesData)
+											<< " NumberOfAnnotations = <" << vNumberOfAnnotations << ">"
+											<< " number of coordinate tuples in PointCoordinatesData = <" << numberOfPointCoordinatesTuples << ">"
+											<< endl;
+									}
+									else {
+										log << EMsgDC(PointCoordinatesDataNumberOfValuesDoesNotMatchNumberOfAnnotationsForPOINTGraphicType)
+											<< " NumberOfAnnotations = " << vNumberOfAnnotations
+											<< " number of coordinate tuples in PointCoordinatesData = " << numberOfPointCoordinatesTuples
+											<< endl;
+									}
+									success = false;
+								}
+							}
+							else if (strcmp("RECTANGLE",vGraphicType) == 0 || strcmp("ELLIPSE",vGraphicType) == 0) {
+								if (vNumberOfAnnotations * 4 != numberOfPointCoordinatesTuples) {
+									if (newformat) {
+										log << EMsgDCF(MMsgDC(PointCoordinatesDataNumberOfTuplesNotMultipleOfFourTimesNumberOfAnnotationsForRECTANGLEOrELLIPSEGraphicType),aPointCoordinatesData ? aPointCoordinatesData : aDoublePointCoordinatesData)
+											<< " NumberOfAnnotations = <" << vNumberOfAnnotations << ">"
+											<< " number of coordinate tuples in PointCoordinatesData = <" << numberOfPointCoordinatesTuples << ">"
+											<< endl;
+									}
+									else {
+										log << EMsgDC(PointCoordinatesDataNumberOfTuplesNotMultipleOfFourTimesNumberOfAnnotationsForRECTANGLEOrELLIPSEGraphicType)
+											<< " NumberOfAnnotations = " << vNumberOfAnnotations
+											<< " number of coordinate tuples in PointCoordinatesData = " << numberOfPointCoordinatesTuples
+											<< endl;
+									}
+									success = false;
+								}
+							}
+						}
+					}
+
+					if (aLongPrimitivePointIndexList) {
+						// do not use getVM() since that is always 1 for OX VRs
+						//Uint32 vmLongPrimitivePointIndexList = aLongPrimitivePointIndexList->getVM();
+						Uint32 vlLongPrimitivePointIndexList = aLongPrimitivePointIndexList->getVL();
+	//cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): LongPrimitivePointIndexList VL = " << vlLongPrimitivePointIndexList << endl;
+						Uint32 nValuesInLongPrimitivePointIndexList = vlLongPrimitivePointIndexList / aLongPrimitivePointIndexList->getValueSize(); // OL VR so 32 bit values
+	//cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): LongPrimitivePointIndexList number of values = " << nValuesInLongPrimitivePointIndexList << endl;
+						if (vNumberOfAnnotations != nValuesInLongPrimitivePointIndexList) {
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(LongPrimitivePointIndexListNumberOfValuesDoesNotMatchNumberOfAnnotations),aLongPrimitivePointIndexList)
+									<< " NumberOfAnnotations = <" << vNumberOfAnnotations << ">"
+									<< " number of values in LongPrimitivePointIndexList = <" << nValuesInLongPrimitivePointIndexList << ">"
+									<< endl;
+							}
+							else {
+								log << EMsgDC(LongPrimitivePointIndexListNumberOfValuesDoesNotMatchNumberOfAnnotations)
+									<< " NumberOfAnnotations = " << vNumberOfAnnotations
+									<< " number of values in LongPrimitivePointIndexList = " << nValuesInLongPrimitivePointIndexList
+									<< endl;
+							}
+							success = false;
+						}
+						// check all values in LongPrimitivePointIndexList are within the PointCoordinatesData array
+						{
+							if (!aLongPrimitivePointIndexList->isLargeAttributeLeftOnDisk()) {
+								const Uint32 *vLongPrimitivePointIndexList;
+								(void)aLongPrimitivePointIndexList->getValue(vLongPrimitivePointIndexList,nValuesInLongPrimitivePointIndexList);
+								if (nValuesInLongPrimitivePointIndexList > 0) {
+									Uint32 vLongPrimitivePointIndex = vLongPrimitivePointIndexList[0];
+									if (vLongPrimitivePointIndex != 1) {
+										if (newformat) {
+											log << EMsgDCF(MMsgDC(LongPrimitivePointIndexListFirstValueNotOne),aLongPrimitivePointIndexList)
+												<< " LongPrimitivePointIndex entry = <" << vLongPrimitivePointIndex << ">"
+												<< endl;
+										}
+										else {
+											log << EMsgDC(LongPrimitivePointIndexListFirstValueNotOne)
+												<< " LongPrimitivePointIndex entry = " << vLongPrimitivePointIndex
+												<< endl;
+										}
+										success = false;
+									}
+								}
+								Uint32 lastLongPrimitivePointIndex = 0;
+								for (int i=0; i<nValuesInLongPrimitivePointIndexList; ++i) {
+	//cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): checking LongPrimitivePointIndexList value  " << i << endl;
+									Uint32 vLongPrimitivePointIndex = vLongPrimitivePointIndexList[i];
+									//Uint32 vLongPrimitivePointIndex = 0;	// harmless in case getValue() fails e.g., if OtherLonglargeAttribute left on disk rather than OtherLongSmallAttribute
+									//(void)aLongPrimitivePointIndexList->getValue(i,vLongPrimitivePointIndex);	// fetching individual vaalues does not work :( - need to fetch entire array 1st
+	//cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): vLongPrimitivePointIndex [" << i << "] = " << vLongPrimitivePointIndex << endl;
+									if (vLongPrimitivePointIndex >= numberOfPointCoordinatesDataEntries) {
+										if (newformat) {
+											log << EMsgDCF(MMsgDC(LongPrimitivePointIndexListValueNotWithinPointCoordinatesData),aLongPrimitivePointIndexList)
+												<< " LongPrimitivePointIndex entry = <" << vLongPrimitivePointIndex << ">"
+												<< " number of PointCoordinatesData values = <" << numberOfPointCoordinatesDataEntries << ">"
+												<< endl;
+										}
+										else {
+											log << EMsgDC(LongPrimitivePointIndexListValueNotWithinPointCoordinatesData)
+												<< " LongPrimitivePointIndex entry = " << vLongPrimitivePointIndex
+												<< " number of PointCoordinatesData values = " << numberOfPointCoordinatesDataEntries
+												<< endl;
+										}
+										success = false;
+									}
+									if (vLongPrimitivePointIndex <= lastLongPrimitivePointIndex) {
+										if (newformat) {
+											log << EMsgDCF(MMsgDC(LongPrimitivePointIndexListValueNotAscending),aLongPrimitivePointIndexList)
+												<< " LongPrimitivePointIndex entry = <" << vLongPrimitivePointIndex << ">"
+												<< " not greater than <" << lastLongPrimitivePointIndex << ">"
+												<< endl;
+										}
+										else {
+											log << EMsgDC(LongPrimitivePointIndexListValueNotAscending)
+												<< " LongPrimitivePointIndex entry = " << vLongPrimitivePointIndex
+												<< " not greater than " << lastLongPrimitivePointIndex
+												<< endl;
+										}
+										success = false;
+									}
+									lastLongPrimitivePointIndex = vLongPrimitivePointIndex;
+									if (!success) break;	// only want to flag first error, since might be many thousands
+								}
+							}
+							else {
+	cerr << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): Cannot check aLongPrimitivePointIndexList since too large and left on disk" << endl;
+								if (verbose) log << "checkAnnotationGroupSequenceItemIsInternallyConsistent(): Cannot check aLongPrimitivePointIndexList since too large and left on disk" << endl;
+								// trying would throw assertion failure from aLongPrimitivePointIndexList->getValue() array
 							}
 						}
 					}
@@ -2348,6 +2757,81 @@ checkCoordinateContentItemsHaveAppropriateChildren(AttributeList &list,bool verb
 		Attribute *a=listi();
 		Assert(a);
 		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkCoordinateContentItemsHaveAppropriateChildren)) {
+			success=false;
+		}
+		++listi;
+	}
+	return success;
+}
+
+static bool
+checkCoordinatesInCoordinateContentItems(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
+//cerr << "checkCoordinatesInCoordinateContentItems():" << endl;
+	bool success=true;
+	{
+		Attribute *aValueType = list[TagFromName(ValueType)];
+		if (aValueType) {
+			const char *vValueType=AttributeValue(aValueType);
+			if (vValueType && strcmp(vValueType,"SCOORD3D") == 0) {
+//cerr << "checkCoordinatesInCoordinateContentItems(): have SCOORD3D" << endl;
+				Attribute *aGraphicData=list[TagFromName(GraphicData)];
+				int nGraphicData = aGraphicData ? aGraphicData->getVM() : 0;
+				Attribute *aGraphicType = list[TagFromName(GraphicType)];
+				const char *vGraphicType=AttributeValue(aGraphicType);
+					//int i;
+					//for (i=0; i<nGraphicData; ++i) {
+					//	if (i > 0) log << ",";
+					//		float v;
+					//		if (aGraphicData->getValue(i,v)) log << v;
+					//	}
+					//}
+				if (nGraphicData%3 != 0) {
+					if (newformat) {
+						log << EMsgDC(ThreeDCoordinatesContentItemHasIncorrectNumberOfGraphicDataValues) << " for " << vValueType
+							<< " = <" << nGraphicData << "> - expected multiple of 3" << endl;
+					}
+					else {
+						log << EMsgDC(ThreeDCoordinatesContentItemHasIncorrectNumberOfGraphicDataValues) << " for " << vValueType
+							<< " got " << nGraphicData << " - expected multiple of 3" << endl;
+					}
+					success=false;
+				}
+				else {
+//cerr << "checkCoordinatesInCoordinateContentItems(): have SCOORD3D with nGraphicData multiple of 3" << endl;
+//cerr << "checkCoordinatesInCoordinateContentItems(): have SCOORD3D with vGraphicType = " << vGraphicType << endl;
+					if (vGraphicType && strcmp(vGraphicType,"POLYGON") == 0) {
+//cerr << "checkCoordinatesInCoordinateContentItems(): have SCOORD3D POLYGON" << endl;
+						if (nGraphicData > 3) {	// only chek if there is more than one point
+							int i=0;
+							for (i=0; i<3; ++i) {
+								float vFirst;
+								float vLast;
+								(void)aGraphicData->getValue(i,vFirst);					// should succeed based on predoncitions already checked
+								(void)aGraphicData->getValue(nGraphicData-3+i,vLast);	// should succeed based on predoncitions already checked
+								if (vFirst != vLast) {	// ? need jitter tolerance :(
+									if (newformat) {
+										log << EMsgDC(ThreeDCoordinatesContentItemPolygonNotClosedDifferentFirstAndLastCoordinateValues) << " for " << vValueType
+											<< " = <" << vLast << "> - expected <" << vFirst << ">" << endl;
+										}
+									else {
+										log << EMsgDC(ThreeDCoordinatesContentItemPolygonNotClosedDifferentFirstAndLastCoordinateValues) << " for " << vValueType
+											<< " got " << vLast << " - expected " << vFirst << endl;
+									}
+									success=false;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	AttributeListIterator listi(list);
+	while (!listi) {
+		Attribute *a=listi();
+		Assert(a);
+		if (!::loopOverListsInSequencesWithLog(a,verbose,newformat,log,&::checkCoordinatesInCoordinateContentItems)) {
 			success=false;
 		}
 		++listi;
@@ -2741,6 +3225,436 @@ checkConsistencyOfTiledImageGeometry(AttributeList &list,bool verbose,bool newfo
 	return success;
 }
 
+// copied from attrmxrd.cc
+static Uint32
+skipBytes(istream *stream,Uint32 nSkip) {
+	bool success=true;
+	const int bufferSize=32768;
+	char buffer[bufferSize];
+	Uint32 totalSkipped=0;
+	while (nSkip > 0) {
+		int nToRead = nSkip > bufferSize ? bufferSize : (int)nSkip;
+		stream->read(buffer,nToRead);
+		if (stream->fail()) {
+			break;
+		}
+		int nActuallyRead = (int)(stream->gcount());
+		if (nActuallyRead == 0) {
+			break;
+		}
+		nSkip-=nActuallyRead;
+		totalSkipped+=nActuallyRead;
+	}
+	return totalSkipped;
+}
+
+static bool
+checkOffsetTables(AttributeList &list,istream& input_opener,bool verbose,bool newformat,TextOutputStream &log) {
+//cerr << "checkOffsetTables():" << endl;
+	bool success=true;
+
+	Attribute *aPixelData=list[TagFromName(PixelData)];
+	
+	if (aPixelData && aPixelData->isEncapsulated()) {
+		Attribute *aNumberOfFrames=list[TagFromName(NumberOfFrames)];
+		Uint32 vNumberOfFrames = 1;
+		if (aNumberOfFrames) {
+			(void)aNumberOfFrames->getValue(0,vNumberOfFrames);
+		}
+		
+		bool checkMarkerSegment = false;
+		bool isJPEGorJPEGLSMarkerSegmentFamily = false;
+		bool isJPEG2000MarkerSegmentFamily = false;
+		{
+			Attribute *aTransferSyntax=list[TagFromName(TransferSyntaxUID)];
+			char *vTransferSyntax = NULL;
+			if (aTransferSyntax) {
+				(void)aTransferSyntax->getValue(0,vTransferSyntax);
+			}
+			if (vTransferSyntax) {
+//cerr << "checkOffsetTables(): vTransferSyntax = " << vTransferSyntax << endl;
+				TransferSyntax ts = TransferSyntax(vTransferSyntax);
+				isJPEGorJPEGLSMarkerSegmentFamily = ts.isISO10918JPEGFamily();
+				isJPEG2000MarkerSegmentFamily = ts.isISO15444JPEG2000Family();
+			}
+			checkMarkerSegment = isJPEGorJPEGLSMarkerSegmentFamily || isJPEG2000MarkerSegmentFamily;
+		}
+//cerr << "checkOffsetTables(): checkMarkerSegment = " << checkMarkerSegment << endl;
+//cerr << "checkOffsetTables(): isJPEGorJPEGLSMarkerSegmentFamily = " << isJPEGorJPEGLSMarkerSegmentFamily << endl;
+//cerr << "checkOffsetTables(): isJPEG2000MarkerSegmentFamily = " << isJPEG2000MarkerSegmentFamily << endl;
+		
+		Uint32 offsetOfFirstFragmentItemTag = 0;	// need this for checking both the Basic Offset Table and the Extended Offset Table
+		
+		BinaryInputStream in(input_opener,LittleEndian);
+		
+		long offset = aPixelData->getByteOffset();
+//cerr << "checkOffsetTables(): aPixelData offsetToStartOfPixelDataAttribute = " << offset << endl;
+		// can assume Explicit VR LE representation since all encapsulated TS are that
+		offset += 12;	// length of PixelData group, element, VR and padding, VL
+		offset += 4;	// length of Item Tag group, element
+			
+		in.seekg(offset);	// need to seek from beginning, since may not have been rewound from previous reads
+		Uint32 lengthOfBasicOffsetTableInBytes = in.read32();
+//cerr << "checkOffsetTables(): lengthOfBasicOffsetTableInBytes = " << lengthOfBasicOffsetTableInBytes << endl;
+		offset+=4;
+		
+		// check Basic Offset Table, if present ... (000531)
+		if (lengthOfBasicOffsetTableInBytes) {
+			Uint32 lengthOfBasicOffsetTableInWords = lengthOfBasicOffsetTableInBytes/4;
+			if (lengthOfBasicOffsetTableInWords != vNumberOfFrames) {
+				if (newformat) {
+					log << EMsgDCF(MMsgDC(LengthOfBasicOffsetTableNotEqualToNumberOfFrames),aPixelData)
+						<< " length of Basic Offset Table = <" << lengthOfBasicOffsetTableInWords << ">"
+						<< " Number of Frames =  <" << vNumberOfFrames << ">"
+						<< endl;
+				}
+				else {
+					log << EMsgDC(LengthOfBasicOffsetTableNotEqualToNumberOfFrames)
+						<< " length of Basic Offset Table = " << lengthOfBasicOffsetTableInWords
+						<< " Number of Frames =  " << vNumberOfFrames
+						<< endl;
+				}
+				offsetOfFirstFragmentItemTag += lengthOfBasicOffsetTableInBytes;
+			}
+			else {
+//cerr << "checkOffsetTables(): checking Basic Offset Table contents" << endl;
+				// read the offset table into an array, since we are going to be seeking away from it
+				Uint32 basicOffsetTable[lengthOfBasicOffsetTableInWords];
+				for (int i; i<lengthOfBasicOffsetTableInWords; ++i) {
+					basicOffsetTable[i] = in.read32();
+					if (basicOffsetTable[i] % 2 != 0) {	//  (000526)
+						if (newformat) {
+							log << EMsgDCF(MMsgDC(BasicOffsetTableEntryIsNotEvenLength),aPixelData)
+								<< " for entry <" << i << "> value <" << basicOffsetTable[i] << ">"
+								<< endl;
+						}
+						else {
+							log << EMsgDC(BasicOffsetTableEntryIsNotEvenLength)
+								<< " for entry " << i << " value " << basicOffsetTable[i]
+								<< endl;
+						}
+					}
+				}
+				offset += lengthOfBasicOffsetTableInBytes;
+				// compute the offset of the start of the first actual fragment Item Tag, which is encoded as zero in the BOT
+				offsetOfFirstFragmentItemTag = offset;
+//cerr << "checkOffsetTables(): offsetOfFirstFragmentItemTag = " << offsetOfFirstFragmentItemTag << endl;
+				// now check that the target of each offset is an Item Tag
+				for (int i; i<lengthOfBasicOffsetTableInWords; ++i) {
+					offset = basicOffsetTable[i] + offsetOfFirstFragmentItemTag;
+//cerr << "checkOffsetTables(): checking for frame " << i << " Item Tag at offset = " << offset << endl;
+					in.seekg(offset);
+					Uint16 group = in.read16();
+					Uint16 element = in.read16();
+					Tag tag = Tag(group,element);
+//cerr << "checkOffsetTables(): potential Item Tag = ";
+//tag.write(log);
+//cerr << endl;
+					if (tag != TagFromName(Item)) {
+						if (newformat) {
+							log << EMsgDCF(MMsgDC(BasicOffsetTableEntryDoesNotPointToItemTag),aPixelData)
+								<< " for entry <" << i << ">"
+								<< endl;
+						}
+						else {
+							log << EMsgDC(BasicOffsetTableEntryDoesNotPointToItemTag)
+								<< " for entry " << i
+								<< endl;
+						}
+					}
+					else {
+						// good Item Tag, so now check its length
+						Uint32 itemLength = in.read32();
+//cerr << "checkOffsetTables(): frame " << i << " itemLength = " << itemLength << endl;
+						if (itemLength == 0) {
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(EncapsulatedPixelDataFragmentIsZeroLength),aPixelData)
+									<< " for entry <" << i << ">"
+									<< endl;
+							}
+							else {
+								log << EMsgDC(EncapsulatedPixelDataFragmentIsZeroLength)
+									<< " for entry " << i
+									<< endl;
+							}
+						}
+						else {
+							if (itemLength % 2 != 0) {
+								if (newformat) {
+									log << EMsgDCF(MMsgDC(EncapsulatedPixelDataFragmentNotEvenLength),aPixelData)
+										<< " for entry <" << i << "> item length <" << itemLength << ">"
+										<< endl;
+								}
+								else {
+									log << EMsgDC(EncapsulatedPixelDataFragmentNotEvenLength)
+										<< " for entry " << i << " item length " << itemLength
+										<< endl;
+								}
+							}
+							if (itemLength > 2) {
+								// see if Frame starts with JPEG SOI or J2K SOC
+								if (checkMarkerSegment) {
+									unsigned m1 = in.read8() & 0xff;
+									unsigned m2 = in.read8() & 0xff;
+//cerr << "checkOffsetTables(): frame " << i << " marker = " << hex << m1 << "," << m2 << dec << endl;
+									if (m1 != 0xff || (isJPEGorJPEGLSMarkerSegmentFamily && m2 != 0xd8) || (isJPEG2000MarkerSegmentFamily && m2 != 0x4f)) {
+										if (newformat) {
+											log << WMsgDCF(MMsgDC(EncapsulatedPixelDataFragmentDoesNotStartWithSOIMarker),aPixelData)
+												<< " for entry <" << i << ">"
+												<< endl;
+										}
+										else {
+											log << WMsgDC(EncapsulatedPixelDataFragmentDoesNotStartWithSOIMarker)
+												<< " for entry " << i
+												<< endl;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		else {
+//cerr << "checkOffsetTables(): no Basic Offset Table present" << endl;
+			offsetOfFirstFragmentItemTag = offset;
+		}
+
+		// check Extended Offset Table, if present ...
+//cerr << "checkOffsetTables(): looking for ExtendedOffsetTable attribute" << endl;
+		Uint32 nExtendedOffsetTable = 0;
+		const Uint64 *vExtendedOffsetTable = NULL;
+		Attribute *aExtendedOffsetTable = list[TagFromName(ExtendedOffsetTable)];
+		if (aExtendedOffsetTable) {
+			if (lengthOfBasicOffsetTableInBytes > 0) {
+				if (newformat) {
+					log << EMsgDCF(MMsgDC(NotPermittedWhenBasicOffsetTablesPresent),aExtendedOffsetTable)
+						<< endl;
+				}
+				else {
+					log << EMsgDC(ExtendedOffsetTableNotPermittedWhenBasicOffsetTablesPresent)
+						<< endl;
+				}
+			}
+		}
+//cerr << "checkOffsetTables(): getting ExtendedOffsetTable values" << endl;
+//			// this fails, since reading OV not implemented yet (only OtherVeryLongLargeAttribute, not ... SmallAttribute) :(
+//			(void)aExtendedOffsetTable->getValue(vExtendedOffsetTable,nExtendedOffsetTable);
+//
+//			if (nExtendedOffsetTable != vNumberOfFrames) {
+//				log << EMsgDCF(MMsgDC(LengthOfExtendedOffsetTableNotEqualToNumberOfFrames),aPixelData)
+//					<< " length of Extended Offset Table = " << nExtendedOffsetTable
+//					<< " Number of Frames =  " << vNumberOfFrames
+//					<< endl;
+//			}
+//			else {
+//cerr << "checkOffsetTables(): checking Extended Offset Table contents" << endl;
+				//Uint32 nExtendedOffsetTableLengths = 0;
+				//const Uint64 *vExtendedOffsetTableLengths = NULL;
+				//{
+				//	Attribute *aExtendedOffsetTableLengths = list[TagFromName(ExtendedOffsetTableLengths)];
+				//	if (aExtendedOffsetTableLengths) {
+				//		(void)aExtendedOffsetTableLengths->getValue(vExtendedOffsetTableLengths,nExtendedOffsetTableLengths));
+				//	}
+				//}
+				
+				// offsetOfFirstFragmentItemTag should have been set earlier wehn looking for Basic Offset Table, regardless of whether present or not
+				// check that the target of each offset is an Item Tag
+//				for (int i; i<nExtendedOffsetTable; ++i) {
+//					offset = vExtendedOffsetTable[i] + offsetOfFirstFragmentItemTag;
+//cerr << "checkOffsetTables(): checking for frame " << i << " Item Tag at offset = " << offset << endl;
+//					in.seekg(offset);
+//					Uint16 group = in.read16();
+//					Uint16 element = in.read16();
+//					Tag tag = Tag(group,element);
+//cerr << "checkOffsetTables(): potential Item Tag = ";
+//tag.write(log);
+//cerr << endl;
+//					if (tag != TagFromName(Item)) {
+//						log << EMsgDCF(MMsgDC(ExtendedOffsetTableEntryDoesNotPointToItemTag),aPixelData)
+//							<< " for Extended Offset Table entry " << i
+//							<< endl;
+//					}
+//				}
+//			}
+	}
+
+	return success;
+}
+
+static bool
+checkUIDsAreNotReusedForDifferentEntities(AttributeList &list,bool verbose,bool newformat,TextOutputStream &log) {
+//cerr << "checkUIDsAreNotReusedForDifferentEntities():" << endl;
+	bool success=true;
+
+	Attribute *aSOPInstanceUID=list[TagFromName(SOPInstanceUID)];
+	Attribute *aSeriesInstanceUID=list[TagFromName(SeriesInstanceUID)];
+	Attribute *aStudyInstanceUID=list[TagFromName(StudyInstanceUID)];
+	Attribute *aFrameOfReferenceUID=list[TagFromName(FrameOfReferenceUID)];
+
+	char *vSOPInstanceUID=AttributeValue(aSOPInstanceUID,"");
+	char *vSeriesInstanceUID=AttributeValue(aSeriesInstanceUID,"");
+	char *vStudyInstanceUID=AttributeValue(aStudyInstanceUID,"");
+	char *vFrameOfReferenceUID=AttributeValue(aFrameOfReferenceUID,"");
+
+	if (strlen(vSOPInstanceUID) > 0) {
+		if (strcmp(vSOPInstanceUID,vSeriesInstanceUID) == 0) {
+			if (newformat) {
+				log << EMsgDCF(MMsgDC(SOPInstanceUIDHasSameValueAsSeriesInstanceUID),aSOPInstanceUID)
+					<< " = <" << vSOPInstanceUID << ">"
+					<< endl;
+			}
+			else {
+				log << EMsgDC(SOPInstanceUIDHasSameValueAsSeriesInstanceUID)
+					<< " <" << vSOPInstanceUID << ">"
+					<< endl;
+			}
+		}
+		if (strcmp(vSOPInstanceUID,vStudyInstanceUID) == 0) {
+			if (newformat) {
+				log << EMsgDCF(MMsgDC(SOPInstanceUIDHasSameValueAsStudyInstanceUID),aSOPInstanceUID)
+					<< " = <" << vSOPInstanceUID << ">"
+					<< endl;
+			}
+			else {
+				log << EMsgDC(SOPInstanceUIDHasSameValueAsStudyInstanceUID)
+					<< " <" << vSOPInstanceUID << ">"
+					<< endl;
+			}
+		}
+		if (strcmp(vSOPInstanceUID,vFrameOfReferenceUID) == 0) {
+			if (newformat) {
+				log << EMsgDCF(MMsgDC(SOPInstanceUIDHasSameValueAsFrameOfReferenceUID),aSOPInstanceUID)
+					<< " = <" << vSOPInstanceUID << ">"
+					<< endl;
+			}
+			else {
+				log << EMsgDC(SOPInstanceUIDHasSameValueAsFrameOfReferenceUID)
+					<< " <" << vSOPInstanceUID << ">"
+					<< endl;
+			}
+		}
+	}
+
+	if (strlen(vSeriesInstanceUID) > 0) {
+		if (strcmp(vSeriesInstanceUID,vStudyInstanceUID) == 0) {
+			if (newformat) {
+				log << EMsgDCF(MMsgDC(SeriesInstanceUIDHasSameValueAsStudyInstanceUID),aSeriesInstanceUID)
+					<< " = <" << vSeriesInstanceUID << ">"
+					<< endl;
+			}
+			else {
+				log << EMsgDC(SeriesInstanceUIDHasSameValueAsStudyInstanceUID)
+					<< " <" << vSeriesInstanceUID << ">"
+					<< endl;
+			}
+		}
+		if (strcmp(vSeriesInstanceUID,vFrameOfReferenceUID) == 0) {
+			if (newformat) {
+				log << EMsgDCF(MMsgDC(SeriesInstanceUIDHasSameValueAsFrameOfReferenceUID),aSeriesInstanceUID)
+					<< " = <" << vSeriesInstanceUID << ">"
+					<< endl;
+			}
+			else {
+				log << EMsgDC(SeriesInstanceUIDHasSameValueAsFrameOfReferenceUID)
+					<< " <" << vSeriesInstanceUID << ">"
+					<< endl;
+			}
+		}
+	}
+
+	if (strlen(vStudyInstanceUID) > 0) {
+		if (strcmp(vStudyInstanceUID,vFrameOfReferenceUID) == 0) {
+			if (newformat) {
+				log << EMsgDCF(MMsgDC(StudyInstanceUIDHasSameValueAsFrameOfReferenceUID),aStudyInstanceUID)
+					<< " = <" << vStudyInstanceUID << ">"
+					<< endl;
+			}
+			else {
+				log << EMsgDC(StudyInstanceUIDHasSameValueAsFrameOfReferenceUID)
+					<< " <" << vStudyInstanceUID << ">"
+					<< endl;
+			}
+		}
+	}
+	
+	{
+			Attribute *aSpecimenDescriptionSequence = list[TagFromName(SpecimenDescriptionSequence)];
+			if (aSpecimenDescriptionSequence && aSpecimenDescriptionSequence->isSequence()) {
+				AttributeList **aSpecimenDescriptionSequenceLists;
+				int nSpecimenDescriptionSequenceItems=aSpecimenDescriptionSequence->getLists(&aSpecimenDescriptionSequenceLists);
+				for (int i=0; i<nSpecimenDescriptionSequenceItems; ++i) {
+				AttributeList *SpecimenDescriptionSequenceItemList = aSpecimenDescriptionSequenceLists[i];
+				if (SpecimenDescriptionSequenceItemList) {
+					Attribute *aSpecimenUID=(*SpecimenDescriptionSequenceItemList)[TagFromName(SpecimenUID)];
+					char *vSpecimenUID=AttributeValue(aSpecimenUID,"");
+					if (strlen(vSpecimenUID) > 0) {
+//cerr << "Checking SpecimenUID " << vSpecimenUID << endl;
+						if (strcmp(vSpecimenUID,vSOPInstanceUID) == 0) {
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(SpecimenUIDHasSameValueAsSOPInstanceUID),aSpecimenUID)
+								<< " = <" << vSpecimenUID << ">"
+								<< endl;
+							}
+							else {
+								log << EMsgDC(SpecimenUIDHasSameValueAsSOPInstanceUID)
+								<< " <" << vSpecimenUID << ">"
+								<< endl;
+							}
+						}
+						if (strcmp(vSpecimenUID,vSeriesInstanceUID) == 0) {
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(SpecimenUIDHasSameValueAsSeriesInstanceUID),aSpecimenUID)
+								<< " = <" << vSpecimenUID << ">"
+								<< endl;
+							}
+							else {
+								log << EMsgDC(SpecimenUIDHasSameValueAsSeriesInstanceUID)
+								<< " <" << vSpecimenUID << ">"
+								<< endl;
+							}
+						}
+						if (strcmp(vSpecimenUID,vStudyInstanceUID) == 0) {
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(SpecimenUIDHasSameValueAsStudyInstanceUID),aSpecimenUID)
+								<< " = <" << vSpecimenUID << ">"
+								<< endl;
+							}
+							else {
+								log << EMsgDC(SpecimenUIDHasSameValueAsStudyInstanceUID)
+								<< " <" << vSpecimenUID << ">"
+								<< endl;
+							}
+						}
+						if (strcmp(vSpecimenUID,vFrameOfReferenceUID) == 0) {
+							if (newformat) {
+								log << EMsgDCF(MMsgDC(SpecimenUIDHasSameValueAsFrameOfReferenceUID),aSpecimenUID)
+								<< " = <" << vSpecimenUID << ">"
+								<< endl;
+							}
+							else {
+								log << EMsgDC(SpecimenUIDHasSameValueAsFrameOfReferenceUID)
+								<< " <" << vSpecimenUID << ">"
+								<< endl;
+							}
+						}
+					}
+					delete[] vSpecimenUID;
+				}
+			}
+		}
+	}
+	
+
+	delete[] vSOPInstanceUID;
+	delete[] vSeriesInstanceUID;
+	delete[] vStudyInstanceUID;
+	delete[] vFrameOfReferenceUID;
+
+	return success;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -2859,6 +3773,8 @@ main(int argc, char *argv[])
 	
 	if (!checkCoordinateContentItemsHaveAppropriateChildren(list,verbose,newformat,log)) success = false;
 	
+	if (!checkCoordinatesInCoordinateContentItems(list,verbose,newformat,log)) success = false;
+	
 	if (!checkInstanceReferencesAreIncludedInHierarchicalEvidenceSequences(list,list,verbose,newformat,log)) success = false;
 	
 	if (!checkPerFrameFunctionalGroupsSequencesAreNotAlreadyPresentInSharedFunctionalGroup(list,verbose,newformat,log)) success = false;
@@ -2873,7 +3789,15 @@ main(int argc, char *argv[])
 	
 	if (!checkReferencedSegmentNumbersHaveTarget(list,verbose,newformat,log)) success = false;
 	
+	if (!checkAnnotationGroupSequenceItemIsInternallyConsistent(list,verbose,newformat,log)) success = false;
+	
 	if (!checkConsistencyOfTiledImageGeometry(list,verbose,newformat,log)) success = false;
+	
+	if (!checkOffsetTables(list,*(istream *)input_opener,verbose,newformat,log)) success = false;	// (000531)
+	
+	if (!checkUIDsAreNotReusedForDifferentEntities(list,verbose,newformat,log)) success = false;
+	
+	if (!checkCodeSequenceItemsAreNotUnknown(list,verbose,newformat,log)) success = false;	// (000589)
 
 	if (!list.validatePrivate(verbose,newformat,log)) success = false;
 	

@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)dcentvfy.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)dcentvfy.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <fstream>
 #else
@@ -251,6 +251,76 @@ const char *getElementName(Tag t,ElementDictionary *dict) {
 	return  (t.isPrivateGroup() ? "--private--" : dict->getKeyword(t));
 }
 
+// This hash table stuff was based on elmhash.h, but differs in that value is string, not an index number
+//
+// ********************* stuff for StringByString *********************
+
+class StringEntryString {
+	HashKeyString key;
+	const char *value;
+public:
+	StringEntryString(void)		{}
+	StringEntryString(const char *s,const char *v)
+					{ key=HashKeyString(s); value=v; }
+	StringEntryString(StringEntryString *e)
+					{ key=e->key; value=e->value; }
+
+	HashKeyString	getKey(void) const	{ return key; }
+	const char *	getValue(void) const	{ return value; }
+
+	bool operator==(StringEntryString e)
+					{ return key == e.getKey(); }
+};
+
+class StringEntryStringList : public SimpleList<StringEntryString>
+{
+public:
+	~StringEntryStringList() {}	// only because buggy g++ 2.7.0 freaks
+};
+
+class StringEntryStringListIterator : public SimpleListIterator<StringEntryString>
+{
+public:
+	StringEntryStringListIterator(void)
+		: SimpleListIterator<StringEntryString>() {}
+	StringEntryStringListIterator(StringEntryStringList& list)
+		: SimpleListIterator<StringEntryString>(list) {}
+};
+
+class StringByString : public OpenHashTable <StringEntryString,
+					HashKeyString,
+					StringEntryStringList,
+					StringEntryStringListIterator>
+{
+public:
+	StringByString(unsigned long size)
+		: OpenHashTable<StringEntryString,
+				HashKeyString,
+				StringEntryStringList,
+				StringEntryStringListIterator>(size)
+		{}
+
+	// supply virtual functions for OpenHashTable ...
+
+	unsigned long	hash(const HashKeyString &key,unsigned long size)
+		{
+			const unsigned nchars = 10;
+			const unsigned shift  = 4;
+
+			unsigned n=nchars;
+			unsigned long value=0;
+			const char *s=key.getString();
+			while (n-- && *s) {
+				value=(value<<shift)|*s++;
+			}
+			return value%size; 
+		}
+
+	HashKeyString key(const StringEntryString &e)	{ return e.getKey(); }
+	
+	const char * get(const char *key) { StringEntryString *e=operator[](key); return e ? e->getValue() : NULL; }
+};
+
 bool
 compareInformationEntitiesOfAttributeLists(AttributeList *list1,AttributeList *list2,const char *ie,const char *filename1,const char *filename2,bool verbose,TextOutputStream &log,ElementDictionary *dict) {
 	if (verbose) log << "Comparing attribute lists for IE " << ie << endl;
@@ -281,7 +351,10 @@ compareInformationEntitiesOfAttributeLists(AttributeList *list1,AttributeList *l
 			const char *element = getElementName(t1,dict);
 			if (verbose) log << "Checking attribute " << element << endl;
 			if (verbose) log << "Checking attribute " << element << " -  IE1=" << describeInformationEntity(ie1) << " versus IE2=" << describeInformationEntity(ie2) << endl;
-			if (ie1 == ieWanted || ie2 == ieWanted) {	// do not need to check for private tag, since there would be no IE information
+			if (ie1 == ieWanted || ie2 == ieWanted
+			 || (ieWanted == SeriesIE && (ie1 == EquipmentIE || ie2 == EquipmentIE))	// (000595)
+			 || (ieWanted == SeriesIE && (ie1 == FrameOfReferenceIE || ie2 == FrameOfReferenceIE))	// (000597)
+			) {	// do not need to check for private tag, since there would be no IE information
 				if (verbose) log << "Attribute is candidate this IE " << element << endl;
 				if (ie1 != ie2) {
 					log << WMsgDC(DifferentInformationEntitiesForAttributeInOneInstanceComparedToTheOther)
@@ -291,6 +364,7 @@ compareInformationEntitiesOfAttributeLists(AttributeList *list1,AttributeList *l
 						<< endl;
 				}
 				else {
+					const char *ieForMessages = describeInformationEntity(ie1);		// may be EquipmentIE rather than (supplied) SeriesIE (000595)
 					if (a1->isSequence() || a2->isSequence()) {
 						if (verbose) log << "Checking Sequence Attribute " << element << endl;
 						if (a1->isSequence() && a2->isSequence()) {
@@ -306,14 +380,14 @@ compareInformationEntitiesOfAttributeLists(AttributeList *list1,AttributeList *l
 										if (verbose) log << "Checking Sequence Attribute " << element << " item " << dec << (item+1) << endl;
 										AttributeList *l1 = sal1[item];
 										AttributeList *l2 = sal2[item];
-										bool ourSucess = compareInformationEntitiesOfAttributeLists(l1,l2,ie,filename1,filename2,verbose,log,dict);
+										bool ourSucess = compareInformationEntitiesOfAttributeLists(l1,l2,ieForMessages,filename1,filename2,verbose,log,dict);
 										if (!ourSucess) success = false;
 									}
 								}
 							}
 							else {
 								log << EMsgDC(SequenceHasDifferentNumberOfItemsInOneInstanceComparedToTheOther)
-									<< " - " << MMsgDC(Element) << "=<" << element << "> " << MMsgDC(IE) << "=<" << ie << "> for file <" << filename1 << "> versus <" << filename2 << ">"
+									<< " - " << MMsgDC(Element) << "=<" << element << "> " << MMsgDC(IE) << "=<" << ieForMessages << "> for file <" << filename1 << "> versus <" << filename2 << ">"
 									<< " - " << n1 << " versus " << n2
 									<< endl;
 								success = false;
@@ -321,7 +395,7 @@ compareInformationEntitiesOfAttributeLists(AttributeList *list1,AttributeList *l
 						}
 						else {
 							log << EMsgDC(SequenceHasDifferentValueRepresentationInOneInstanceComparedToTheOther)
-								<< " - " << MMsgDC(Element) << "=<" << element << "> " << MMsgDC(IE) << "=<" << ie << "> for file <" << filename1 << "> versus <" << filename2 << ">"
+								<< " - " << MMsgDC(Element) << "=<" << element << "> " << MMsgDC(IE) << "=<" << ieForMessages << "> for file <" << filename1 << "> versus <" << filename2 << ">"
 								<< " - " << MMsgDC(ValueRepresentation) << " "
 								<< " " << a1->getVR() << " versus " << a2->getVR()
 								<< endl;
@@ -329,7 +403,7 @@ compareInformationEntitiesOfAttributeLists(AttributeList *list1,AttributeList *l
 						}
 					}
 					else {
-						bool ourSucess = diffAttributes(a1,a2,element,ie,filename1,filename2,verbose,log,dict);
+						bool ourSucess = diffAttributes(a1,a2,element,ieForMessages/*(000595)*/,filename1,filename2,verbose,log,dict);
 						if (!ourSucess) success = false;
 					}
 				}
@@ -425,7 +499,52 @@ compareAllDeepestChildrenOfCurrentRecord(RecordBase *record,InstanceRecord *&com
 	return success;
 }
 
-bool checkNonLeafRecordAndChilden(RecordBase *record,bool verbose,bool veryverbose,TextOutputStream &log) {
+bool checkSOPInstanceUIDReferences(const char *filename,AttributeList *list,StringByString &sopInstanceUIDForSOPInstanceUID,bool verbose,bool veryverbose,TextOutputStream &log) {
+	bool success = true;
+	ElementDictionary *dict = list->getDictionary();
+	Assert(dict);
+	AttributeListIterator listi(*list);
+	Attribute *a = listi();
+	while (a) {
+		Tag t = a->getTag();
+		if (t == TagFromName(ReferencedSOPInstanceUID)) {
+			char *referencedSOPInstanceUID;
+			a->getValue(0,referencedSOPInstanceUID);
+			const char *existingSOPInstanceUID = sopInstanceUIDForSOPInstanceUID.get(referencedSOPInstanceUID);
+			if (!existingSOPInstanceUID) {
+				log << EMsgDC(MissingSOPInstanceThatWasReferenced) << " - " << referencedSOPInstanceUID << " for file <" << filename << ">" << endl;
+				success = false;
+			}
+		}
+		
+		if (a->isSequence()) {
+			SequenceAttribute *sa = (SequenceAttribute *)a;
+			AttributeList **sal;
+			int n = sa->getLists(&sal);
+			if (n > 0) {
+				for (int item=0; item <n; ++item) {
+					AttributeList *l = sal[item];
+					bool ourSucess = checkSOPInstanceUIDReferences(filename,l,sopInstanceUIDForSOPInstanceUID,verbose,veryverbose,log);
+					if (!ourSucess) success = false;
+				}
+			}
+		}
+		
+		++listi;
+		a = listi();
+	}
+	return success;
+}
+
+bool checkSOPInstanceUIDReferences(InstanceRecord *testInstance,StringByString &sopInstanceUIDForSOPInstanceUID,bool verbose,bool veryverbose,TextOutputStream &log) {
+	bool success = true;
+	const char *filename = testInstance->getFileName();
+	AttributeList *list = testInstance->getAttributeList();
+	Assert(list);
+	return checkSOPInstanceUIDReferences(filename,list,sopInstanceUIDForSOPInstanceUID,verbose,veryverbose,log);
+}
+
+bool checkNonLeafRecordAndChilden(RecordBase *record,StringByString &sopInstanceUIDForSOPInstanceUID,bool verbose,bool veryverbose,TextOutputStream &log) {
 	bool success = true;
 	RecordBase *child = record->getChild();
 	if (child) {
@@ -438,96 +557,31 @@ bool checkNonLeafRecordAndChilden(RecordBase *record,bool verbose,bool veryverbo
 		bool ourSucess = compareAllDeepestChildrenOfCurrentRecord(record,compareWith,ie,verbose,veryverbose,log);
 		if (!ourSucess) success = false;
 		while (child) {
-			bool ourSucess = checkNonLeafRecordAndChilden(child,verbose,veryverbose,log);
+			bool ourSucess = checkNonLeafRecordAndChilden(child,sopInstanceUIDForSOPInstanceUID,verbose,veryverbose,log);
 			if (!ourSucess) success = false;
 			child = child->getSibling();
 		}
 	}
-	// else do not check leaf records themselves (i.e., instances)
+	else {
+		Assert(strcmp(record->getInformationEntity(),"Instance") == 0);
+		// no child ... we assume all leaves are instances (since they could not be created otherwise)
+		InstanceRecord *testInstance = (InstanceRecord *)record;
+		bool ourSucess = checkSOPInstanceUIDReferences(testInstance,sopInstanceUIDForSOPInstanceUID,verbose,veryverbose,log);
+		if (!ourSucess) success = false;
+	}
 	return success;
 }
 
 bool
-checkAllRecords(RecordBase *record,bool verbose,bool veryverbose,TextOutputStream &log) {
+checkAllRecords(RecordBase *record,StringByString &sopInstanceUIDForSOPInstanceUID,bool verbose,bool veryverbose,TextOutputStream &log) {
 	bool success = true;
 	while (record) {
-		bool ourSucess = checkNonLeafRecordAndChilden(record,verbose,veryverbose,log);
+		bool ourSucess = checkNonLeafRecordAndChilden(record,sopInstanceUIDForSOPInstanceUID,verbose,veryverbose,log);
 		if (!ourSucess) success = false;
 		record = record->getSibling();
 	}
 	return success;
 }
-
-// This hash table stuff was based on elmhash.h, but differs in that value is string, not an index number
-//
-// ********************* stuff for StringByString *********************
-
-class StringEntryString {
-	HashKeyString key;
-	const char *value;
-public:
-	StringEntryString(void)		{}
-	StringEntryString(const char *s,const char *v)
-					{ key=HashKeyString(s); value=v; }
-	StringEntryString(StringEntryString *e)
-					{ key=e->key; value=e->value; }
-
-	HashKeyString	getKey(void) const	{ return key; }
-	const char *	getValue(void) const	{ return value; }
-
-	bool operator==(StringEntryString e)
-					{ return key == e.getKey(); }
-};
-
-class StringEntryStringList : public SimpleList<StringEntryString>
-{
-public:
-	~StringEntryStringList() {}	// only because buggy g++ 2.7.0 freaks
-};
-
-class StringEntryStringListIterator : public SimpleListIterator<StringEntryString>
-{
-public:
-	StringEntryStringListIterator(void)
-		: SimpleListIterator<StringEntryString>() {}
-	StringEntryStringListIterator(StringEntryStringList& list)
-		: SimpleListIterator<StringEntryString>(list) {}
-};
-
-class StringByString : public OpenHashTable <StringEntryString,
-					HashKeyString,
-					StringEntryStringList,
-					StringEntryStringListIterator>
-{
-public:
-	StringByString(unsigned long size)
-		: OpenHashTable<StringEntryString,
-				HashKeyString,
-				StringEntryStringList,
-				StringEntryStringListIterator>(size)
-		{}
-
-	// supply virtual functions for OpenHashTable ...
-
-	unsigned long	hash(const HashKeyString &key,unsigned long size)
-		{
-			const unsigned nchars = 10;
-			const unsigned shift  = 4;
-
-			unsigned n=nchars;
-			unsigned long value=0;
-			const char *s=key.getString();
-			while (n-- && *s) {
-				value=(value<<shift)|*s++;
-			}
-			return value%size; 
-		}
-
-	HashKeyString key(const StringEntryString &e)	{ return e.getKey(); }
-	
-	const char * get(const char *key) { StringEntryString *e=operator[](key); return e ? e->getValue() : NULL; }
-};
-
 
 static bool readOneFile(const char *filename,PatientRecord *&headPatient,DicomInputOptions &dicom_input_options,bool success,bool verbose,bool veryverbose,TextOutputStream &log,
 		StringByString &patientIDForSOPInstanceUID,
@@ -535,7 +589,8 @@ static bool readOneFile(const char *filename,PatientRecord *&headPatient,DicomIn
 		StringByString &seriesInstanceUIDForSOPInstanceUID,
 		StringByString &patientIDForSeriesInstanceUID,
 		StringByString &studyInstanceUIDForSeriesInstanceUID,
-		StringByString &patientIDForStudyInstanceUID
+		StringByString &patientIDForStudyInstanceUID,
+		StringByString &sopInstanceUIDForSOPInstanceUID
 	) {
 	Assert(filename);
 	if (verbose) log << "Reading \"" << filename << "\"" << endl;
@@ -746,6 +801,13 @@ static bool readOneFile(const char *filename,PatientRecord *&headPatient,DicomIn
 			seriesInstanceUIDForSOPInstanceUID+=new StringEntryString(sopInstanceUID,seriesInstanceUID);
 		}
 	}
+	{
+		// don't need to check anything - just want to keep track of all SOPInstanceUID values so that we can check for references to them later
+		const char *existingSOPInstanceUID = sopInstanceUIDForSOPInstanceUID.get(sopInstanceUID);
+		if (!existingSOPInstanceUID) {
+			sopInstanceUIDForSOPInstanceUID+=new StringEntryString(sopInstanceUID,sopInstanceUID);
+		}
+	}
 
 	if (verbose) log << filename << " Done processing file for SOPInstanceUID " << sopInstanceUID << endl;
 	if (fstr) {
@@ -812,6 +874,7 @@ main(int argc, char *argv[])
 
 	PatientRecord *headPatient = NULL;
 
+	StringByString sopInstanceUIDForSOPInstanceUID(1000);
 	StringByString patientIDForSOPInstanceUID(1000);
 	StringByString studyInstanceUIDForSOPInstanceUID(1000);
 	StringByString seriesInstanceUIDForSOPInstanceUID(1000);
@@ -824,7 +887,7 @@ main(int argc, char *argv[])
 	int i;
 	for (i=0; i < numberofinputfiles; ++i) {
 		bool thisFileSucceeded = readOneFile(listoffilenames[i],headPatient,dicom_input_options,success,verbose,veryverbose,log,
-			patientIDForSOPInstanceUID,studyInstanceUIDForSOPInstanceUID,seriesInstanceUIDForSOPInstanceUID,patientIDForSeriesInstanceUID,studyInstanceUIDForSeriesInstanceUID,patientIDForStudyInstanceUID);
+			patientIDForSOPInstanceUID,studyInstanceUIDForSOPInstanceUID,seriesInstanceUIDForSOPInstanceUID,patientIDForSeriesInstanceUID,studyInstanceUIDForSeriesInstanceUID,patientIDForStudyInstanceUID,sopInstanceUIDForSOPInstanceUID);
 		if (!thisFileSucceeded) success=false;
 	}
 
@@ -843,7 +906,7 @@ main(int argc, char *argv[])
 				flfstr->getline(lineBuffer,2048);
 				if (strlen(lineBuffer)) {
 					bool thisFileSucceeded = readOneFile(lineBuffer,headPatient,dicom_input_options,success,verbose,veryverbose,log,
-						patientIDForSOPInstanceUID,studyInstanceUIDForSOPInstanceUID,seriesInstanceUIDForSOPInstanceUID,patientIDForSeriesInstanceUID,studyInstanceUIDForSeriesInstanceUID,patientIDForStudyInstanceUID);
+						patientIDForSOPInstanceUID,studyInstanceUIDForSOPInstanceUID,seriesInstanceUIDForSOPInstanceUID,patientIDForSeriesInstanceUID,studyInstanceUIDForSeriesInstanceUID,patientIDForStudyInstanceUID,sopInstanceUIDForSOPInstanceUID);
 					if (!thisFileSucceeded) success=false;
 				}
 				// else skip blank lines
@@ -853,7 +916,7 @@ main(int argc, char *argv[])
 	
 	//if (success) {
 	{
-		bool successfulCheck = checkAllRecords(headPatient,verbose,veryverbose,log);
+		bool successfulCheck = checkAllRecords(headPatient,sopInstanceUIDForSOPInstanceUID,verbose,veryverbose,log);
 		if (!successfulCheck) success=false;
 	}
 	//}

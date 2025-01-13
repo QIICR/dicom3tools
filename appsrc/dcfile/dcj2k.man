@@ -51,7 +51,7 @@ the transfer syntax used is 1.2.840.10008.1.2.4.91.
 .SH SEE ALSO
 .BR dcunjpeg(1)
 .SH AUTHOR
-Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 Only single sample (not color) compression is supported for now.
 .LP

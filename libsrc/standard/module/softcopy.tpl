@@ -233,6 +233,83 @@ Module="PresentationStateBlending"
 	SequenceEnd
 ModuleEnd
 
+Module="AdvancedBlendingPresentationState"
+	Sequence="AdvancedBlendingSequence"						Type="1"	VM="1-n"
+		Name="BlendingInputNumber"							Type="1"
+		Name="StudyInstanceUID"								Type="1"
+		Name="SeriesInstanceUID"							Type="1"
+		Sequence="ReferencedImageSequence"					Type="1C"	VM="1-n"	NoCondition=""
+			InvokeMacro="ImageSOPInstanceReferenceMacro"
+			Name="ReferencedOpticalPathIdentifier"			Type="1C"	VM="1"	NoCondition=""
+		SequenceEnd
+		Sequence="ReferencedSpatialRegistrationSequence"	Type="1C"	VM="1"	NoCondition=""	mbpo="true"
+			InvokeMacro="HierarchicalSOPInstanceReferenceMacro"
+		SequenceEnd
+		InvokeMacro="ThresholdSequenceMacro"
+		Sequence="SoftcopyVOILUTSequence"					Type="1C"	VM="1-n"	NoCondition=""
+			Sequence="ReferencedImageSequence"				Type="1C"	VM="1-n"	NoCondition=""
+				InvokeMacro="ImageSOPInstanceReferenceMacro"
+				Name="ReferencedOpticalPathIdentifier"		Type="1C"	VM="1"	NoCondition=""
+			SequenceEnd
+			InvokeMacro="VOILUTMacro"
+		SequenceEnd
+		Sequence="PaletteColorLookupTableSequence"			Type="1C"	VM="1"	NoCondition=""
+			InvokeMacro="PaletteColorLookupTableMacro"
+		SequenceEnd
+		Name="TimeSeriesBlending"							Type="1C"	StringEnumValues="TrueFalseFull"	NoCondition=""	mbpo="true"
+		Name="GeometryForDisplay"							Type="1C"	StringEnumValues="TrueFalseFull"	NoCondition=""	mbpo="true"
+	SequenceEnd
+ModuleEnd
+
+Module="AdvancedBlendingPresentationStateIDCVOIPaletteOpticalPath"
+	Sequence="AdvancedBlendingSequence"						Type="1"	VM="1-n"
+		Name="BlendingInputNumber"							Type="1"
+		Name="StudyInstanceUID"								Type="1"
+		Name="SeriesInstanceUID"							Type="1"
+		Sequence="ReferencedImageSequence"					Type="1C"	VM="1-n"	NoCondition=""
+			InvokeMacro="ImageSOPInstanceReferenceMacro"
+			Name="ReferencedOpticalPathIdentifier"			Type="1C"	VM="1"	NoCondition=""
+		SequenceEnd
+		Sequence="ReferencedSpatialRegistrationSequence"	Type="1C"	VM="1"	NoCondition=""	mbpo="true"
+			InvokeMacro="HierarchicalSOPInstanceReferenceMacro"
+		SequenceEnd
+		InvokeMacro="ThresholdSequenceMacro"
+		Sequence="SoftcopyVOILUTSequence"					Type="1C"	VM="1-n"	NoCondition=""
+			Sequence="ReferencedImageSequence"				Type="1C"	VM="1-n"	NoCondition=""
+				InvokeMacro="ImageSOPInstanceReferenceMacro"
+				Name="ReferencedOpticalPathIdentifier"		Type="1C"	VM="1"	NoCondition=""
+			SequenceEnd
+			InvokeMacro="VOILUTMacro"
+		SequenceEnd
+		Sequence="PaletteColorLookupTableSequence"			Type="1C"	VM="1"	NoCondition=""
+			InvokeMacro="PaletteColorLookupTableMacro"
+		SequenceEnd
+		Name="TimeSeriesBlending"							Type="1C"	StringEnumValues="TrueFalseFull"	NoCondition=""	mbpo="true"
+		Name="GeometryForDisplay"							Type="1C"	StringEnumValues="TrueFalseFull"	NoCondition=""	mbpo="true"
+	SequenceEnd
+ModuleEnd
+
+DefineMacro="ThresholdSequenceMacro"
+	Sequence="ThresholdSequence"							Type="1C"	VM="1-n"	NoCondition=""
+		Name="ThresholdType"								Type="1"	StringEnumValues="ThresholdType"
+		Sequence="ThresholdValueSequence"					Type="1"	VM="1-2"
+			Name="ThresholdValue"							Type="1"
+		SequenceEnd
+	SequenceEnd
+MacroEnd
+
+Module="AdvancedBlendingPresentationStateDisplay"
+	Name="PixelPresentation"								Type="1"	StringEnumValues="AdvancedBlendingPixelPresentation"
+	Sequence="BlendingDisplaySequence"						Type="1"	VM="1-n"
+		Sequence="BlendingDisplayInputSequence"				Type="1"	VM="1-n"
+			Name="BlendingInputNumber"						Type="1"
+		SequenceEnd
+		Name="RelativeOpacity"								Type="1C"	Condition="BlendingModeIsForeground"
+		Name="BlendingMode"									Type="1"	StringEnumValues="BlendingMode"
+		Name="BlendingInputNumber"							Type="1C"	NoCondition=""
+	SequenceEnd
+ModuleEnd
+
 Module="ICCProfile"
 	Name="ICCProfile"											Type="1"
 	Name="ColorSpace"											Type="3"

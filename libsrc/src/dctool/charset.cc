@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)charset.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)charset.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include <string.h>
 
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
@@ -97,6 +97,7 @@ SpecificCharacterSetInfo::setSpecificCharacterSet(int nCharSetValues,char** char
 bool
 SpecificCharacterSetInfo::isValidString(const char *s,int& badCharacterPosition) const {
 //cerr << "SpecificCharacterSetInfo::isValidString(): checking string = <" << s << ">" << endl;
+//cerr << "SpecificCharacterSetInfo::isValidString(): flag7BitSingleByte = " << flag7BitSingleByte << endl;
 	bool success = true;
 	const char *p=s;
 	while (*p) {

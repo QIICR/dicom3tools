@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)andump.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)andump.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <iostream>
 #include <iomanip>
@@ -125,7 +125,7 @@ doTagValues(DicomInputStream& in,TextOutputStream& log,Uint32 vl)
 }
 
 static TextOutputStream&
-doBinaryValues(DicomInputStream& in,TextOutputStream& log,Uint32 vl,size_t size,Uint32& rval)
+doBinaryValues(DicomInputStream& in,TextOutputStream& log,Uint64 vl,size_t size,Uint64& rval)
 {
 	rval=0;
 	if (vl < size) size=vl;	// handles special case of 1 US where UL wanted
@@ -139,11 +139,12 @@ doBinaryValues(DicomInputStream& in,TextOutputStream& log,Uint32 vl,size_t size,
 	else {
 		log << "[";
 		while (vl) {
-			Uint32 value;
+			Uint64 value;
 			switch(size) {
 				case 1: { Uint8  v; in >> v; value=v; } break;
 				case 2: { Uint16 v; in >> v; value=v; } break;
 				case 4: { Uint32 v; in >> v; value=v; } break;
+				case 8: { Uint64 v; in >> v; value=v; } break;
 				default: Assert(0); break;
 			}
 			rval=value;
@@ -163,7 +164,7 @@ static TextOutputStream&
 doFloatValues(DicomInputStream& in,TextOutputStream& log,Uint32 vl,size_t size)
 {
 	if (vl%size) {
-		Uint32 ival;
+		Uint64 ival;
 		doBinaryValues(in,log,vl,1,ival);
 		cerr << EMsgDC(BadValueLength) << endl;
 		//in.seekg(vl,ios::cur);
@@ -205,37 +206,31 @@ doFloatValues(DicomInputStream& in,TextOutputStream& log,Uint32 vl,size_t size)
 				log << dec << value;
 			}
 			else if (size == 8) {
-				Uint32 binary1; in >> binary1;
-				Uint32 binary2; in >> binary2;
+				Uint64 binary; in >> binary;
 
 				double value;
-				Uint32 high = in.isBigEndian() ? binary1 : binary2;
-				Uint32 low  = in.isBigEndian() ? binary2 : binary1;
-
-				Int16 sign	=(Int16)((high&0x80000000)>>31);
-				Int16 exponent	=(Int16)((high&0x7ff00000)>>20);
-				Uint32 mantissahigh = high&0x000fffff;
-				Uint32 mantissalow  = low &0xffffffff;
-				double mantissavalue = (double)mantissahigh * powi(2.0,32)
-						     + (double)mantissalow;
+						     
+				Int16 sign	=(Int16)((binary&0x8000000000000000)>>63);
+				Int16 exponent	=(Int16)((binary&0x7ff0000000000000)>>52);
+				Uint64 mantissa = binary&0x000fffffffffffff;
 
 				if (exponent == 0) {
-					if (mantissahigh == 0 && mantissalow == 0)
+					if (mantissa == 0)
 						value=0;
 					else {
-						value=(mantissavalue/powi(2.0,52))
+						value=(mantissa/powi(2.0,52))
 							*powi(2.0,-1022);
 						value = (sign == 0) ? value : -value;
 					}
 				}
 				else if (exponent == 255) {
-					if (mantissahigh || mantissalow)
+					if (mantissa)
 						value=quiet_nan(0);
 					else
 						value=infinity();
 				}
 				else {
-					value=(1.0+mantissavalue/powi(2.0,52))
+					value=(1.0+mantissa/powi(2.0,52))
 						*powi(2.0,exponent-1023);
 					value = (sign == 0) ? value : -value;
 				}
@@ -464,7 +459,7 @@ log << ")"
 				else if (isAttributeTagVR(vr))
 					doTagValues(stream,log,vl);
 				else if (isNumericVR(vr)) {
-					Uint32 ival;
+					Uint64 ival;
 					size_t size=sizeofNumericVR(vr);
 					doBinaryValues(stream,log,vl,size,ival);
 					if (!stream.fail() && vl == size) {
@@ -481,7 +476,7 @@ log << ")"
 				}
 				else {
 					//cerr << endl << WMsgDC(UnrecognizedVR) << endl;
-					Uint32 ival;
+					Uint64 ival;
 					doBinaryValues(stream,log,vl,1,ival);
 				}
 			}

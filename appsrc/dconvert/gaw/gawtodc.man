@@ -76,6 +76,6 @@ Converting ...
 .BR gendump(1) ,
 .BR gentodc(1)
 .SH AUTHOR
-Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 .SH BUGS
 The header layout was derived by guesswork by comparing the known Genesis layout to the similar Advantage Windows layout, but may not be reliable.

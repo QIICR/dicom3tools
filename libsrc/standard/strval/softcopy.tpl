@@ -298,5 +298,20 @@ StringValues="FillMode" {
 	STIPPELED
 }
 
+StringValues="ThresholdType" {
+	RANGE_INCL,
+	RANGE_EXCL,
+	GREATER_OR_EQUAL,
+	LESS_OR_EQUAL,
+	GREATER_THAN,
+	LESS_THAN
+}
 
+StringValues="AdvancedBlendingPixelPresentation" {
+	TRUE_COLOR
+}
 
+StringValues="BlendingMode" {
+	EQUAL,
+	FOREGROUND
+}

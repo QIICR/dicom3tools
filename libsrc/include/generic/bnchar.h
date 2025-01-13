@@ -1,4 +1,4 @@
-/* bnchar.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* bnchar.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_bnchar__
 #define __Header_bnchar__
 

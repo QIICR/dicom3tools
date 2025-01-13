@@ -1,4 +1,4 @@
-Last modified: Fri Sep  4 13:28:51 EDT 2015
+Last modified: Sat Nov 25 11:28:47 EST 2023
 
 Quick start:
 
@@ -325,6 +325,9 @@ Linux Stuff.
 
 Recent "distributions" of Linux should have no problem compiling
 the tools. The Configure script should set up everything required.
+
+Linux Stuff (old).
+
 earlier versions of egcs were a problem, but no longer seem to be.
 
 Finding the X11 static libraries can be painful and Configure does
@@ -364,7 +367,35 @@ OSF Stuff.
 
 It has been a long time since it was compiled on a Dec Alpha.
 
-Darwin (Mac OS X) Stuff.
+MacOS Stuff
+
+More recent versions of MacOS (Catalina, Big Sur, Monterey, Ventura) work as long
+as the XCode Command Line Tools are installed, as well as imake and makedepend
+(and xorg-libX11 and xorg-libXext for the X11 stuff), such as by using MacPorts
+(HomeBrew has not been tested).
+
+For recent versions that support building Universal Binaries (with both arm64
+and x86_64 architecture support), MacPorts needs the "+universal" command line option
+specified, else ld will report "Undefined symbols for architecture arm64" when
+building X11 stuff. The Configure script should detect when a recent enough clang
+to build both architectures is present and pass on the necessary options. When
+clang is version 15 or later, the "-force_cpusubtype_ALL" that is no longer
+supported will not be used.
+
+In recent releases, libstdc++ is no longer present and libc++ must be used; the
+Configure script will detect and specify that, and basetype.h will point to the
+appropriate strstream rather than backward/strstream include as necessary. Also,
+the minimum OS version option will be specified to make the includes work.
+
+In short, the following should be sufficient if the XCode Command Line Tools are
+installed:
+
+port install imake
+port install makedepend
+port install xorg-libX11 +universal
+port install xorg-libXext +universal
+
+Darwin (Mac OS X) Stuff (very old versions).
 
 On recent Mac OS versions (Yosemite, Mavericks (?)), the X11 library and
 include files may not be present even if XQuartz is installed, and

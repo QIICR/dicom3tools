@@ -1,11 +1,11 @@
-/* attrtype.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* attrtype.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_attrtype__
 #define __Header_attrtype__
 
 #include "attrtypb.h"
 
 #ifndef LARGESTOTHERDATATOKEEPINMEMORY
-#define LARGESTOTHERDATATOKEEPINMEMORY 524288
+#define LARGESTOTHERDATATOKEEPINMEMORY 8388608
 #endif
 
 /* ************************** Tag Attributes ************************* */
@@ -351,6 +351,16 @@ public:
 	~UnsignedLongAttribute() {} // only because buggy g++ 2.7.0 freaks
 };
 
+class UnsignedVeryLongAttribute : public NumericBinaryAttribute<Uint64,8> {
+public:
+	UnsignedVeryLongAttribute(Tag t) : NumericBinaryAttribute<Uint64,8>(t) {}
+	UnsignedVeryLongAttribute(Tag t,Uint64 v)
+		: NumericBinaryAttribute<Uint64,8>(t)
+		{ addValue(v); }
+	const char *	getVR() const	{ return "UV"; }
+	~UnsignedVeryLongAttribute() {} // only because buggy g++ 2.7.0 freaks
+};
+
 class SignedShortAttribute : public NumericBinaryAttribute<Int16,2> {
 public:
 	SignedShortAttribute(Tag t) : NumericBinaryAttribute<Int16,2>(t) {}
@@ -369,6 +379,16 @@ public:
 		{ addValue(v); }
 	const char *	getVR() const	{ return "SL"; }
 	~SignedLongAttribute() {} // only because buggy g++ 2.7.0 freaks
+};
+
+class SignedVeryLongAttribute : public NumericBinaryAttribute<Int64,8> {
+public:
+	SignedVeryLongAttribute(Tag t) : NumericBinaryAttribute<Int64,8>(t) {}
+	SignedVeryLongAttribute(Tag t,Int64 v)
+		: NumericBinaryAttribute<Int64,8>(t)
+		{ addValue(v); }
+	const char *	getVR() const	{ return "SV"; }
+	~SignedVeryLongAttribute() {} // only because buggy g++ 2.7.0 freaks
 };
 
 class UnspecifiedShortAttribute : public NumericBinaryAttribute<Uint16,2> {
@@ -445,6 +465,12 @@ public:
 	virtual ~OtherWordSmallNonPixelAttribute() {}
 };
 
+class OtherLongSmallAttribute : public OtherLongSmallAttributeBase {
+public:
+	OtherLongSmallAttribute(Tag t) : OtherLongSmallAttributeBase(t) {}
+	virtual ~OtherLongSmallAttribute() {}
+};
+
 class OtherByteLargeNonPixelAttribute : public OtherByteLargeNonPixelAttributeBase {
 public:
 	OtherByteLargeNonPixelAttribute(Tag t,BinaryInputStream &stream,OurStreamPos pos)
@@ -464,6 +490,13 @@ public:
 	OtherLongLargeAttribute(Tag t,BinaryInputStream &stream,OurStreamPos pos)
 		: OtherLongLargeAttributeBase(t,stream,pos) {}
 	virtual ~OtherLongLargeAttribute() {}
+};
+
+class OtherVeryLongLargeAttribute : public OtherVeryLongLargeAttributeBase {
+public:
+	OtherVeryLongLargeAttribute(Tag t,BinaryInputStream &stream,OurStreamPos pos)
+		: OtherVeryLongLargeAttributeBase(t,stream,pos) {}
+	virtual ~OtherVeryLongLargeAttribute() {}
 };
 
 class OtherFloatLargeAttribute : public OtherFloatLargeAttributeBase {

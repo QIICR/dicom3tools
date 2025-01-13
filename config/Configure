@@ -6,7 +6,7 @@ TMPROOT="/tmp/$0.$$"
 if [ -f generic.cf ]; then mv generic.cf generic.cf.bak; fi
 
 echo  >generic.cf "/* Automagically generated - edits will be lost */"
-echo              '/* Configure last updated $Date: 2015/11/18 23:39:08 $ */' | sed -e 's/[$]//g' -e 's/Date: //' >>generic.cf
+echo              '/* Configure last updated $Date: 2023/11/25 16:47:09 $ */' | sed -e 's/[$]//g' -e 's/Date: //' >>generic.cf
 echo >>generic.cf "/* This file created      "`date +'%Y/%m/%d %H:%M:%S'`" */"
 if [ ! -z "$BASH_VERSION" ]
 then
@@ -356,7 +356,7 @@ then
 		echo 1>&2 "Configure: using $usegcc version $gccversion"
 		if gplusplusversion=`getVersion "$usegpp -v" | grep -v 'Configured with:' | grep -i version`
 		then
-			gplusplussubversion=`echo "$gplusplusversion" | sed -e 's/egcs-//' -e 's/Apple Computer.* based on //' -e 's/Apple LLVM version/LLVM version/'`
+			gplusplussubversion=`echo "$gplusplusversion" | sed -e 's/egcs-//' -e 's/Apple Computer.* based on //' -e 's/Apple LLVM version/LLVM version/' -e 's/Apple clang version/clang VERSION/'`
 			gplusplusmajorversion=`echo "$gplusplussubversion" | awk '{print $3}' | sed 's/[.]/ /g' | awk '{print $1}'`
 			gplusplusminorversion=`echo "$gplusplussubversion" | awk '{print $3}' | sed 's/[.]/ /g' | awk '{print $2}'`
 			gplusplustinyversion=` echo "$gplusplussubversion" | awk '{print $3}' | sed 's/[.]/ /g' | awk '{print $3}'`
@@ -845,6 +845,11 @@ then
 		echo >>generic.cf "#ifndef X11LibraryPath"
 		echo >>generic.cf "#define X11LibraryPath /opt/X11/lib"
 		echo >>generic.cf "#endif"
+	elif [ -d /opt/local/lib/X11 ]
+	then
+		echo >>generic.cf "#ifndef X11LibraryPath"
+		echo >>generic.cf "#define X11LibraryPath /opt/local/lib"
+		echo >>generic.cf "#endif"
 	elif [ -d /usr/X11R6/lib ]
 	then
 		echo >>generic.cf "#ifndef X11LibraryPath"
@@ -856,6 +861,11 @@ then
 	then
 		echo >>generic.cf "#ifndef X11IncludePath"
 		echo >>generic.cf "#define X11IncludePath /opt/X11/include"
+		echo >>generic.cf "#endif"
+	elif [ -d /opt/local/include/X11 ]
+	then
+		echo >>generic.cf "#ifndef X11IncludePath"
+		echo >>generic.cf "#define X11IncludePath /opt/local/include"
 		echo >>generic.cf "#endif"
 	elif [ -d /usr/X11R6/include ]
 	then
@@ -881,13 +891,52 @@ then
 	
 	instructionsetarchitecture=`uname -p`
 	machinearchitecture=`uname -m`
-	if [ "$gplusplusmajorversion" -ge 4 -a $instructionsetarchitecture = 'i386' ]
+	echo 1>&2 "Configure: instructionsetarchitecture = ${instructionsetarchitecture}"
+	echo 1>&2 "Configure: machinearchitecture = ${machinearchitecture}"
+	# https://stackoverflow.com/questions/2923502/what-does-macosx-version-min-imply
+	# https://www.logcg.com/en/archives/3369.html "clang: warning: libstdc++ is deprecated; move to libc++ with a minimum deployment target of OS X 10.9"
+	# https://github.com/pybind/python_example/issues/44
+	# https://github.com/alliedmodders/sourcepawn/issues/325
+	if [ "$gplusplusmajorversion" -ge 15 ]
+	then
+		# not sure exactly when -force_cpusubtype_ALL was removed and causes ld to fail, but certainly in 15 (with XCode 15)
+		echo 1>&2 "Configure: building Darwin for both x86_64 and arm64 with libc++ but without -force_cpusubtype_ALL argument"
+		echo >>generic.cf "#ifndef CPlusPlusDefaultOptions"
+		echo >>generic.cf "#define CPlusPlusDefaultOptions -arch x86_64 -arch arm64 -mmacosx-version-min=10.9 -stdlib=libc++"
+		echo >>generic.cf "#endif"
+
+		echo >>generic.cf "#ifndef AnsiCDefaultOptions"
+		echo >>generic.cf "#define AnsiCDefaultOptions -arch x86_64 -arch arm64 -mmacosx-version-min=10.0"
+		echo >>generic.cf "#endif"
+	# XCode 12.5 has clang 12.0.5 per https://gist.github.com/yamaya/2924292
+	#elif [ "$gplusplusmajorversion" -ge 12 -a \( $machinearchitecture = 'arm64' -o $machinearchitecture = 'aarch64' \) ]
+	elif [ "$gplusplusmajorversion" -gt 12 -o \( "$gplusplusmajorversion" -eq 12 -a "$gplusplusminorversion" -eq 0 -a "$gplusplustinyversion" -ge 5 \) ]
+	then
+		echo 1>&2 "Configure: building Darwin for both x86_64 and arm64 with libc++ with -force_cpusubtype_ALL argument"
+		echo >>generic.cf "#ifndef CPlusPlusDefaultOptions"
+		echo >>generic.cf "#define CPlusPlusDefaultOptions -force_cpusubtype_ALL -arch x86_64 -arch arm64 -mmacosx-version-min=10.9 -stdlib=libc++"
+		echo >>generic.cf "#endif"
+
+		echo >>generic.cf "#ifndef AnsiCDefaultOptions"
+		echo >>generic.cf "#define AnsiCDefaultOptions -force_cpusubtype_ALL -arch x86_64 -arch arm64 -mmacosx-version-min=10.0"
+		echo >>generic.cf "#endif"
+	elif [ "$gplusplusmajorversion" -ge 12 ]
+	then
+		echo 1>&2 "Configure: building Darwin for intel only with libc++"
+		echo >>generic.cf "#ifndef CPlusPlusDefaultOptions"
+		echo >>generic.cf "#define CPlusPlusDefaultOptions -force_cpusubtype_ALL -arch x86_64 -mmacosx-version-min=10.9 -stdlib=libc++"
+		echo >>generic.cf "#endif"
+
+		echo >>generic.cf "#ifndef AnsiCDefaultOptions"
+		echo >>generic.cf "#define AnsiCDefaultOptions -force_cpusubtype_ALL -arch x86_64 -mmacosx-version-min=10.0"
+		echo >>generic.cf "#endif"
+	elif [ "$gplusplusmajorversion" -ge 4 -a $instructionsetarchitecture = 'i386' ]
 	then
 		echo 1>&2 "Configure: building Darwin for intel only"
 		echo >>generic.cf "#ifndef CPlusPlusDefaultOptions"
 		echo >>generic.cf "#define CPlusPlusDefaultOptions -force_cpusubtype_ALL -arch $machinearchitecture -mmacosx-version-min=10.0"
 		echo >>generic.cf "#endif"
-	
+
 		echo >>generic.cf "#ifndef AnsiCDefaultOptions"
 		echo >>generic.cf "#define AnsiCDefaultOptions -force_cpusubtype_ALL -arch $machinearchitecture -mmacosx-version-min=10.0"
 		echo >>generic.cf "#endif"

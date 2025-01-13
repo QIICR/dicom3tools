@@ -71,6 +71,10 @@ DefineMacro="IdentifiedPersonOrDeviceMacro"
 	Name="Manufacturer"										Type="1C"	Condition="ObserverTypeIsDevice"
 	Name="ManufacturerModelName"							Type="1C"	Condition="ObserverTypeIsDevice"
 	Name="StationAETitle"									Type="3"
+	Name="DeviceSerialNumber"								Type="3"
+	Name="SoftwareVersions"									Type="3"
+	Name="DateOfManufacture"								Type="3"
+	Name="DateOfInstallation"								Type="3"
 	Name="InstitutionName"									Type="2"
 	Sequence="InstitutionCodeSequence"						Type="2"	VM="0-1"
 		InvokeMacro="CodeSequenceMacro"
@@ -303,7 +307,7 @@ Module="SRDocumentGeneral"
 	Sequence="PertinentOtherEvidenceSequence"						Type="1C"	VM="1-n"	NoCondition=""	# real world
 		InvokeMacro="HierarchicalSOPInstanceReferenceMacro"
 	SequenceEnd
-	Sequence="ReferencedInstanceSequence"							Type="1C"	VM="1"	NoCondition=""	# real world
+	Sequence="ReferencedInstanceSequence"							Type="1C"	VM="1-n"	NoCondition=""	# real world
 		InvokeMacro="SOPInstanceReferenceMacro"
 		Sequence="PurposeOfReferenceCodeSequence"					Type="1"	VM="1"
 			InvokeMacro="CodeSequenceMacro"

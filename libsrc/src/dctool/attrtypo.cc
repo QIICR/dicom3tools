@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)attrtypo.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)attrtypo.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #include "attr.h"
 #include "attrtypo.h"
 #include "attrtag.h"
@@ -78,7 +78,7 @@ OtherByteSmallNonPixelAttributeBase::read(BinaryInputStream& stream,Uint32 lengt
 {
 	Assert(lengthinbytes == 0);
 	Assert(data == 0);
-	Assert(length%2 == 0);	// DICOM likes even things
+	//Assert(length%2 == 0);	// DICOM likes even things - but should read without failing and complain later
 	data=new unsigned char[length];
 	Assert(data);
 	if (length) stream.read((char *)data,size_t(length));
@@ -183,7 +183,7 @@ OtherWordSmallNonPixelAttributeBase::read(BinaryInputStream& stream,Uint32 lengt
 {
 	Assert(lengthinbytes == 0);
 	Assert(data == 0);
-	Assert(length%2 == 0);	// DICOM likes even things
+	//Assert(length%2 == 0);	// DICOM likes even things - but should read without failing and complain later
 	Uint32 lengthinwords=length/2;
 	if (lengthinwords) {
 		data=new Uint16[lengthinwords];
@@ -217,6 +217,99 @@ OtherWordSmallNonPixelAttributeBase::setValue(const Uint16 *values,Uint32 length
 		Uint16 *ptr=data;
 		while (i--) *ptr++=*values++;
 		lengthinbytes=lengthinwords*2;
+	}
+}
+
+OtherLongSmallAttributeBase::OtherLongSmallAttributeBase(Tag t)
+	 : OtherNonPixelAttribute(t)
+{
+	data=0;
+}
+
+OtherLongSmallAttributeBase:: ~OtherLongSmallAttributeBase(void)
+{
+	if (data) delete[] data;
+}
+
+BinaryOutputStream&
+OtherLongSmallAttributeBase::writeValues(BinaryOutputStream& stream)
+{
+	if (lengthinbytes) {
+		Assert(data);
+		Assert(lengthinbytes%4 == 0);
+		Uint32 lengthinwords=lengthinbytes/4;
+		Uint32 *ptr=data;
+		while (lengthinwords--) stream << *ptr++;
+	}
+	return stream;
+}
+
+TextOutputStream&
+OtherLongSmallAttributeBase::writeData(TextOutputStream& stream)
+{
+	Assert(lengthinbytes%4 == 0);
+	Uint32 i = lengthinbytes/4;
+	Uint32 *ptr = data;
+	while (i > 0) {
+		writeZeroPaddedHexNumber(stream,*ptr++,8);
+		--i;
+		if (i > 0) {
+			stream << ",";
+			if (i%8 == 0) stream << "\n\t";
+		}
+	}
+	return stream;
+}
+
+TextOutputStream&
+OtherLongSmallAttributeBase::write(TextOutputStream& stream,ElementDictionary *dict,bool verbose,bool showUsedAndIE)
+{
+	Attribute::writeBase(stream,dict,verbose,showUsedAndIE);
+	stream << "[";
+	writeData(stream);
+	stream << "] ";
+	return stream;
+}
+
+BinaryInputStream&
+OtherLongSmallAttributeBase::read(BinaryInputStream& stream,Uint32 length)
+{
+	Assert(lengthinbytes == 0);
+	Assert(data == 0);
+	//Assert(length%4 == 0);	// DICOM likes even things - but should read without failing and complain later
+	Uint32 lengthinwords=length/4;
+	if (lengthinwords) {
+		data=new Uint32[lengthinwords];
+		Assert(data);
+		Uint32 i=lengthinwords;
+		Uint32 *ptr=data;
+		while (i--) stream >> *ptr++;
+		lengthinbytes=length;
+	}
+	return stream;
+}
+
+bool
+OtherLongSmallAttributeBase::getValue(const Uint32 * & rvalue,Uint32 &rlengthinwords) const
+{
+	Assert(lengthinbytes%4 == 0);
+	rlengthinwords=lengthinbytes/4;
+	rvalue=data;
+	return true;	// ? should this be false if zero length ? :(
+}
+
+void
+OtherLongSmallAttributeBase::setValue(const Uint32 *values,Uint32 lengthinwords)
+{
+	Assert(lengthinbytes == 0);
+	Assert(data == 0);
+	if (lengthinwords) {
+		data=new Uint32[lengthinwords];
+		Assert(data);
+		Uint32 i=lengthinwords;
+		Uint32 *ptr=data;
+		while (i--) *ptr++=*values++;
+		lengthinbytes=lengthinwords*4;
 	}
 }
 
@@ -460,14 +553,99 @@ OtherLongLargeAttributeBase::read(BinaryInputStream& stream,Uint32 vl)
 }
 
 bool
-OtherLongLargeAttributeBase::getValue(const Uint16 * &,Uint32 &) const
+OtherLongLargeAttributeBase::getValue(const Uint32 * &,Uint32 &) const
 {
 	Assert(0);
 	return false;
 }
 
 void
-OtherLongLargeAttributeBase::setValue(const Uint16 *,Uint32 )
+OtherLongLargeAttributeBase::setValue(const Uint32 *,Uint32 )
+{
+	Assert(0);
+}
+
+/* ********************* OV VR Attributes ********************* */
+
+OtherVeryLongLargeAttributeBase::OtherVeryLongLargeAttributeBase(Tag t,
+		BinaryInputStream &stream,OurStreamPos pos)
+	 : OtherNonPixelAttribute(t)
+{
+	srcstream=&stream;
+	Assert(srcstream);
+	srcpos=pos;
+	srcendian=srcstream->getEndian();
+	Assert(srcendian != NoEndian);
+	Assert(srcendian != ByteEndian);
+}
+
+OtherVeryLongLargeAttributeBase::~OtherVeryLongLargeAttributeBase()
+{
+}
+
+BinaryOutputStream&
+OtherVeryLongLargeAttributeBase::writeValues(BinaryOutputStream& dststream)
+{
+	// use current dststream endian, not getTransferSyntaxToReadDataSet()->getEndian()
+	Endian dstendian=dststream.getEndian();
+	Assert(dstendian != NoEndian);
+	Assert(dstendian != ByteEndian);
+
+	Assert(getVL()%8 == 0);
+
+	srcstream->clear();
+	srcstream->seekg(srcpos);
+	if (srcstream->good()) {
+		// we don't have a ConvertByteToUint64, analogous to the ConvertByteToUint16 used for OW, so do it like we do for OF and OD ...
+		Source<unsigned char> srcinput (*srcstream,1024,getVL());
+		if (dstendian != srcendian) {
+			ConvertSourceToSinkSwapping<unsigned char,unsigned char,8> swab(srcinput);
+			Sink<unsigned char> output(dststream,swab);
+			output.write(getVL());
+		}
+		else {
+			Sink<unsigned char> output(dststream,srcinput);
+			output.write(getVL());
+		}
+	}
+	return dststream;
+}
+
+TextOutputStream&
+OtherVeryLongLargeAttributeBase::writeData(TextOutputStream& stream)
+{
+	stream << "...";
+	return stream;
+}
+
+TextOutputStream&
+OtherVeryLongLargeAttributeBase::write(TextOutputStream& stream,ElementDictionary *dict,bool verbose,bool showUsedAndIE)
+{
+	Attribute::writeBase(stream,dict,verbose,showUsedAndIE);
+	stream << "[";
+	writeData(stream);
+	stream << "] ";
+	return stream;
+}
+
+BinaryInputStream&
+OtherVeryLongLargeAttributeBase::read(BinaryInputStream& stream,Uint32 vl)
+{
+	Assert(&stream == srcstream);
+	stream.seekg(vl,ios::cur);
+	lengthinbytes=vl;
+	return stream;
+}
+
+bool
+OtherVeryLongLargeAttributeBase::getValue(const Uint64 * &,Uint32 &) const
+{
+	Assert(0);
+	return false;
+}
+
+void
+OtherVeryLongLargeAttributeBase::setValue(const Uint64 *,Uint32 )
 {
 	Assert(0);
 }
@@ -695,7 +873,7 @@ UnknownSmallAttributeBase::read(BinaryInputStream& stream,Uint32 length)
 {
 	Assert(lengthinbytes == 0);
 	Assert(data == 0);
-	//Assert(length%2 == 0);	// DICOM likes even things
+	//Assert(length%2 == 0);	// DICOM likes even things - but should read without failing and complain later
 	data=new unsigned char[length];
 	Assert(data);
 	if (length) stream.read((char *)data,size_t(length));

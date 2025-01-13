@@ -1,4 +1,4 @@
-static const char *CopyrightIdentifier(void) { return "@(#)attrtypv.cc Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
+static const char *CopyrightIdentifier(void) { return "@(#)attrtypv.cc Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved."; }
 #if USESTANDARDHEADERSWITHOUTEXTENSION == 1
 #include <cctype>
 #else
@@ -14,8 +14,8 @@ using namespace std;
 #include "mesgtext.h"
 #include "elmdict.h"
 
-static bool inline iscntrlok(char c) {	// Per PS 3.5 6.1.3
-	return (c == 0x1b /*ESC*/ || c == 0x0a /*LF*/ || c == 0x0c /*FF*/ || c == 0x0d /*CR*/);
+static bool inline iscntrlok(char c) {	// Per PS 3.5 6.1.3 and CP 1425 that added TAB
+	return (c == 0x1b /*ESC*/ || c == 0x0a /*LF*/ || c == 0x0c /*FF*/ || c == 0x0d /*CR*/ || c == 0x09 /*TAB*/);
 }
 
 static bool inline isescape(char c) {	// Per PS 3.5 6.1.3
@@ -139,6 +139,15 @@ writeErrorBadVRRange(bool verbose,bool newformat,TextOutputStream& log,ElementDi
 	log << MMsgDC(RangeInvalidForThisVR)
 	    << (newformat ? " - " : ", ") << MMsgDC(Expected) << " " << (expected ? expected : "")
 	    << endl;
+}
+
+// (000580)
+static void
+writeErrorBadTimezoneNL(bool verbose,bool newformat,TextOutputStream& log,ElementDictionary *dict,const Attribute *a,const char *vr,int valuenumber,const char *value,unsigned timezonedigitsfound) {
+	writeErrorBadVRValue(verbose,newformat,log,dict,a,vr,valuenumber,value);
+	log << MMsgDC(TimezoneLengthInvalidForDTVR);
+	log << " - " << MMsgDC(Got) << " <" << timezonedigitsfound << "> - " << MMsgDC(Expected) << " 4 " << MMsgDC(Digits);
+	log << endl;
 }
 
 bool
@@ -317,7 +326,11 @@ DateStringAttribute::validateVR(bool verbose,bool newformat,TextOutputStream& lo
 	while (!i) {
 		char *s=i();
 		int l=strlen(s);
-		if (l == 8 || l == 10) {
+		if (l != 8 && l != 10) {		// check length seperately from content (000581)
+			writeErrorBadVRLengthNL(verbose,newformat,log,dict,this,getVR(),vn,s,l,"== 8 or 10");
+			ok=false;
+		}
+		{	// check content regardless of length (000581) ...
 			const char *p=s;
 			if (*p != '1' &&  *p != '2') {
 				writeErrorBadVRCharNL(verbose,newformat,log,dict,this,getVR(),vn,s,*p);
@@ -371,10 +384,6 @@ DateStringAttribute::validateVR(bool verbose,bool newformat,TextOutputStream& lo
 				ok=false;
 			}
 		}
-		else {
-			writeErrorBadVRLengthNL(verbose,newformat,log,dict,this,getVR(),vn,s,l,"== 8 or 10");
-			ok=false;
-		}
 		++vn; ++i;
 		//if (s) delete[] s;
 	}
@@ -402,7 +411,11 @@ DateTimeStringAttribute::validateVR(bool verbose,bool newformat,TextOutputStream
 	while (!i) {
 		char *s=i();
 		int l=strlen(s);
-		if (l >= 2 && l <= 26) {
+		if (l < 2 || l > 26)  {		// check length seperately from content (000581)
+			writeErrorBadVRLengthNL(verbose,newformat,log,dict,this,getVR(),vn,s,l,">= 2 && <= 26");
+			ok=false;
+		}
+		{	// check content regardless of length (000581) ...
 			const char *p=s;
 			if (*p != '1' &&  *p != '2') {
 				writeErrorBadVRCharNL(verbose,newformat,log,dict,this,getVR(),vn,s,*p);
@@ -485,11 +498,17 @@ DateTimeStringAttribute::validateVR(bool verbose,bool newformat,TextOutputStream
 											while (*++p && isdigit(*p));
 										}
 										if (*p == '+' || *p == '-') {	// + or - ZZZZ
+											unsigned timezonedigitcount = 0;
 											while (*++p) {
+												++timezonedigitcount;
 												if (!isdigit(*p)) {
 													writeErrorBadVRCharNL(verbose,newformat,log,dict,this,getVR(),vn,s,*p);
 													ok=false;
 												}
+											}
+											if (timezonedigitcount != 4) { // (000580)
+												writeErrorBadTimezoneNL(verbose,newformat,log,dict,this,getVR(),vn,s,timezonedigitcount);
+												ok=false;
 											}
 										}
 									}
@@ -504,10 +523,6 @@ DateTimeStringAttribute::validateVR(bool verbose,bool newformat,TextOutputStream
 					++p;
 				}
 			}
-		}
-		else {
-			writeErrorBadVRLengthNL(verbose,newformat,log,dict,this,getVR(),vn,s,l,">= 2 && <= 26");
-			ok=false;
 		}
 		++vn; ++i;
 		//if (s) delete[] s;
@@ -863,7 +878,11 @@ TimeStringAttribute::validateVR(bool verbose,bool newformat,TextOutputStream& lo
 	while (!i) {
 		char *s=i();
 		int l=strlen(s);
-		if (l >= 2 && l <= 16) {
+		if (l < 2 || l > 16) {		// check length seperately from content (000581)
+			writeErrorBadVRLengthNL(verbose,newformat,log,dict,this,getVR(),vn,s,l,">= 2 && <= 16");
+			ok=false;
+		}
+		{	// check content regardless of length (000581) ...
 			const char *p=s;
 			if (*p != '0' &&  *p != '1' &&  *p != '2') {
 				writeErrorBadVRCharNL(verbose,newformat,log,dict,this,getVR(),vn,s,*p);
@@ -924,10 +943,6 @@ TimeStringAttribute::validateVR(bool verbose,bool newformat,TextOutputStream& lo
 					}
 				}
 			}
-		}
-		else {
-			writeErrorBadVRLengthNL(verbose,newformat,log,dict,this,getVR(),vn,s,l,">= 2 && <= 16");
-			ok=false;
 		}
 		++vn; ++i;
 		//if (s) delete[] s;

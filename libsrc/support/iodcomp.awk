@@ -1,4 +1,4 @@
-#  iodcomp.awk Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved.
+#  iodcomp.awk Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved.
 # create C++ headers from composite iod template
 
 # can set these values on the command line:

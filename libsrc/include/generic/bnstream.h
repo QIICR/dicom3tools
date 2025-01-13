@@ -1,4 +1,4 @@
-/* bnstream.h Copyright (c) 1993-2021, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
+/* bnstream.h Copyright (c) 1993-2024, David A. Clunie DBA PixelMed Publishing. All rights reserved. */
 #ifndef __Header_bnstream__
 #define __Header_bnstream__
 
@@ -40,7 +40,7 @@ class Tag;	// for operator<<() and operator>>()
 class BinaryInputStream : public istream {
 private:
 	Endian endian;
-	char buffer[4];
+	char buffer[8];
 	bool swapped32big;
 public:
 	BinaryInputStream(streambuf *buf,Endian e=NoEndian)
@@ -120,6 +120,47 @@ public:
 			}
 			return u;
 		}
+	Uint32 read64(void)
+		{
+			Assert(endian!=NoEndian);
+			Uint64 u;
+			read(buffer,8);
+			if (isBigEndian()) {
+				u =  (Uint64)((unsigned char *)buffer)[0];
+				u <<= 8;
+				u |= (Uint64)((unsigned char *)buffer)[1];
+				u <<= 8;
+				u |= (Uint64)((unsigned char *)buffer)[2];
+				u <<= 8;
+				u |= (Uint64)((unsigned char *)buffer)[3];
+				u <<= 8;
+				u |= (Uint64)((unsigned char *)buffer)[4];
+				u <<= 8;
+				u |= (Uint64)((unsigned char *)buffer)[5];
+				u <<= 8;
+				u |= (Uint64)((unsigned char *)buffer)[6];
+				u <<= 8;
+				u |= (Uint64)((unsigned char *)buffer)[7];
+			}
+			else {
+				u =  (Uint64)((unsigned char *)buffer)[7];
+				u <<= 8;
+				u =  (Uint64)((unsigned char *)buffer)[6];
+				u <<= 8;
+				u =  (Uint64)((unsigned char *)buffer)[5];
+				u <<= 8;
+				u =  (Uint64)((unsigned char *)buffer)[4];
+				u <<= 8;
+				u =  (Uint64)((unsigned char *)buffer)[3];
+				u <<= 8;
+				u |= (Uint64)((unsigned char *)buffer)[2];
+				u <<= 8;
+				u |= (Uint64)((unsigned char *)buffer)[1];
+				u <<= 8;
+				u |= (Uint64)((unsigned char *)buffer)[0];
+			}
+			return u;
+		}
 
 	BinaryInputStream& operator>>(Uint8& rhs)
 		{
@@ -134,6 +175,11 @@ public:
 	BinaryInputStream& operator>>(Uint32& rhs)
 		{
 			rhs=read32();
+			return *this;
+		}
+	BinaryInputStream& operator>>(Uint64& rhs)
+		{
+			rhs=read64();
 			return *this;
 		}
 	BinaryInputStream& operator>>(Tag& rhs);	// in attrtag.cc
@@ -155,7 +201,7 @@ public:
 class BinaryOutputStream : public ostream {
 private:
 	Endian endian;
-	unsigned char buffer[4];
+	unsigned char buffer[8];
 public:
 	BinaryOutputStream(streambuf *buf,Endian e=NoEndian)
 		: ostream(buf)
@@ -207,6 +253,31 @@ public:
 			}
 			write((char *)buffer,4);
 		}
+	void write64(Uint64 u)
+		{
+			Assert(endian!=NoEndian);
+			if (isBigEndian()) {
+				buffer[0]=(unsigned char)(u>>56);
+				buffer[1]=(unsigned char)(u>>48);
+				buffer[2]=(unsigned char)(u>>40);
+				buffer[3]=(unsigned char)(u>>32);
+				buffer[4]=(unsigned char)(u>>24);
+				buffer[5]=(unsigned char)(u>>16);
+				buffer[6]=(unsigned char)(u>>8);
+				buffer[7]=(unsigned char)u;
+			}
+			else {
+				buffer[7]=(unsigned char)(u>>56);
+				buffer[6]=(unsigned char)(u>>48);
+				buffer[5]=(unsigned char)(u>>40);
+				buffer[4]=(unsigned char)(u>>32);
+				buffer[3]=(unsigned char)(u>>24);
+				buffer[2]=(unsigned char)(u>>16);
+				buffer[1]=(unsigned char)(u>>8);
+				buffer[0]=(unsigned char)u;
+			}
+			write((char *)buffer,8);
+		}
 
 	BinaryOutputStream& operator<<(Uint8 rhs)
 		{
@@ -221,6 +292,11 @@ public:
 	BinaryOutputStream& operator<<(Uint32 rhs)
 		{
 			write32(rhs);
+			return *this;
+		}
+	BinaryOutputStream& operator<<(Uint64 rhs)
+		{
+			write64(rhs);
 			return *this;
 		}
 	BinaryOutputStream& operator<<(Tag rhs);	// in attrtag.cc

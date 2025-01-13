@@ -277,14 +277,29 @@ Module="StructureSet"
 			SequenceEnd
 		SequenceEnd
 	SequenceEnd
+	Sequence="SourceSeriesInformationSequence"					Type="3"	VM="1-n"
+		Name="Modality"											Type="1"
+		Name="SeriesDate"										Type="1"
+		Name="SeriesTime"										Type="1"
+		Name="SeriesDescription"								Type="1"
+		Name="SeriesInstanceUID"								Type="1"
+		Name="SeriesNumber"										Type="1"
+	SequenceEnd
 	Sequence="StructureSetROISequence"							Type="1"	VM="1-n"
 		Name="ROINumber"										Type="1"
 		Name="ReferencedFrameOfReferenceUID"					Type="1"
 		Name="ROIName"											Type="2"
 		Name="ROIDescription"									Type="3"
 		Name="ROIVolume"										Type="3"
+		Name="ROIDateTime"										Type="3"
 		Name="ROIGenerationAlgorithm"							Type="2"	StringDefinedTerms="ROIGenerationAlgorithm"
 		Name="ROIGenerationDescription"							Type="3"
+		Sequence="RTProtocolCodeSequence"						Type="3"	VM="1-n"
+			InvokeMacro="CodeSequenceMacro"
+		SequenceEnd
+		Sequence="ROICreatorSequence"							Type="3"	VM="1"
+			InvokeMacro="IdentifiedPersonOrDeviceMacro"
+		SequenceEnd
 		Sequence="ROIDerivationAlgorithmIdentificationSequence"	Type="3"	VM="1"
 			InvokeMacro="AlgorithmIdentificationMacro"
 		SequenceEnd
@@ -314,6 +329,9 @@ Module="ROIContour"
 			Name="ImageOrientationPatient"						Type="1"
 			Name="ImagePositionPatient"							Type="1"
 		SequenceEnd
+		Sequence="SourceSeriesSequence"							Type="3"	VM="1-n"
+			Name="SeriesInstanceUID"							Type="1"
+		SequenceEnd
 		Sequence="ContourSequence"								Type="3"	VM="1-n"
 			Name="ContourNumber"								Type="3"
 			Sequence="ContourImageSequence"						Type="3"	VM="1-n"
@@ -338,6 +356,10 @@ Module="RTROIObservations"
 	Sequence="RTROIObservationsSequence"						Type="1"	VM="1-n"
 		Name="ObservationNumber"								Type="1"
 		Name="ReferencedROINumber"								Type="1"
+		Name="ROIObservationDateTime"							Type="3"
+		Sequence="ROIObservationContextCodeSequence"			Type="3"	VM="1-n"
+			InvokeMacro="CodeSequenceMacro"									BaselineContextID="9272"
+		SequenceEnd
 		Name="ROIObservationLabel"								Type="3"
 		Name="ROIObservationDescription"						Type="3"
 		Sequence="RTRelatedROISequence"							Type="3"	VM="1-n"
@@ -359,6 +381,9 @@ Module="RTROIObservations"
 		SequenceEnd
 		Name="RTROIInterpretedType"								Type="2"	StringDefinedTerms="RTROIInterpretedType"
 		Name="ROIInterpreter"									Type="2"
+		Sequence="ROIInterpreterSequence"						Type="1C"	VM="1"	NoCondition="" mbpo="true"
+			InvokeMacro="IdentifiedPersonOrDeviceMacro"
+		SequenceEnd
 		Name="MaterialID"										Type="3"
 		Sequence="ROIPhysicalPropertiesSequence"				Type="3"	VM="1-n"
 			Name="ROIPhysicalProperty"							Type="1"	StringDefinedTerms="ROIPhysicalProperty"
@@ -561,6 +586,8 @@ Module="RTBeams"
 		SequenceEnd
 		Name="ManufacturerModelName"							Type="3"
 		Name="DeviceSerialNumber"								Type="3"
+		Name="DateOfManufacture"								Type="3"
+		Name="DateOfInstallation"								Type="3"
 		Name="PrimaryDosimeterUnit"								Type="3"	StringEnumValues="PrimaryDosimeterUnit"
 		Name="ReferencedToleranceTableNumber"					Type="3"
 		Name="SourceAxisDistance"								Type="3"
@@ -647,8 +674,8 @@ Module="RTBeams"
 			Name="BlockNumber"									Type="1"
 			Name="BlockName"									Type="3"
 			Name="MaterialID"									Type="2"
-			Name="BlockThickness"								Type="2"
-			Name="BlockTransmission"							Type="2"
+			Name="BlockThickness"								Type="2C"	Condition="MaterialIDNotEmpty" mbpo="true"
+			Name="BlockTransmission"							Type="2C"	Condition="MaterialIDEmptyOrAbsent" mbpo="true"
 			Name="BlockNumberOfPoints"							Type="2"
 			Name="BlockData"									Type="2"
 		SequenceEnd
@@ -748,6 +775,8 @@ Module="RTBrachyApplicationSetups"
 		SequenceEnd
 		Name="ManufacturerModelName"							Type="3"
 		Name="DeviceSerialNumber"								Type="3"
+		Name="DateOfManufacture"								Type="3"
+		Name="DateOfInstallation"								Type="3"
 	SequenceEnd
 	Sequence="SourceSequence"									Type="1"	VM="1-n"
 		Name="SourceNumber"										Type="1"
@@ -874,6 +903,8 @@ Module="RTTreatmentMachineRecord"
 		SequenceEnd
 		Name="ManufacturerModelName"							Type="2"
 		Name="DeviceSerialNumber"								Type="2"
+		Name="DateOfManufacture"								Type="3"
+		Name="DateOfInstallation"								Type="3"
 	SequenceEnd
 ModuleEnd
 
@@ -1269,6 +1300,8 @@ Module="RTIonBeams"
 		SequenceEnd
 		Name="ManufacturerModelName"							Type="3"
 		Name="DeviceSerialNumber"								Type="3"
+		Name="DateOfManufacture"								Type="3"
+		Name="DateOfInstallation"								Type="3"
 		Name="PrimaryDosimeterUnit"								Type="3"	StringEnumValues="IonPrimaryDosimeterUnit"
 		Name="ReferencedToleranceTableNumber"					Type="3"
 		Name="VirtualSourceAxisDistances"						Type="1"
